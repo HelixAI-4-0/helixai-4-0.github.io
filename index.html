@@ -2975,6 +2975,11 @@ function _updateModelPillLabel() {
     'minimax':'MiniMax M2.7', 'nova':'Nova Micro',
     'gpt-4o':'GPT-4o', 'gpt-4.1':'GPT-4.1', 'gpt-4o-mini':'GPT-4o mini',
     'deepseek-r1':'DeepSeek R1', 'mistral-large':'Mistral Large',
+    // LLM7 models
+    'DeepSeek-V3':'DeepSeek V3', 'DeepSeek-R1':'DeepSeek R1',
+    'Qwen3-235B-A22B':'Qwen3 235B', 'Qwen3-32B':'Qwen3 32B',
+    'Llama-3.3-70B-Instruct':'Llama 3.3 70B', 'Mistral-Small-3.1-24B-Instruct':'Mistral Small',
+    'gemma-3-27b-it':'Gemma 3 27B',
   };
   if (customApiKey?.key) {
     const rawModel = customApiKey.model.split('/').pop();
@@ -3029,13 +3034,16 @@ function renderCloudModelSheet() {
   }).join('');
 
   // All providers — key saved = normal, no key = locked/dimmed with "+ Add Key" CTA
+  // noKey providers (e.g. LLM7) are always available without a key
   const allProviderHtml = Object.entries(PROVIDER_MODELS).map(([provId, prov]) => {
-    const hasKey = !!(apiKeys[provId] && apiKeys[provId].trim());
+    const hasKey = !!(apiKeys[provId] && apiKeys[provId].trim()) || !!prov.noKey;
     const provColor = prov?.color || '#818cf8';
     const provModels = prov?.models || [];
-    const hdrExtra = hasKey
-      ? `<button onclick="event.stopPropagation();removeProviderKey('${provId}')" style="border:none;background:none;color:var(--red);font-size:11px;font-family:var(--font-sans);cursor:pointer;padding:2px 6px;border-radius:6px;opacity:0.7">Remove</button>`
-      : `<button onclick="event.stopPropagation();openApiKeySheet()" style="border:none;background:rgba(99,102,241,0.15);color:#818cf8;font-size:10px;font-family:var(--font-sans);cursor:pointer;padding:3px 10px;border-radius:8px;font-weight:700">+ Add Key</button>`;
+    const hdrExtra = prov.noKey
+      ? `<span style="font-size:10px;font-weight:700;padding:1px 8px;border-radius:6px;background:rgba(48,209,88,0.15);color:#30d158;border:1px solid rgba(48,209,88,0.3)">FREE · No key</span>`
+      : hasKey
+        ? `<button onclick="event.stopPropagation();removeProviderKey('${provId}')" style="border:none;background:none;color:var(--red);font-size:11px;font-family:var(--font-sans);cursor:pointer;padding:2px 6px;border-radius:6px;opacity:0.7">Remove</button>`
+        : `<button onclick="event.stopPropagation();openApiKeySheet()" style="border:none;background:rgba(99,102,241,0.15);color:#818cf8;font-size:10px;font-family:var(--font-sans);cursor:pointer;padding:3px 10px;border-radius:8px;font-weight:700">+ Add Key</button>`;
     const hdr = `<div data-section-hdr style="padding:8px 16px 4px;font-family:var(--font-sans);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;border-top:1px solid var(--border);margin-top:6px;display:flex;align-items:center;justify-content:space-between">
       <span style="display:flex;align-items:center;gap:5px;color:${provColor}">${prov?.icon || '🔑'} ${prov?.name}${hasKey ? ' ✓' : ''}</span>
       ${hdrExtra}
@@ -3382,7 +3390,18 @@ function _switchToFreeCloud(modelId) {
 }
 
 // Helper: switch to a saved API provider+model key
+// noKey providers (like LLM7) use a sentinel space as key — _callOpenAICompatible strips it
 function _switchToApiKey(providerId, modelId) {
+  const prov = PROVIDER_MODELS[providerId];
+  if (prov?.noKey) {
+    customApiKey = { provider: providerId, key: ' ', model: modelId };
+    lsSet('customApiKey', customApiKey);
+    _updateModelPillLabel && _updateModelPillLabel();
+    renderCloudModelSheet && renderCloudModelSheet();
+    showToast('Switched to ' + (prov.name || providerId) + ' · ' + modelId.split('/').pop().slice(0,20));
+    haptic && haptic();
+    return;
+  }
   const key = apiKeys[providerId];
   if (!key) { showToast('No key saved for ' + (PROVIDER_MODELS[providerId]?.name || providerId) + ' — add it in Settings'); return; }
   customApiKey = { provider: providerId, key, model: modelId };
@@ -3695,6 +3714,31 @@ const PROVIDER_MODELS = {
       { id:'claude-haiku',  name:'Claude Haiku 4.5',      free:true, sub:'Anthropic · FREE · Fast' },
       { id:'minimax',       name:'MiniMax M2.7',          free:true, sub:'MiniMax · FREE · Reasoning' },
       { id:'nova',          name:'Nova Micro',            free:true, sub:'Amazon · FREE · Tiny & fast' },
+    ]
+  },
+  llm7: {
+    name:'LLM7', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em;flex-shrink:0"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>', color:'#7c3aed',
+    endpoint:'https://api.llm7.io/v1/chat/completions',
+    models:[
+      { id:'gpt-4.1-nano-2025-04-14',             name:'GPT-4.1 Nano',          free:true, sub:'OpenAI · FREE · Ultra fast' },
+      { id:'gpt-4o-mini-2024-07-18',              name:'GPT-4o mini',           free:true, sub:'OpenAI · FREE · Fast & balanced' },
+      { id:'gpt-o3-2025-04-16',                   name:'o3',                    free:true, sub:'OpenAI · FREE · Reasoning' },
+      { id:'deepseek-r1-0528',                    name:'DeepSeek R1 (May)',      free:true, sub:'DeepSeek · FREE · Latest reasoning' },
+      { id:'grok-3-mini-high',                    name:'Grok 3 Mini High',      free:true, sub:'xAI · FREE · Smart & fast' },
+      { id:'llama-4-scout-17b-16e-instruct',      name:'Llama 4 Scout 17B',     free:true, sub:'Meta · FREE · Vision · Efficient' },
+      { id:'llama-3.1-8b-instruct-fp8',           name:'Llama 3.1 8B',          free:true, sub:'Meta · FREE · Lightweight' },
+      { id:'mistral-small-3.1-24b-instruct-2503', name:'Mistral Small 3.1 24B', free:true, sub:'Mistral · FREE · Vision · Latest' },
+      { id:'mistral-large-2411',                  name:'Mistral Large',         free:true, sub:'Mistral · FREE · Most powerful' },
+      { id:'mistral-medium',                      name:'Mistral Medium',        free:true, sub:'Mistral · FREE · Balanced' },
+      { id:'open-mixtral-8x22b',                  name:'Mixtral 8x22B',         free:true, sub:'Mistral · FREE · MoE · Capable' },
+      { id:'qwen2.5-coder-32b-instruct',          name:'Qwen2.5 Coder 32B',     free:true, sub:'Alibaba · FREE · Code expert' },
+      { id:'codestral-2501',                      name:'Codestral',             free:true, sub:'Mistral · FREE · Code · Latest' },
+      { id:'phi-4-multimodal-instruct',           name:'Phi-4 Multimodal',      free:true, sub:'Microsoft · FREE · Vision · Compact' },
+      { id:'pixtral-large-2411',                  name:'Pixtral Large',         free:true, sub:'Mistral · FREE · Vision · Powerful' },
+      { id:'rtist',                               name:'rTist',                 free:true, sub:'LLM7 · FREE · Creative image prompts' },
+      { id:'elixposearch',                        name:'ElixpoSearch',          free:true, sub:'LLM7 · FREE · Web search' },
+      { id:'mirexa',                              name:'Mirexa',                free:true, sub:'LLM7 · FREE · Conversational' },
+      { id:'bidara',                              name:'Bidara',                free:true, sub:'LLM7 · FREE · NASA-inspired assistant' },
     ]
   }
 };
