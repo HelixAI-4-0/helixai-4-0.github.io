@@ -6204,20 +6204,20 @@ window.addEventListener('load', async function _handleGitHubCallback() {
 
   showToast('⏳ Signing in with GitHub…');
   try {
-    const redirectUri = ls('ghOAuthRedirect', location.href.split('?')[0].split('#')[0]);
     const res = await fetch(WORKER, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ action: 'exchange_code', code, redirect_uri: redirectUri })
+      body:    JSON.stringify({ action: 'exchange_code', code })
     });
     const data = await res.json();
+    console.log('[Helix GitHub OAuth]', data);
     if (data.access_token) {
       await _finalizeGitHubLogin(data.access_token);
     } else {
-      showToast('❌ GitHub login failed: ' + (data.error_description || data.error || 'unknown error'));
+      alert('GitHub login failed: ' + (data.error_description || data.error || JSON.stringify(data)));
     }
   } catch(e) {
-    showToast('❌ GitHub login error: ' + e.message);
+    alert('GitHub login error: ' + e.message);
   }
 });
 
@@ -6242,13 +6242,9 @@ async function _finalizeGitHubLogin(accessToken) {
   };
   lsSet('helixUser', helixUser);
   lsSet('githubPAT', accessToken);
-  if (helixUser.name) { setUserName(helixUser.name); updateUserUI(); }
-  _renderLoginPage();
-  _updateAccountUI();
-  showToast('✅ ' + t('loginSuccess') + ', ' + helixUser.name + '!');
-  haptic && haptic();
-  const msg = document.getElementById('loginStatusMsg');
-  if (msg) msg.textContent = '';
+  setUserName(helixUser.name || helixUser.username);
+  // Reload so the app picks up the saved login from localStorage
+  location.reload();
 }
 
 // Stub per compatibilità con eventuali chiamate esistenti
