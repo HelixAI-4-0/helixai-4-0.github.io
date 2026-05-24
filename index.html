@@ -6194,7 +6194,7 @@ function loginWithGitHub() {
 }
 
 // ── On page load: handle GitHub redirect with ?code= ──
-(async function _handleGitHubCallback() {
+window.addEventListener('load', async function _handleGitHubCallback() {
   const params = new URLSearchParams(location.search);
   const code   = params.get('code');
   if (!code) return;
@@ -6219,7 +6219,7 @@ function loginWithGitHub() {
   } catch(e) {
     showToast('❌ GitHub login error: ' + e.message);
   }
-})();
+});
 
 function _ghCancelDevice() {} // kept for compatibility
 
