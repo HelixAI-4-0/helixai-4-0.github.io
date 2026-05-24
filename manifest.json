@@ -1,37 +1,20 @@
-{
-  "name": "Helix AI",
-  "short_name": "Helix",
-  "description": "Your personal AI assistant — local & cloud, voice & text. No account needed.",
-  "start_url": "./",
-  "id": "/",
-  "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#131211",
-  "theme_color": "#d4714a",
-  "lang": "en",
-  "categories": ["productivity", "utilities"],
-  "icons": [
+const manifest = {
+  name: "Helix AI",
+  short_name: "Helix",
+  description: "Your personal AI assistant — local & cloud, voice & text.",
+  start_url: "./",
+  display: "standalone",
+  orientation: "portrait-primary",
+  background_color: "#131211",
+  theme_color: "#d4714a",
+  icons: [
     {
-      "src": "image0.jpg",
-      "sizes": "any",
-      "type": "image/jpeg",
-      "purpose": "any"
+      src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E...",
+      sizes: "512x512",
+      type: "image/svg+xml",
+      purpose: "any maskable"
     },
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23131211'/%3E%3Cpath d='M368 92 A180 215 0 0 0 144 420' stroke='%23d4714a' stroke-width='72' stroke-linecap='round' fill='none' opacity='0.55'/%3E%3Cpath d='M144 92 A180 215 0 0 1 368 420' stroke='%23d4714a' stroke-width='72' stroke-linecap='round' fill='none'/%3E%3Cpath d='M256 154 C302 219 302 293 256 364 C210 293 210 219 256 154 Z' fill='%23f5f3f0'/%3E%3C/svg%3E",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
+    // ...
   ],
-  "shortcuts": [
-    {
-      "name": "New Chat",
-      "short_name": "Chat",
-      "description": "Start a new conversation with Helix",
-      "url": "./"
-    }
-  ],
-  "screenshots": [],
-  "prefer_related_applications": false
-}
+  // ...
+};
