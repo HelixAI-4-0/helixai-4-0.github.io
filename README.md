@@ -1,4 +1,4 @@
-# 🤖 Helix AI
+#  Helix AI
 
 ![Helix AI](image0.jpg)
 
