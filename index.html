@@ -3716,6 +3716,26 @@ const PROVIDER_MODELS = {
       { id:'nova',          name:'Nova Micro',            free:true, sub:'Amazon · FREE · Tiny & fast' },
     ]
   },
+  nvidia: {
+    name:'NVIDIA NIM', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/><circle cx="12" cy="13" r="2" fill="currentColor"/></svg>', color:'#76b900',
+    endpoint:'https://integrate.api.nvidia.com/v1/chat/completions',
+    models:[
+      { id:'minimaxai/minimax-m2.7',                  name:'MiniMax M2.7',        free:true,  sub:'230B MoE · Best coding · 1M ctx · FREE w/ limits' },
+      { id:'qwen/qwen3-coder-480b-a35b-instruct',     name:'Qwen3 Coder 480B',    free:true,  sub:'Agentic coding · 256k ctx · FREE w/ limits' },
+      { id:'mistralai/mistral-nemotron',              name:'Mistral Nemotron',    free:true,  sub:'Best function calling · Agentic · FREE w/ limits' },
+      { id:'mistralai/mistral-large-3-675b',          name:'Mistral Large 3',     free:true,  sub:'675B MoE · General purpose · FREE w/ limits' },
+      { id:'meta/llama-4-maverick-17b-128e-instruct', name:'Llama 4 Maverick',    free:true,  sub:'Meta · Most popular · Multimodal · FREE w/ limits' },
+      { id:'meta/llama-4-scout-17b-16e-instruct',     name:'Llama 4 Scout',       free:true,  sub:'Meta · Efficient · FREE w/ limits' },
+      { id:'meta/llama-3.3-70b-instruct',             name:'Llama 3.3 70B',       free:true,  sub:'Meta · Reliable · 128k ctx · FREE w/ limits' },
+      { id:'stepfun-ai/step-3.5-flash',               name:'Step-3.5 Flash',      free:true,  sub:'200B MoE · Reasoning · Agentic · FREE w/ limits' },
+      { id:'nvidia/llama-3.3-nemotron-super-49b-v1',  name:'Nemotron Super 49B',  free:false, sub:'NVIDIA · Optimized · $0.10/1M in' },
+      { id:'nvidia/nemotron-mini-4b-instruct',        name:'Nemotron Mini 4B',    free:true,  sub:'NVIDIA · Edge · On-device · FREE w/ limits' },
+      { id:'google/gemma-3n-e4b-it',                  name:'Gemma 3n E4B',        free:true,  sub:'Google · Edge · Multimodal · FREE w/ limits' },
+      { id:'google/gemma-3n-e2b-it',                  name:'Gemma 3n E2B',        free:true,  sub:'Google · Tiny · Multimodal · FREE w/ limits' },
+      { id:'microsoft/phi-4-multimodal-instruct',     name:'Phi-4 Multimodal',    free:true,  sub:'Microsoft · Vision + Audio · FREE w/ limits' },
+      { id:'bytedance/seed-oss-36b',                  name:'Seed OSS 36B',        free:true,  sub:'ByteDance · General · FREE w/ limits' },
+    ]
+  },
   llm7: {
     name:'LLM7', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em;flex-shrink:0"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>', color:'#7c3aed',
     endpoint:'https://api.llm7.io/v1/chat/completions',
