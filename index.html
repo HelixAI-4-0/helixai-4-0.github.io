@@ -6178,113 +6178,50 @@ function loginWithGoogle() {
 // ── GitHub OAuth Device Flow ──────────────────────────────────────
 // Crea una GitHub OAuth App su github.com/settings/developers
 // → metti il tuo Client ID qui sotto (NON serve il client secret)
-const HELIX_GITHUB_CLIENT_ID = 'Ov23liYyTmEqJ9choNBe';
+const HELIX_GITHUB_CLIENT_ID     = 'Ov23liYyTmEqJ9choNBe';
 
-let _ghDevicePollTimer = null;
+const WORKER = 'https://royal-haze-6f0d.marcociullo380.workers.dev';
 
+// ── GitHub Web OAuth flow ──
 function loginWithGitHub() {
-  const section = document.getElementById('githubInputSection');
-  if (!section) return;
-  // Toggle: se già aperto, chiudi
-  if (section.style.display === 'flex') { _ghCancelDevice(); return; }
-  _startGitHubDeviceFlow();
+  const redirectUri = location.href.split('?')[0].split('#')[0];
+  lsSet('ghOAuthRedirect', redirectUri);
+  const url = 'https://github.com/login/oauth/authorize'
+    + '?client_id=' + encodeURIComponent(HELIX_GITHUB_CLIENT_ID)
+    + '&redirect_uri=' + encodeURIComponent(redirectUri)
+    + '&scope=read:user%20user:email';
+  location.href = url;
 }
 
-async function _startGitHubDeviceFlow() {
-  const section = document.getElementById('githubInputSection');
-  const msg     = document.getElementById('loginStatusMsg');
+// ── On page load: handle GitHub redirect with ?code= ──
+(async function _handleGitHubCallback() {
+  const params = new URLSearchParams(location.search);
+  const code   = params.get('code');
+  if (!code) return;
 
-  if (!HELIX_GITHUB_CLIENT_ID || HELIX_GITHUB_CLIENT_ID === 'YOUR_CLIENT_ID_HERE') {
-    showToast('⚠️ Set HELIX_GITHUB_CLIENT_ID in the code');
-    return;
-  }
+  // Clean the URL immediately so a refresh doesn't re-trigger
+  history.replaceState({}, '', location.pathname + location.hash);
 
-  // Mostra spinner mentre contatta GitHub
-  section.style.display = 'flex';
-  section.innerHTML = `<div style="font-family:var(--font-sans);font-size:14px;color:var(--text2);text-align:center;padding:12px 0">⏳ Connecting to GitHub…</div>`;
-  if (msg) msg.textContent = '';
-
-  const PROXY = 'https://corsproxy.io/?url=';
+  showToast('⏳ Signing in with GitHub…');
   try {
-    // Step 1: request device code
-    const res = await fetch(PROXY + encodeURIComponent('https://github.com/login/device/code'), {
-      method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ client_id: HELIX_GITHUB_CLIENT_ID, scope: 'read:user user:email' })
+    const redirectUri = ls('ghOAuthRedirect', location.href.split('?')[0].split('#')[0]);
+    const res = await fetch(WORKER, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ action: 'exchange_code', code, redirect_uri: redirectUri })
     });
-    if (!res.ok) throw new Error('GitHub unreachable (' + res.status + ')');
     const data = await res.json();
-
-    const { device_code, user_code, verification_uri, expires_in, interval } = data;
-    const pollInterval = (interval || 5) * 1000;
-
-    // Step 2: mostra il codice all'utente
-    section.innerHTML = `
-      <div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:8px 0">
-        <div style="font-family:var(--font-sans);font-size:13px;color:var(--text2);text-align:center;line-height:1.5">
-          Enter this code on GitHub
-        </div>
-        <div style="font-family:'SF Mono','Fira Code',monospace;font-size:28px;font-weight:700;letter-spacing:0.18em;color:var(--accent);background:rgba(var(--accentRgb),0.1);border:1.5px solid rgba(var(--accentRgb),0.3);border-radius:14px;padding:14px 24px;cursor:pointer;user-select:all"
-          onclick="navigator.clipboard?.writeText('${user_code}');showToast('Code copied!')" title="Tap to copy">
-          ${user_code}
-        </div>
-        <a href="${verification_uri}" target="_blank"
-          style="display:block;width:100%;padding:14px;border-radius:14px;border:none;background:var(--accent);color:white;font-family:var(--font-sans);font-size:16px;font-weight:600;cursor:pointer;text-align:center;text-decoration:none;box-sizing:border-box">
-          Open github.com/login/device
-        </a>
-        <div style="font-family:var(--font-sans);font-size:12px;color:var(--text3);text-align:center">
-          Waiting for authorization… <span id="ghDeviceCountdown"></span>
-        </div>
-        <button onclick="_ghCancelDevice()"
-          style="width:100%;padding:10px;border-radius:14px;border:1px solid var(--border);background:transparent;color:var(--text3);font-family:var(--font-sans);font-size:14px;cursor:pointer">
-          Annulla
-        </button>
-      </div>`;
-
-    // Countdown
-    let secsLeft = expires_in || 900;
-    const countEl = () => document.getElementById('ghDeviceCountdown');
-    const tick = setInterval(() => {
-      secsLeft--;
-      const el = countEl();
-      if (el) el.textContent = '(' + Math.floor(secsLeft/60) + ':' + String(secsLeft%60).padStart(2,'0') + ')';
-      if (secsLeft <= 0) clearInterval(tick);
-    }, 1000);
-
-    // Step 3: polling per il token
-    clearInterval(_ghDevicePollTimer);
-    _ghDevicePollTimer = setInterval(async () => {
-      try {
-        const tr = await fetch(PROXY + encodeURIComponent('https://github.com/login/oauth/access_token'), {
-          method: 'POST',
-          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            client_id: HELIX_GITHUB_CLIENT_ID,
-            device_code,
-            grant_type: 'urn:ietf:params:oauth:grant-type:device_code'
-          })
-        });
-        const td = await tr.json();
-
-        if (td.access_token) {
-          clearInterval(_ghDevicePollTimer);
-          clearInterval(tick);
-          await _finalizeGitHubLogin(td.access_token);
-        } else if (td.error === 'access_denied' || td.error === 'expired_token') {
-          clearInterval(_ghDevicePollTimer);
-          clearInterval(tick);
-          _ghCancelDevice();
-          showToast('❌ ' + (td.error === 'access_denied' ? 'Access denied' : 'Code expired'));
-        }
-        // 'authorization_pending' e 'slow_down' → continuare a fare polling
-      } catch(e) { /* rete — ritenta */ }
-    }, pollInterval);
-
+    if (data.access_token) {
+      await _finalizeGitHubLogin(data.access_token);
+    } else {
+      showToast('❌ GitHub login failed: ' + (data.error_description || data.error || 'unknown error'));
+    }
   } catch(e) {
-    section.innerHTML = `<div style="font-family:var(--font-sans);font-size:13px;color:var(--red);text-align:center;padding:8px">${e.message}</div>`;
-    if (msg) msg.textContent = '';
+    showToast('❌ GitHub login error: ' + e.message);
   }
-}
+})();
+
+function _ghCancelDevice() {} // kept for compatibility
 
 async function _finalizeGitHubLogin(accessToken) {
   const section = document.getElementById('githubInputSection');
@@ -6312,12 +6249,6 @@ async function _finalizeGitHubLogin(accessToken) {
   haptic && haptic();
   const msg = document.getElementById('loginStatusMsg');
   if (msg) msg.textContent = '';
-}
-
-function _ghCancelDevice() {
-  clearInterval(_ghDevicePollTimer);
-  const section = document.getElementById('githubInputSection');
-  if (section) { section.style.display = 'none'; section.innerHTML = ''; }
 }
 
 // Stub per compatibilità con eventuali chiamate esistenti
