@@ -92,20 +92,9 @@ function safeParse(md) {
   } catch(e) { return ''; }
 }
 
-// Strip Pollinations promotional/notice blocks injected by the API
+// LLM7 does not inject notice blocks — passthrough only
 function stripPollinationsNotice(text) {
-  if (!text) return text;
-  // Split into paragraphs (blank-line separated) and remove any containing Pollinations notice.
-  // This avoids fragile emoji-based regex that breaks when the API changes formatting.
-  const NOTICE_RE = /important notice|pollinations\.ai|legacy text api|enter\.pollinations|text\.pollinations|migrate to our new|anonymous requests to the text/i;
-  const paragraphs = text.split(/\n\n+/);
-  const clean = paragraphs.filter(p => !NOTICE_RE.test(p));
-  // If everything got stripped (entire reply was just the notice), return empty string
-  text = clean.join('\n\n').trim();
-  // Belt-and-suspenders: also strip any remaining single lines with Pollinations content
-  text = text.replace(/^.*(?:pollinations\.ai|Pollinations legacy|enter\.pollinations).*$/gm, '');
-  text = text.replace(/\n{3,}/g, '\n\n').trim();
-  return text;
+  return text || text;
 }
 </script>
 <script type="module">
@@ -1425,7 +1414,7 @@ button { touch-action: manipulation; }
         <button id="provBtn_local" onclick="setPollinationsMode('local')" class="prov-chip">🖥 Local Only</button>
       </div>
       <div style="padding:0 16px 10px;font-family:var(--font-sans);font-size:11px;color:var(--text3);line-height:1.5">
-        <span style="color:#4ade80;font-weight:700">Cloud:</span> <strong style="color:var(--text2)">GPT-4.1 / GPT-4o / DeepSeek-R1 / Qwen-Coder</strong> via Pollinations · free, no key.<br>
+        <span style="color:#4ade80;font-weight:700">Cloud:</span> <strong style="color:var(--text2)">GPT-4.1 Nano / GPT-4o mini / DeepSeek-R1 / Qwen2.5 Coder</strong> via LLM7 · free, no key.<br>
         <span style="color:#a78bfa;font-weight:700">Local:</span> Runs <strong style="color:var(--text2)">in-browser</strong> via WebGPU · full privacy · offline.
       </div>
       <!-- Custom API Key button -->
@@ -2167,39 +2156,39 @@ function _welcomeRenderProviderStep() {
 
   const labels = {
     en: { title:'How do you want to use Helix?', sub:'Choose your AI source', skip:'Skip for now',
-          cloud:'Free cloud', cloudSub:'No account needed · Powered by Pollinations.ai',
+          cloud:'Free cloud', cloudSub:'No account needed · Powered by LLM7.io',
           key:'API key', keySub:'OpenAI, Anthropic, Groq…',
           local:'On-device', localSub:'Private · No internet needed' },
     it: { title:'Come vuoi usare Helix?', sub:'Scegli la tua fonte AI', skip:'Salta per ora',
-          cloud:'Cloud gratuito', cloudSub:'Nessun account · Pollinations.ai',
+          cloud:'Cloud gratuito', cloudSub:'Nessun account · LLM7.io',
           key:'Chiave API', keySub:'OpenAI, Anthropic, Groq…',
           local:'Sul dispositivo', localSub:'Privato · Nessuna connessione' },
     es: { title:'¿Cómo quieres usar Helix?', sub:'Elige tu fuente de IA', skip:'Omitir por ahora',
-          cloud:'Nube gratuita', cloudSub:'Sin cuenta · Pollinations.ai',
+          cloud:'Nube gratuita', cloudSub:'Sin cuenta · LLM7.io',
           key:'Clave API', keySub:'OpenAI, Anthropic, Groq…',
           local:'En el dispositivo', localSub:'Privado · Sin internet' },
     fr: { title:'Comment utiliser Helix?', sub:'Choisissez votre source IA', skip:'Passer pour l\'instant',
-          cloud:'Cloud gratuit', cloudSub:'Sans compte · Pollinations.ai',
+          cloud:'Cloud gratuit', cloudSub:'Sans compte · LLM7.io',
           key:'Clé API', keySub:'OpenAI, Anthropic, Groq…',
           local:'Sur l\'appareil', localSub:'Privé · Sans internet' },
     de: { title:'Wie möchtest du Helix nutzen?', sub:'Wähle deine KI-Quelle', skip:'Vorerst überspringen',
-          cloud:'Kostenlose Cloud', cloudSub:'Kein Konto · Pollinations.ai',
+          cloud:'Kostenlose Cloud', cloudSub:'Kein Konto · LLM7.io',
           key:'API-Schlüssel', keySub:'OpenAI, Anthropic, Groq…',
           local:'Auf dem Gerät', localSub:'Privat · Kein Internet nötig' },
     pt: { title:'Como quer usar o Helix?', sub:'Escolha a fonte de IA', skip:'Pular por enquanto',
-          cloud:'Nuvem gratuita', cloudSub:'Sem conta · Pollinations.ai',
+          cloud:'Nuvem gratuita', cloudSub:'Sem conta · LLM7.io',
           key:'Chave API', keySub:'OpenAI, Anthropic, Groq…',
           local:'No dispositivo', localSub:'Privado · Sem internet' },
     zh: { title:'如何使用 Helix？', sub:'选择你的 AI 来源', skip:'暂时跳过',
-          cloud:'免费云端', cloudSub:'无需账号 · Pollinations.ai',
+          cloud:'免费云端', cloudSub:'无需账号 · LLM7.io',
           key:'API 密钥', keySub:'OpenAI, Anthropic, Groq…',
           local:'本地设备', localSub:'隐私 · 无需联网' },
     ja: { title:'Helix の使い方を選んでください', sub:'AI ソースを選択', skip:'今はスキップ',
-          cloud:'無料クラウド', cloudSub:'アカウント不要 · Pollinations.ai',
+          cloud:'無料クラウド', cloudSub:'アカウント不要 · LLM7.io',
           key:'API キー', keySub:'OpenAI, Anthropic, Groq…',
           local:'デバイス上', localSub:'プライベート · インターネット不要' },
     ko: { title:'Helix 사용 방법을 선택하세요', sub:'AI 소스 선택', skip:'나중에',
-          cloud:'무료 클라우드', cloudSub:'계정 불필요 · Pollinations.ai',
+          cloud:'무료 클라우드', cloudSub:'계정 불필요 · LLM7.io',
           key:'API 키', keySub:'OpenAI, Anthropic, Groq…',
           local:'기기 내', localSub:'개인 정보 보호 · 인터넷 불필요' },
   };
@@ -2231,7 +2220,7 @@ function _welcomeShowCloud() {
   const title = document.getElementById('welcomeModelTitle');
   const sub   = document.getElementById('welcomeModelSub');
   title.textContent = 'Free cloud models';
-  sub.textContent   = 'text.pollinations.ai — no key needed';
+  sub.textContent   = 'api.llm7.io — no key needed';
   list.innerHTML = `
     <button onclick="_welcomeBackToProviders()" class="wm-item" style="opacity:0.6;justify-content:flex-start">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
@@ -2966,20 +2955,32 @@ function closeCloudModelSheet() {
 function _updateModelPillLabel() {
   const lbl = document.getElementById('modelPillLabel');
   if (!lbl) return;
-  // Friendly names for Pollinations model IDs
+  // Friendly names for cloud model IDs
   const POLL_NAMES = {
-    'openai':'GPT-4o mini', 'openai-large':'GPT-4.1', 'openai-fast':'GPT-4o nano',
-    'claude-haiku':'Claude Haiku', 'mistral':'Mistral Small', 'mistral-large':'Mistral Large',
-    'gemini-fast':'Gemini Flash', 'qwen-coder':'Qwen3 Coder', 'llama':'Llama 3.3 70B',
-    'llama-4-scout':'Llama 4 Scout', 'grok':'Grok 4', 'sonar':'Perplexity Sonar',
-    'minimax':'MiniMax M2.7', 'nova':'Nova Micro',
-    'gpt-4o':'GPT-4o', 'gpt-4.1':'GPT-4.1', 'gpt-4o-mini':'GPT-4o mini',
-    'deepseek-r1':'DeepSeek R1', 'mistral-large':'Mistral Large',
-    // LLM7 models
-    'DeepSeek-V3':'DeepSeek V3', 'DeepSeek-R1':'DeepSeek R1',
-    'Qwen3-235B-A22B':'Qwen3 235B', 'Qwen3-32B':'Qwen3 32B',
-    'Llama-3.3-70B-Instruct':'Llama 3.3 70B', 'Mistral-Small-3.1-24B-Instruct':'Mistral Small',
-    'gemma-3-27b-it':'Gemma 3 27B',
+    // LLM7 free cloud model IDs
+    'gpt-4.1-nano-2025-04-14':'GPT-4.1 Nano',
+    'gpt-4o-mini-2024-07-18':'GPT-4o mini',
+    'gpt-o3-2025-04-16':'o3',
+    'deepseek-r1-0528':'DeepSeek R1',
+    'grok-3-mini-high':'Grok 3 Mini',
+    'llama-4-scout-17b-16e-instruct':'Llama 4 Scout',
+    'llama-3.1-8b-instruct-fp8':'Llama 3.1 8B',
+    'mistral-small-3.1-24b-instruct-2503':'Mistral Small 3.1',
+    'mistral-large-2411':'Mistral Large',
+    'mistral-medium':'Mistral Medium',
+    'open-mixtral-8x22b':'Mixtral 8x22B',
+    'qwen2.5-coder-32b-instruct':'Qwen2.5 Coder',
+    'codestral-2501':'Codestral',
+    'phi-4-multimodal-instruct':'Phi-4',
+    'pixtral-large-2411':'Pixtral Large',
+    'gemini-2.5-flash-lite':'Gemini Flash Lite',
+    // Pollinations text.pollinations.ai model IDs
+    'gpt-4o':'GPT-4.0',
+    'gpt-4.1':'GPT-4.1',
+    'gpt-4o-mini':'GPT-4o mini',
+    'deepseek-r1':'DeepSeek R1',
+    'qwen-coder':'Qwen Coder 32B',
+    'mistral-large':'Mistral Large',
   };
   if (customApiKey?.key) {
     const rawModel = customApiKey.model.split('/').pop();
@@ -3039,11 +3040,13 @@ function renderCloudModelSheet() {
     const hasKey = !!(apiKeys[provId] && apiKeys[provId].trim()) || !!prov.noKey;
     const provColor = prov?.color || '#818cf8';
     const provModels = prov?.models || [];
+    const keyUrl = PROVIDER_KEY_URLS[provId] || '';
+    const linkBtn = keyUrl ? `<button onclick="event.stopPropagation();window.open('${keyUrl}','_blank')" style="border:none;background:rgba(255,255,255,0.07);color:var(--text2);font-size:10px;font-family:var(--font-sans);cursor:pointer;padding:3px 9px;border-radius:6px;font-weight:700;flex-shrink:0">🔗 Get Key</button>` : '';
     const hdrExtra = prov.noKey
-      ? `<span style="font-size:10px;font-weight:700;padding:1px 8px;border-radius:6px;background:rgba(48,209,88,0.15);color:#30d158;border:1px solid rgba(48,209,88,0.3)">FREE · No key</span>`
+      ? `<div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;font-weight:700;padding:1px 8px;border-radius:6px;background:rgba(48,209,88,0.15);color:#30d158;border:1px solid rgba(48,209,88,0.3)">FREE · No key</span>${linkBtn}</div>`
       : hasKey
-        ? `<button onclick="event.stopPropagation();removeProviderKey('${provId}')" style="border:none;background:none;color:var(--red);font-size:11px;font-family:var(--font-sans);cursor:pointer;padding:2px 6px;border-radius:6px;opacity:0.7">Remove</button>`
-        : `<button onclick="event.stopPropagation();openApiKeySheet()" style="border:none;background:rgba(99,102,241,0.15);color:#818cf8;font-size:10px;font-family:var(--font-sans);cursor:pointer;padding:3px 10px;border-radius:8px;font-weight:700">+ Add Key</button>`;
+        ? `<div style="display:flex;align-items:center;gap:6px">${linkBtn}<button onclick="event.stopPropagation();removeProviderKey('${provId}')" style="border:none;background:none;color:var(--red);font-size:11px;font-family:var(--font-sans);cursor:pointer;padding:2px 6px;border-radius:6px;opacity:0.7">Remove</button></div>`
+        : `<div style="display:flex;align-items:center;gap:6px">${linkBtn}<button onclick="event.stopPropagation();openApiKeySheet()" style="border:none;background:rgba(99,102,241,0.15);color:#818cf8;font-size:10px;font-family:var(--font-sans);cursor:pointer;padding:3px 10px;border-radius:8px;font-weight:700">+ Add Key</button></div>`;
     const hdr = `<div data-section-hdr style="padding:8px 16px 4px;font-family:var(--font-sans);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;border-top:1px solid var(--border);margin-top:6px;display:flex;align-items:center;justify-content:space-between">
       <span style="display:flex;align-items:center;gap:5px;color:${provColor}">${prov?.icon || '🔑'} ${prov?.name}${hasKey ? ' ✓' : ''}</span>
       ${hdrExtra}
@@ -3105,6 +3108,7 @@ function renderCloudModelSheet() {
   const hfToken    = ls('hfToken', '');
   const stabilityK = ls('stabilityKey', '');
   const falK       = ls('falKey', '');
+  const geminiImgK = ls('geminiImgKey', '');
   const oaiK       = apiKeys.openai || '';
 
   const _imgRow = (id, label, sub, color, locked) => {
@@ -3130,6 +3134,7 @@ function renderCloudModelSheet() {
     _imgRow('poll_turbo',    'Pollinations Turbo ⚡',    'Free · Faster · No key needed',                '#22d3ee', false) +
     _imgRow('poll_realism',  'Flux Realism 📸',          'Free · Realistic photos · No key needed',      '#a78bfa', false) +
     _imgRow('nano_banana',   'Nano Banana 🍌',           'Free · Enhanced · No key needed',              '#fbbf24', false) +
+    _imgRow('nano_banana_2', 'Nano Banana 2 🍌✨',       'Google · gemini-3.1-flash-image · Gemini key',  '#34d399', !geminiImgK) +
     _imgRow('flux_dev',      'FLUX.1-dev ✨',            'Best quality · HuggingFace token',             '#f59e0b', !hfToken) +
     _imgRow('sd35',          'Stable Diffusion 3.5',    'Stability AI key',                              '#818cf8', !stabilityK) +
     _imgRow('fal_flux_pro',  'FLUX.1-pro ⚡',            'Ultra fast · fal.ai key',                      '#f97316', !falK) +
@@ -3158,6 +3163,7 @@ function renderCloudModelSheet() {
   //  VIDEO PANEL
   // ══════════════════════════════════════
   const vidPrefNow = ls('videoModelPref', 'wan21');
+  const hfVidToken = ls('hfToken', '');
   const _vidRow = (id, label, sub, color, noKey) => {
     const isSel = vidPrefNow === id;
     const badge = noKey
@@ -3195,7 +3201,25 @@ function renderCloudModelSheet() {
     </div>`;
   };
 
-  const vidFreeHtml   = _vidRow('hf_damo', 'Damo-Vilab', 'HuggingFace · free · low quality', '#4ade80', true);
+  const vidFreeHtml = (() => {
+    const isSel = vidPrefNow === 'hf_damo';
+    const hfBadge = hfVidToken
+      ? `<span style="font-size:10px;font-weight:700;background:rgba(255,184,0,0.12);color:#fbbf24;border:1px solid rgba(255,184,0,0.25);padding:2px 7px;border-radius:6px;flex-shrink:0">🔑 HF</span>`
+      : `<span style="font-size:10px;font-weight:600;background:rgba(48,209,88,0.12);color:#30d158;border:1px solid rgba(48,209,88,0.25);padding:2px 7px;border-radius:6px;flex-shrink:0">Free</span>`;
+    return `<div class="sheet-option" onclick="_switchToCloudVideo('hf_damo')">
+      <div class="sheet-option-left">
+        <div class="sheet-model-swatch" style="background:#4ade8022;color:#4ade80;font-size:15px">🎬</div>
+        <div class="sheet-option-info">
+          <span class="sheet-option-name" style="color:#4ade80">Damo-Vilab</span>
+          <div class="sheet-option-sub">HuggingFace · free · low quality${hfVidToken ? ' · HF key active' : ' · add HF key for higher limits'}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        ${hfBadge}
+        ${_check(isSel)}
+      </div>
+    </div>`;
+  })();
   const vidFalHtml    =
     _vidRow('ltx',       'LTX-2.3 Fast',      '~$0.02/5s · ultra-fast · fal.ai',        '#06b6d4', false) +
     _vidRow('wan21',     'Wan 2.1',            '~$0.05/5s · 480p · fal.ai',               '#ef4444', false) +
@@ -3297,7 +3321,7 @@ function renderCloudModelSheet() {
   //  ASSEMBLE PANELS
   // ══════════════════════════════════════
   const textPanel = `<div data-tab-panel="text">
-    ${_hdr('☁️ Free Cloud · Pollinations', '#4ade80')}
+    ${_hdr('☁️ Free Cloud · No Key', '#4ade80')}
     ${cloudAutoHtml}${cloudFreeHtml}
     ${allProviderHtml}
     ${_localSubHdr('🖥 LLM · On-device (WebGPU)', '#a78bfa')}
@@ -3313,7 +3337,10 @@ function renderCloudModelSheet() {
   </div>`;
 
   const videoPanel = `<div data-tab-panel="video" style="display:none">
-    ${_hdr('🆓 Free · No key', '#4ade80')}
+    ${_hdr('🆓 Free · HuggingFace', '#4ade80', hfVidToken
+      ? `<button onclick="event.stopPropagation();openApiKeySheet()" style="border:none;background:rgba(251,191,36,0.15);color:#fbbf24;font-size:10px;font-family:var(--font-sans);cursor:pointer;padding:3px 10px;border-radius:8px;font-weight:700">🔑 HF Key ✓</button>`
+      : `<button onclick="event.stopPropagation();openApiKeySheet()" style="border:none;background:rgba(99,102,241,0.15);color:#818cf8;font-size:10px;font-family:var(--font-sans);cursor:pointer;padding:3px 10px;border-radius:8px;font-weight:700">+ HF Key</button>`
+    )}
     ${vidFreeHtml}
     ${_hdr('🔑 fal.ai Key · Pay-per-use', '#06b6d4', falK ? '' : `<button onclick="event.stopPropagation();openApiKeySheet()" style="border:none;background:rgba(99,102,241,0.15);color:#818cf8;font-size:10px;font-family:var(--font-sans);cursor:pointer;padding:3px 10px;border-radius:8px;font-weight:700">+ Add Key</button>`)}
     ${vidFalHtml}
@@ -3360,7 +3387,7 @@ function _selectLocalSttFromSheet(id) {
 function _switchToCloudImg(id) {
   lsSet('imageModelPref', id);
   _refreshImageTab && _refreshImageTab();
-  const names = { flux_schnell:'FLUX.1-schnell (free)', poll_turbo:'Pollinations Turbo (free)', poll_realism:'Flux Realism (free)', nano_banana:'Nano Banana (free)', flux_dev:'FLUX.1-dev (HF token)', sd35:'SD 3.5 (Stability)', fal_flux_pro:'FLUX.1-pro (fal.ai)', together_flux:'Together FLUX', ideogram:'Ideogram v2', dalle3:'DALL-E 3 (OpenAI)' };
+  const names = { flux_schnell:'FLUX.1-schnell (free)', poll_turbo:'Pollinations Turbo (free)', poll_realism:'Flux Realism (free)', nano_banana:'Nano Banana (free)', nano_banana_2:'Nano Banana 2 (Gemini)', flux_dev:'FLUX.1-dev (HF token)', sd35:'SD 3.5 (Stability)', fal_flux_pro:'FLUX.1-pro (fal.ai)', together_flux:'Together FLUX', ideogram:'Ideogram v2', dalle3:'DALL-E 3 (OpenAI)' };
   showToast('🖼 Image: ' + (names[id] || id));
   haptic && haptic();
   closeCloudModelSheet();
@@ -3378,7 +3405,7 @@ function _switchToCloudTts(id) {
   closeCloudModelSheet();
 }
 
-// Helper: switch to free Pollinations cloud model (clears any active API key)
+// Helper: switch to free LLM7 cloud model (clears any active API key)
 function _switchToFreeCloud(modelId) {
   customApiKey = null;
   lsSet('customApiKey', null);
@@ -3456,6 +3483,34 @@ let _selectedApiModel    = '';
 ══════════════════════════════════════════ */
 let helixUser = ls('helixUser', null);
 // { provider:'google'|'github', name:'', avatar:'', email:'', username:'' }
+
+/* ══════════════════════════════════════════
+   PROVIDER KEY URLS — link to get API key
+══════════════════════════════════════════ */
+const PROVIDER_KEY_URLS = {
+  openai:      'https://platform.openai.com/api-keys',
+  anthropic:   'https://console.anthropic.com/settings/keys',
+  groq:        'https://console.groq.com/keys',
+  gemini:      'https://aistudio.google.com/apikey',
+  openrouter:  'https://openrouter.ai/keys',
+  mistral:     'https://console.mistral.ai/api-keys/',
+  deepseek:    'https://platform.deepseek.com/api_keys',
+  together:    'https://api.together.xyz/settings/api-keys',
+  cohere:      'https://dashboard.cohere.com/api-keys',
+  cerebras:    'https://cloud.cerebras.ai/',
+  perplexity:  'https://www.perplexity.ai/settings/api',
+  fireworks:   'https://fireworks.ai/settings/users/api-keys',
+  novita:      'https://novita.ai/settings/key-management',
+  sambanova:   'https://cloud.sambanova.ai/apis',
+  huggingface: 'https://huggingface.co/settings/tokens',
+  ai21:        'https://studio.ai21.com/account/api-key',
+  cloudflare:  'https://dash.cloudflare.com/profile/api-tokens',
+  venice:      'https://venice.ai/settings/api',
+  hyperbolic:  'https://app.hyperbolic.xyz/settings',
+  chutes:      'https://chutes.ai/app/token',
+  featherless: 'https://featherless.ai/account',
+  xai:         'https://console.x.ai/',
+};
 
 /* ══════════════════════════════════════════
    PROVIDER MODELS CATALOG
@@ -3698,42 +3753,134 @@ const PROVIDER_MODELS = {
   },
   pollinations: {
     name:'Pollinations', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><circle cx="12" cy="12" r="2"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4m-3.17-7.07-2.83 2.83M7 17l-2.83 2.83M4.93 4.93 7.76 7.76M17 17l2.83 2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>', color:'#d4714a',
-    endpoint:'https://gen.pollinations.ai/v1/chat/completions',
+    noKey:true,
+    endpoint:'https://text.pollinations.ai/openai',
     models:[
-      { id:'openai',        name:'GPT-4o mini',          free:true, sub:'OpenAI · FREE · Fast & balanced' },
-      { id:'openai-large',  name:'GPT-4.1',               free:true, sub:'OpenAI · FREE · Most powerful' },
-      { id:'openai-fast',   name:'GPT-4o nano',           free:true, sub:'OpenAI · FREE · Ultra fast' },
-      { id:'qwen-coder',    name:'Qwen3 Coder 30B',       free:true, sub:'Alibaba · FREE · Code expert' },
-      { id:'mistral',       name:'Mistral Small 3.2',     free:true, sub:'Mistral · FREE · Efficient' },
-      { id:'gemini-fast',   name:'Gemini 2.5 Flash Lite', free:true, sub:'Google · FREE · Search+Code' },
-      { id:'grok',          name:'Grok 4.20',             free:true, sub:'xAI · FREE · Multimodal' },
-      { id:'llama',         name:'Llama 3.3 70B',         free:true, sub:'Meta · FREE · Reliable' },
-      { id:'llama-4-scout', name:'Llama 4 Scout',         free:true, sub:'Meta · FREE · Vision' },
-      { id:'sonar',         name:'Perplexity Sonar',      free:true, sub:'Perplexity · FREE · Web search' },
-      { id:'mistral-large', name:'Mistral Large 3',       free:true, sub:'Mistral · FREE · Reasoning' },
-      { id:'claude-haiku',  name:'Claude Haiku 4.5',      free:true, sub:'Anthropic · FREE · Fast' },
-      { id:'minimax',       name:'MiniMax M2.7',          free:true, sub:'MiniMax · FREE · Reasoning' },
-      { id:'nova',          name:'Nova Micro',            free:true, sub:'Amazon · FREE · Tiny & fast' },
+      { id:'gpt-4o',        name:'GPT-4.0',        free:true, sub:'OpenAI · FREE · Multimodal · Capable' },
+      { id:'gpt-4.1',       name:'GPT-4.1',        free:true, sub:'OpenAI · FREE · Latest · Best reasoning' },
+      { id:'gpt-4o-mini',   name:'GPT-4o mini',    free:true, sub:'OpenAI · FREE · Fast · Lightweight' },
+      { id:'deepseek-r1',   name:'DeepSeek R1',    free:true, sub:'DeepSeek · FREE · Reasoning · Powerful' },
+      { id:'qwen-coder',    name:'Qwen Coder 32B', free:true, sub:'Alibaba · FREE · Code expert · Smart' },
+      { id:'mistral-large', name:'Mistral Large',  free:true, sub:'Mistral · FREE · Reasoning · Vision' },
     ]
   },
-  nvidia: {
-    name:'NVIDIA NIM', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/><circle cx="12" cy="13" r="2" fill="currentColor"/></svg>', color:'#76b900',
-    endpoint:'https://integrate.api.nvidia.com/v1/chat/completions',
+  cloudflare: {
+    name:'Cloudflare AI', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><path d="M17.07 15.6c.07-.25.05-.49-.07-.67-.11-.17-.3-.27-.53-.29l-8.65-.13c-.06 0-.11-.03-.14-.07-.03-.05-.03-.11 0-.17l.18-.51c.07-.2.25-.33.47-.35l9.36-.14c1.11-.06 2.32-.97 2.74-2.08l.54-1.4c.02-.06.03-.13.02-.19C20.52 6.61 18.37 5 15.89 5c-2.1 0-3.89 1.14-4.84 2.82-.44-.32-.99-.5-1.58-.48-1.11.03-2.03.82-2.25 1.9C5.76 9.38 4.5 10.71 4.5 12.33c0 .16.01.31.03.47.01.09.09.15.18.15H16.6c.22 0 .41-.14.47-.35z"/></svg>', color:'#F6821F',
+    endpoint:'https://api.cloudflare.com/client/v4/accounts/__CFID__/ai/v1/chat/completions',
+    keyHint:'ACCOUNT_ID|API_TOKEN',
     models:[
-      { id:'minimaxai/minimax-m2.7',                  name:'MiniMax M2.7',        free:true,  sub:'230B MoE · Best coding · 1M ctx · FREE w/ limits' },
-      { id:'qwen/qwen3-coder-480b-a35b-instruct',     name:'Qwen3 Coder 480B',    free:true,  sub:'Agentic coding · 256k ctx · FREE w/ limits' },
-      { id:'mistralai/mistral-nemotron',              name:'Mistral Nemotron',    free:true,  sub:'Best function calling · Agentic · FREE w/ limits' },
-      { id:'mistralai/mistral-large-3-675b',          name:'Mistral Large 3',     free:true,  sub:'675B MoE · General purpose · FREE w/ limits' },
-      { id:'meta/llama-4-maverick-17b-128e-instruct', name:'Llama 4 Maverick',    free:true,  sub:'Meta · Most popular · Multimodal · FREE w/ limits' },
-      { id:'meta/llama-4-scout-17b-16e-instruct',     name:'Llama 4 Scout',       free:true,  sub:'Meta · Efficient · FREE w/ limits' },
-      { id:'meta/llama-3.3-70b-instruct',             name:'Llama 3.3 70B',       free:true,  sub:'Meta · Reliable · 128k ctx · FREE w/ limits' },
-      { id:'stepfun-ai/step-3.5-flash',               name:'Step-3.5 Flash',      free:true,  sub:'200B MoE · Reasoning · Agentic · FREE w/ limits' },
-      { id:'nvidia/llama-3.3-nemotron-super-49b-v1',  name:'Nemotron Super 49B',  free:false, sub:'NVIDIA · Optimized · $0.10/1M in' },
-      { id:'nvidia/nemotron-mini-4b-instruct',        name:'Nemotron Mini 4B',    free:true,  sub:'NVIDIA · Edge · On-device · FREE w/ limits' },
-      { id:'google/gemma-3n-e4b-it',                  name:'Gemma 3n E4B',        free:true,  sub:'Google · Edge · Multimodal · FREE w/ limits' },
-      { id:'google/gemma-3n-e2b-it',                  name:'Gemma 3n E2B',        free:true,  sub:'Google · Tiny · Multimodal · FREE w/ limits' },
-      { id:'microsoft/phi-4-multimodal-instruct',     name:'Phi-4 Multimodal',    free:true,  sub:'Microsoft · Vision + Audio · FREE w/ limits' },
-      { id:'bytedance/seed-oss-36b',                  name:'Seed OSS 36B',        free:true,  sub:'ByteDance · General · FREE w/ limits' },
+      // ─── Workers AI (free tier) ───
+      { id:'@cf/meta/llama-3.3-70b-instruct-fp8-fast',          name:'Llama 3.3 70B',        free:true,  sub:'Workers AI · Meta · FREE 10k/day' },
+      { id:'@cf/meta/llama-3.1-8b-instruct',                    name:'Llama 3.1 8B',         free:true,  sub:'Workers AI · Meta · FREE 10k/day' },
+      { id:'@cf/meta/llama-4-scout-17b-16e-instruct',           name:'Llama 4 Scout 17B',    free:true,  sub:'Workers AI · Meta · Multimodal · FREE 10k/day' },
+      { id:'@cf/openai/gpt-oss-120b',                           name:'GPT-OSS 120B',         free:true,  sub:'Workers AI · OpenAI · FREE 10k/day' },
+      { id:'@cf/openai/gpt-oss-20b',                            name:'GPT-OSS 20B',          free:true,  sub:'Workers AI · OpenAI · Fast · FREE 10k/day' },
+      { id:'@cf/google/gemma-3-27b-it',                         name:'Gemma 3 27B',          free:true,  sub:'Workers AI · Google · FREE 10k/day' },
+      { id:'@cf/google/gemma-3-12b-it',                         name:'Gemma 3 12B',          free:true,  sub:'Workers AI · Google · FREE 10k/day' },
+      { id:'@cf/google/gemma-3-4b-it',                          name:'Gemma 3 4B',           free:true,  sub:'Workers AI · Google · FREE 10k/day' },
+      { id:'@cf/moonshotai/kimi-k2.6',                          name:'Kimi K2.6',            free:true,  sub:'Workers AI · Moonshot · FREE 10k/day' },
+      { id:'@cf/deepseek-ai/deepseek-r1-distill-qwen-32b',      name:'DeepSeek R1 32B',      free:true,  sub:'Workers AI · Reasoning · FREE 10k/day' },
+      { id:'@cf/qwen/qwen2.5-coder-32b-instruct',               name:'Qwen2.5 Coder 32B',    free:true,  sub:'Workers AI · Code · FREE 10k/day' },
+      { id:'@cf/qwen/qwen3-32b',                                name:'Qwen 3 32B',           free:true,  sub:'Workers AI · Alibaba · FREE 10k/day' },
+      { id:'@cf/mistral/mistral-7b-instruct-v0.2',              name:'Mistral 7B',           free:true,  sub:'Workers AI · Mistral · FREE 10k/day' },
+      { id:'@cf/zai-org/glm-4.7-flash',                         name:'GLM-4.7 Flash',        free:true,  sub:'Workers AI · ZAI · FREE 10k/day' },
+      // ─── AI Gateway · Anthropic ───
+      { id:'claude-sonnet-4-6',           name:'Claude Sonnet 4.6',    free:false, sub:'Gateway · Anthropic · Latest' },
+      { id:'claude-opus-4-6',             name:'Claude Opus 4.6',      free:false, sub:'Gateway · Anthropic · Most powerful' },
+      { id:'claude-haiku-4-5-20251001',   name:'Claude Haiku 4.5',     free:false, sub:'Gateway · Anthropic · Fast' },
+      { id:'claude-3-7-sonnet-20250219',  name:'Claude 3.7 Sonnet',    free:false, sub:'Gateway · Anthropic · Thinking' },
+      { id:'claude-3-5-sonnet-20241022',  name:'Claude 3.5 Sonnet',    free:false, sub:'Gateway · Anthropic' },
+      { id:'claude-3-5-haiku-20241022',   name:'Claude 3.5 Haiku',     free:false, sub:'Gateway · Anthropic · Fast' },
+      { id:'claude-3-opus-20240229',      name:'Claude 3 Opus',        free:false, sub:'Gateway · Anthropic' },
+      { id:'claude-3-haiku-20240307',     name:'Claude 3 Haiku',       free:false, sub:'Gateway · Anthropic · Fast' },
+      // ─── AI Gateway · Google AI Studio ───
+      { id:'gemini-2.5-pro',              name:'Gemini 2.5 Pro',       free:false, sub:'Gateway · Google · Best' },
+      { id:'gemini-2.5-flash',            name:'Gemini 2.5 Flash',     free:false, sub:'Gateway · Google · Fast' },
+      { id:'gemini-2.5-flash-lite',       name:'Gemini 2.5 Flash Lite',free:false, sub:'Gateway · Google · Lightest' },
+      { id:'gemini-2.0-flash',            name:'Gemini 2.0 Flash',     free:false, sub:'Gateway · Google' },
+      { id:'gemini-2.0-flash-lite',       name:'Gemini 2.0 Flash Lite',free:false, sub:'Gateway · Google' },
+      { id:'gemini-1.5-pro',              name:'Gemini 1.5 Pro',       free:false, sub:'Gateway · Google · 2M ctx' },
+      { id:'gemini-1.5-flash',            name:'Gemini 1.5 Flash',     free:false, sub:'Gateway · Google' },
+      { id:'gemma-3-27b-it',              name:'Gemma 3 27B',          free:false, sub:'Gateway · Google · Open' },
+      { id:'gemma-3-12b-it',              name:'Gemma 3 12B',          free:false, sub:'Gateway · Google · Open' },
+      { id:'gemma-3-4b-it',               name:'Gemma 3 4B',           free:false, sub:'Gateway · Google · Open' },
+      // ─── AI Gateway · xAI ───
+      { id:'grok-4',                      name:'Grok 4',               free:false, sub:'Gateway · xAI · Flagship' },
+      { id:'grok-3',                      name:'Grok 3',               free:false, sub:'Gateway · xAI' },
+      { id:'grok-3-mini',                 name:'Grok 3 Mini',          free:false, sub:'Gateway · xAI · Fast' },
+      { id:'grok-3-fast',                 name:'Grok 3 Fast',          free:false, sub:'Gateway · xAI · Fast' },
+      { id:'grok-2-vision-1212',          name:'Grok 2 Vision',        free:false, sub:'Gateway · xAI · Multimodal' },
+      // ─── AI Gateway · Groq ───
+      { id:'llama-3.3-70b-versatile',                        name:'Llama 3.3 70B',         free:false, sub:'Gateway · Groq · Fast inference' },
+      { id:'llama-3.1-8b-instant',                           name:'Llama 3.1 8B',          free:false, sub:'Gateway · Groq · Ultra fast' },
+      { id:'meta-llama/llama-4-maverick-17b-128e-instruct',  name:'Llama 4 Maverick 17B',  free:false, sub:'Gateway · Groq · Vision' },
+      { id:'deepseek-r1-distill-llama-70b',                  name:'DeepSeek R1 70B',       free:false, sub:'Gateway · Groq · Reasoning' },
+      { id:'qwen-qwq-32b',                                   name:'Qwen QwQ 32B',          free:false, sub:'Gateway · Groq · Reasoning' },
+      { id:'qwen/qwen3-32b',                                 name:'Qwen 3 32B',            free:false, sub:'Gateway · Groq' },
+      { id:'moonshotai/kimi-k2-instruct',                    name:'Kimi K2',               free:false, sub:'Gateway · Groq · Agentic' },
+      { id:'mistral-saba-24b',                               name:'Mistral Saba 24B',      free:false, sub:'Gateway · Groq' },
+      { id:'gemma2-9b-it',                                   name:'Gemma 2 9B',            free:false, sub:'Gateway · Groq · Google' },
+      // ─── AI Gateway · OpenAI ───
+      { id:'gpt-4o',                      name:'GPT-4o',               free:false, sub:'Gateway · OpenAI · Multimodal' },
+      { id:'gpt-4o-mini',                 name:'GPT-4o mini',          free:false, sub:'Gateway · OpenAI · Fast' },
+      { id:'gpt-4.1-2025-04-14',          name:'GPT-4.1',              free:false, sub:'Gateway · OpenAI · Latest' },
+      { id:'gpt-4.1-mini-2025-04-14',     name:'GPT-4.1 mini',         free:false, sub:'Gateway · OpenAI · Fast' },
+      { id:'gpt-4.1-nano-2025-04-14',     name:'GPT-4.1 nano',         free:false, sub:'Gateway · OpenAI · Lightest' },
+      { id:'o3',                          name:'o3',                   free:false, sub:'Gateway · OpenAI · Reasoning' },
+      { id:'o3-mini',                     name:'o3 mini',              free:false, sub:'Gateway · OpenAI · Reasoning fast' },
+      { id:'o4-mini-2025-04-16',          name:'o4 mini',              free:false, sub:'Gateway · OpenAI · Reasoning' },
+      { id:'o1',                          name:'o1',                   free:false, sub:'Gateway · OpenAI · Reasoning' },
+    ]
+  },
+  venice: {
+    name:'Venice AI', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em;flex-shrink:0"><path d="M3 17c3-3 6-3 9 0s6 3 9 0"/><path d="M3 7c3-3 6-3 9 0s6 3 9 0"/><path d="M3 12c3-3 6-3 9 0s6 3 9 0"/></svg>', color:'#7B8CFF',
+    endpoint:'https://api.venice.ai/api/v1/chat/completions',
+    models:[
+      { id:'llama-3.3-70b',             name:'Llama 3.3 70B',      free:true,  sub:'Meta · Privacy · No logging · FREE w/ limits' },
+      { id:'llama-3.1-405b',            name:'Llama 3.1 405B',     free:false, sub:'Meta · Largest open · No logging · $0.80/1M in' },
+      { id:'deepseek-r1-671b',          name:'DeepSeek R1 671B',   free:false, sub:'Reasoning · Full size · No logging · $2/1M in' },
+      { id:'qwen-2.5-72b-instruct',     name:'Qwen 2.5 72B',       free:false, sub:'Alibaba · Solid · No logging · $0.40/1M in' },
+      { id:'mistral-31-24b',            name:'Mistral Small 3.1',  free:false, sub:'Vision · 24B · No logging · $0.10/1M in' },
+      { id:'dolphin-mixtral-8x22b',     name:'Dolphin Mixtral',    free:false, sub:'Uncensored · MoE · No logging · $0.90/1M in' },
+    ]
+  },
+  hyperbolic: {
+    name:'Hyperbolic', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em;flex-shrink:0"><path d="M2 12 C2 6 7 2 12 2"/><path d="M22 12 C22 18 17 22 12 22"/><path d="M12 2 C17 2 22 6 22 12"/><path d="M12 22 C7 22 2 18 2 12"/><circle cx="12" cy="12" r="3"/></svg>', color:'#00D4FF',
+    endpoint:'https://api.hyperbolic.xyz/v1/chat/completions',
+    models:[
+      { id:'meta-llama/Llama-3.3-70B-Instruct',          name:'Llama 3.3 70B',    free:false, sub:'Meta · Reliable · $0.40/1M in' },
+      { id:'meta-llama/Meta-Llama-3.1-405B-Instruct',    name:'Llama 3.1 405B',   free:false, sub:'Meta · Largest open · $2/1M in' },
+      { id:'meta-llama/Meta-Llama-3.1-8B-Instruct',      name:'Llama 3.1 8B',     free:false, sub:'Meta · Lightweight · $0.04/1M in' },
+      { id:'deepseek-ai/DeepSeek-R1',                    name:'DeepSeek R1',      free:false, sub:'671B Reasoning · $1.20/1M in' },
+      { id:'deepseek-ai/DeepSeek-V3',                    name:'DeepSeek V3',      free:false, sub:'Flagship · $0.40/1M in' },
+      { id:'Qwen/Qwen2.5-72B-Instruct',                  name:'Qwen 2.5 72B',     free:false, sub:'Alibaba · Solid · $0.40/1M in' },
+      { id:'mistralai/Mistral-7B-Instruct-v0.3',         name:'Mistral 7B',       free:false, sub:'Mistral · Open · $0.04/1M in' },
+    ]
+  },
+  chutes: {
+    name:'Chutes.ai', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><path d="M4 6h16v2H4zm2 5h12v2H6zm3 5h6v2H9z"/></svg>', color:'#22D3EE',
+    endpoint:'https://llm.chutes.ai/v1/chat/completions',
+    models:[
+      { id:'deepseek-ai/DeepSeek-V3-0324',                          name:'DeepSeek V3',      free:true,  sub:'Flagship · FREE w/ limits' },
+      { id:'deepseek-ai/DeepSeek-R1',                               name:'DeepSeek R1',      free:true,  sub:'Reasoning · FREE w/ limits' },
+      { id:'meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8',    name:'Llama 4 Maverick', free:true,  sub:'Meta · Multimodal · FREE w/ limits' },
+      { id:'meta-llama/Llama-4-Scout-17B-16E-Instruct',            name:'Llama 4 Scout',    free:true,  sub:'Meta · Efficient · FREE w/ limits' },
+      { id:'Qwen/Qwen3-235B-A22B',                                  name:'Qwen 3 235B',      free:true,  sub:'MoE · Massive · FREE w/ limits' },
+      { id:'MiniMaxAI/MiniMax-M2.5-TEE',                           name:'MiniMax M2.5',     free:true,  sub:'230B MoE · Privacy TEE · FREE w/ limits' },
+      { id:'mistralai/Mistral-Small-3.1-24B-Instruct-2503',        name:'Mistral Small 3.1',free:true,  sub:'Vision · 24B · FREE w/ limits' },
+    ]
+  },
+  featherless: {
+    name:'Featherless', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em;flex-shrink:0"><path d="M20 4L4 20"/><path d="M4 4c0 8 4 12 16 8"/><path d="M20 20c0-8-4-12-16-8"/></svg>', color:'#F472B6',
+    endpoint:'https://api.featherless.ai/v1/chat/completions',
+    models:[
+      { id:'Qwen/Qwen2.5-72B-Instruct',                      name:'Qwen 2.5 72B',       free:false, sub:'Alibaba · Solid · Huge catalog' },
+      { id:'NousResearch/Hermes-3-Llama-3.1-70B',            name:'Hermes 3 70B',       free:false, sub:'Nous · Agentic · Tool use' },
+      { id:'mistralai/Mistral-7B-Instruct-v0.3',             name:'Mistral 7B',         free:false, sub:'Mistral · Open · Reliable' },
+      { id:'meta-llama/Llama-3.3-70B-Instruct',             name:'Llama 3.3 70B',      free:false, sub:'Meta · Strong · 128k ctx' },
+      { id:'cognitivecomputations/dolphin-2.9-llama3-8b',   name:'Dolphin Llama 3 8B', free:false, sub:'Uncensored · Creative · Compact' },
+      { id:'mistralai/Mixtral-8x7B-Instruct-v0.1',          name:'Mixtral 8x7B',       free:false, sub:'MoE · Capable · 32k ctx' },
+      { id:'NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO',   name:'Hermes 2 Mixtral',   free:false, sub:'Nous · DPO trained · MoE' },
     ]
   },
   llm7: {
@@ -3763,23 +3910,23 @@ const PROVIDER_MODELS = {
   }
 };
 // 'auto'  = cloud when online, local fallback (default)
-// 'cloud' = always cloud (Pollinations, forced)
+// 'cloud' = always cloud (LLM7, forced)
 // 'local' = always local WebLLM
 
-/* ── Cloud model override (user-selected Pollinations model) ── */
+/* ── Cloud model override (user-selected LLM7 model) ── */
 let selectedCloudModelId = ls('selectedCloudModelId', null); // null = use persona default
 
 /* ── Local model selector ── */
 let selectedLocalModelId = ls('selectedLocalModelId', null);
 
-/* ── Available Pollinations cloud models ── */
+/* ── Available LLM7 free cloud models ── */
 const CLOUD_MODEL_OPTIONS = [
-  { id:'gpt-4o',        name:'GPT-4.0',         sub:'OpenAI · Multimodal · Capable',    color:'#10a37f', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><path d="M22.28 9.82a5.98 5.98 0 0 0-.52-4.91 6.05 6.05 0 0 0-6.51-2.9 6.06 6.06 0 0 0-10.27 2.17 5.98 5.98 0 0 0-3.98 2.9 6.05 6.05 0 0 0 .74 7.1 5.98 5.98 0 0 0 .51 4.91 6.05 6.05 0 0 0 6.51 2.9A5.98 5.98 0 0 0 13.26 24a6.06 6.06 0 0 0 5.77-4.21 5.99 5.99 0 0 0 3.98-2.9 6.06 6.06 0 0 0-.73-7.07zM13.26 22.43a4.48 4.48 0 0 1-2.88-1.04l.14-.08 4.78-2.76a.79.79 0 0 0 .4-.68v-6.74l2.02 1.17a.07.07 0 0 1 .04.05v5.58a4.5 4.5 0 0 1-4.5 4.5zM3.6 18.31a4.47 4.47 0 0 1-.53-3.01l.14.08 4.78 2.76a.77.77 0 0 0 .78 0l5.84-3.37v2.33a.08.08 0 0 1-.03.06L9.74 19.95a4.5 4.5 0 0 1-6.14-1.64zM2.34 7.9a4.48 4.48 0 0 1 2.36-1.98V11.6a.77.77 0 0 0 .39.68l5.81 3.35-2.02 1.17a.08.08 0 0 1-.07 0L4.2 14.72A4.5 4.5 0 0 1 2.34 7.9zM18.94 11.76l-5.83-3.36 2.02-1.16a.08.08 0 0 1 .07 0l4.68 2.69a4.5 4.5 0 0 1-.68 8.1v-5.6a.79.79 0 0 0-.26-.67zM20.95 8.74l-.14-.09-4.77-2.78a.78.78 0 0 0-.79 0L9.41 9.23V6.9a.07.07 0 0 1 .03-.06l4.83-2.79a4.5 4.5 0 0 1 6.68 4.66zM8.31 12.86l-2.02-1.16a.08.08 0 0 1-.04-.06V6.07a4.5 4.5 0 0 1 7.38-3.45l-.14.08-4.78 2.76a.79.79 0 0 0-.4.68v6.72zm1.1-2.37 2.6-1.5 2.61 1.5v3l-2.6 1.5-2.61-1.5v-3z"/></svg>' },
-  { id:'gpt-4.1',       name:'GPT-4.1',          sub:'OpenAI · Latest · Best reasoning', color:'#10a37f', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><path d="M22.28 9.82a5.98 5.98 0 0 0-.52-4.91 6.05 6.05 0 0 0-6.51-2.9 6.06 6.06 0 0 0-10.27 2.17 5.98 5.98 0 0 0-3.98 2.9 6.05 6.05 0 0 0 .74 7.1 5.98 5.98 0 0 0 .51 4.91 6.05 6.05 0 0 0 6.51 2.9A5.98 5.98 0 0 0 13.26 24a6.06 6.06 0 0 0 5.77-4.21 5.99 5.99 0 0 0 3.98-2.9 6.06 6.06 0 0 0-.73-7.07zM13.26 22.43a4.48 4.48 0 0 1-2.88-1.04l.14-.08 4.78-2.76a.79.79 0 0 0 .4-.68v-6.74l2.02 1.17a.07.07 0 0 1 .04.05v5.58a4.5 4.5 0 0 1-4.5 4.5zM3.6 18.31a4.47 4.47 0 0 1-.53-3.01l.14.08 4.78 2.76a.77.77 0 0 0 .78 0l5.84-3.37v2.33a.08.08 0 0 1-.03.06L9.74 19.95a4.5 4.5 0 0 1-6.14-1.64zM2.34 7.9a4.48 4.48 0 0 1 2.36-1.98V11.6a.77.77 0 0 0 .39.68l5.81 3.35-2.02 1.17a.08.08 0 0 1-.07 0L4.2 14.72A4.5 4.5 0 0 1 2.34 7.9zM18.94 11.76l-5.83-3.36 2.02-1.16a.08.08 0 0 1 .07 0l4.68 2.69a4.5 4.5 0 0 1-.68 8.1v-5.6a.79.79 0 0 0-.26-.67zM20.95 8.74l-.14-.09-4.77-2.78a.78.78 0 0 0-.79 0L9.41 9.23V6.9a.07.07 0 0 1 .03-.06l4.83-2.79a4.5 4.5 0 0 1 6.68 4.66zM8.31 12.86l-2.02-1.16a.08.08 0 0 1-.04-.06V6.07a4.5 4.5 0 0 1 7.38-3.45l-.14.08-4.78 2.76a.79.79 0 0 0-.4.68v6.72zm1.1-2.37 2.6-1.5 2.61 1.5v3l-2.6 1.5-2.61-1.5v-3z"/></svg>' },
-  { id:'gpt-4o-mini',   name:'GPT-4o mini',      sub:'OpenAI · Fast · Lightweight',      color:'#10a37f', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><path d="M22.28 9.82a5.98 5.98 0 0 0-.52-4.91 6.05 6.05 0 0 0-6.51-2.9 6.06 6.06 0 0 0-10.27 2.17 5.98 5.98 0 0 0-3.98 2.9 6.05 6.05 0 0 0 .74 7.1 5.98 5.98 0 0 0 .51 4.91 6.05 6.05 0 0 0 6.51 2.9A5.98 5.98 0 0 0 13.26 24a6.06 6.06 0 0 0 5.77-4.21 5.99 5.99 0 0 0 3.98-2.9 6.06 6.06 0 0 0-.73-7.07zM13.26 22.43a4.48 4.48 0 0 1-2.88-1.04l.14-.08 4.78-2.76a.79.79 0 0 0 .4-.68v-6.74l2.02 1.17a.07.07 0 0 1 .04.05v5.58a4.5 4.5 0 0 1-4.5 4.5zM3.6 18.31a4.47 4.47 0 0 1-.53-3.01l.14.08 4.78 2.76a.77.77 0 0 0 .78 0l5.84-3.37v2.33a.08.08 0 0 1-.03.06L9.74 19.95a4.5 4.5 0 0 1-6.14-1.64zM2.34 7.9a4.48 4.48 0 0 1 2.36-1.98V11.6a.77.77 0 0 0 .39.68l5.81 3.35-2.02 1.17a.08.08 0 0 1-.07 0L4.2 14.72A4.5 4.5 0 0 1 2.34 7.9zM18.94 11.76l-5.83-3.36 2.02-1.16a.08.08 0 0 1 .07 0l4.68 2.69a4.5 4.5 0 0 1-.68 8.1v-5.6a.79.79 0 0 0-.26-.67zM20.95 8.74l-.14-.09-4.77-2.78a.78.78 0 0 0-.79 0L9.41 9.23V6.9a.07.07 0 0 1 .03-.06l4.83-2.79a4.5 4.5 0 0 1 6.68 4.66zM8.31 12.86l-2.02-1.16a.08.08 0 0 1-.04-.06V6.07a4.5 4.5 0 0 1 7.38-3.45l-.14.08-4.78 2.76a.79.79 0 0 0-.4.68v6.72zm1.1-2.37 2.6-1.5 2.61 1.5v3l-2.6 1.5-2.61-1.5v-3z"/></svg>' },
-  { id:'deepseek-r1',   name:'DeepSeek R1',       sub:'DeepSeek · Reasoning · Powerful',  color:'#4299e1', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><path d="M12 3C7.03 3 3 7.03 3 12s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 2c3.86 0 7 3.14 7 7 0 3.86-3.14 7-7 7-3.86 0-7-3.14-7-7 0-3.86 3.14-7 7-7zm0 2a5 5 0 1 0 0 10A5 5 0 0 0 12 7zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/></svg>' },
-  { id:'qwen-coder',    name:'Qwen Coder 32B',    sub:'Alibaba · Code expert · Smart',    color:'#6366f1', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>' },
-  { id:'mistral-large', name:'Mistral Large',     sub:'Mistral · Reasoning · Vision',     color:'#ff7000', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><rect x="2" y="2" width="4.5" height="4.5"/><rect x="8.75" y="2" width="4.5" height="4.5"/><rect x="15.5" y="2" width="4.5" height="4.5"/><rect x="8.75" y="8.75" width="4.5" height="4.5"/><rect x="15.5" y="8.75" width="4.5" height="4.5"/><rect x="2" y="15.5" width="4.5" height="4.5"/><rect x="8.75" y="15.5" width="4.5" height="4.5"/><rect x="15.5" y="15.5" width="4.5" height="4.5"/></svg>' },
+  { id:'gpt-4.1-nano-2025-04-14',         name:'GPT-4.1 Nano',         sub:'OpenAI · FREE · Ultra fast',            color:'#10a37f', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><path d="M22.28 9.82a5.98 5.98 0 0 0-.52-4.91 6.05 6.05 0 0 0-6.51-2.9 6.06 6.06 0 0 0-10.27 2.17 5.98 5.98 0 0 0-3.98 2.9 6.05 6.05 0 0 0 .74 7.1 5.98 5.98 0 0 0 .51 4.91 6.05 6.05 0 0 0 6.51 2.9A5.98 5.98 0 0 0 13.26 24a6.06 6.06 0 0 0 5.77-4.21 5.99 5.99 0 0 0 3.98-2.9 6.06 6.06 0 0 0-.73-7.07zM13.26 22.43a4.48 4.48 0 0 1-2.88-1.04l.14-.08 4.78-2.76a.79.79 0 0 0 .4-.68v-6.74l2.02 1.17a.07.07 0 0 1 .04.05v5.58a4.5 4.5 0 0 1-4.5 4.5zM3.6 18.31a4.47 4.47 0 0 1-.53-3.01l.14.08 4.78 2.76a.77.77 0 0 0 .78 0l5.84-3.37v2.33a.08.08 0 0 1-.03.06L9.74 19.95a4.5 4.5 0 0 1-6.14-1.64zM2.34 7.9a4.48 4.48 0 0 1 2.36-1.98V11.6a.77.77 0 0 0 .39.68l5.81 3.35-2.02 1.17a.08.08 0 0 1-.07 0L4.2 14.72A4.5 4.5 0 0 1 2.34 7.9zM18.94 11.76l-5.83-3.36 2.02-1.16a.08.08 0 0 1 .07 0l4.68 2.69a4.5 4.5 0 0 1-.68 8.1v-5.6a.79.79 0 0 0-.26-.67zM20.95 8.74l-.14-.09-4.77-2.78a.78.78 0 0 0-.79 0L9.41 9.23V6.9a.07.07 0 0 1 .03-.06l4.83-2.79a4.5 4.5 0 0 1 6.68 4.66zM8.31 12.86l-2.02-1.16a.08.08 0 0 1-.04-.06V6.07a4.5 4.5 0 0 1 7.38-3.45l-.14.08-4.78 2.76a.79.79 0 0 0-.4.68v6.72zm1.1-2.37 2.6-1.5 2.61 1.5v3l-2.6 1.5-2.61-1.5v-3z"/></svg>' },
+  { id:'gpt-4o-mini-2024-07-18',          name:'GPT-4o mini',          sub:'OpenAI · FREE · Fast & balanced',       color:'#10a37f', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><path d="M22.28 9.82a5.98 5.98 0 0 0-.52-4.91 6.05 6.05 0 0 0-6.51-2.9 6.06 6.06 0 0 0-10.27 2.17 5.98 5.98 0 0 0-3.98 2.9 6.05 6.05 0 0 0 .74 7.1 5.98 5.98 0 0 0 .51 4.91 6.05 6.05 0 0 0 6.51 2.9A5.98 5.98 0 0 0 13.26 24a6.06 6.06 0 0 0 5.77-4.21 5.99 5.99 0 0 0 3.98-2.9 6.06 6.06 0 0 0-.73-7.07zM13.26 22.43a4.48 4.48 0 0 1-2.88-1.04l.14-.08 4.78-2.76a.79.79 0 0 0 .4-.68v-6.74l2.02 1.17a.07.07 0 0 1 .04.05v5.58a4.5 4.5 0 0 1-4.5 4.5zM3.6 18.31a4.47 4.47 0 0 1-.53-3.01l.14.08 4.78 2.76a.77.77 0 0 0 .78 0l5.84-3.37v2.33a.08.08 0 0 1-.03.06L9.74 19.95a4.5 4.5 0 0 1-6.14-1.64zM2.34 7.9a4.48 4.48 0 0 1 2.36-1.98V11.6a.77.77 0 0 0 .39.68l5.81 3.35-2.02 1.17a.08.08 0 0 1-.07 0L4.2 14.72A4.5 4.5 0 0 1 2.34 7.9zM18.94 11.76l-5.83-3.36 2.02-1.16a.08.08 0 0 1 .07 0l4.68 2.69a4.5 4.5 0 0 1-.68 8.1v-5.6a.79.79 0 0 0-.26-.67zM20.95 8.74l-.14-.09-4.77-2.78a.78.78 0 0 0-.79 0L9.41 9.23V6.9a.07.07 0 0 1 .03-.06l4.83-2.79a4.5 4.5 0 0 1 6.68 4.66zM8.31 12.86l-2.02-1.16a.08.08 0 0 1-.04-.06V6.07a4.5 4.5 0 0 1 7.38-3.45l-.14.08-4.78 2.76a.79.79 0 0 0-.4.68v6.72zm1.1-2.37 2.6-1.5 2.61 1.5v3l-2.6 1.5-2.61-1.5v-3z"/></svg>' },
+  { id:'deepseek-r1-0528',                name:'DeepSeek R1',          sub:'DeepSeek · FREE · Latest reasoning',    color:'#4299e1', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><path d="M12 3C7.03 3 3 7.03 3 12s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 2c3.86 0 7 3.14 7 7 0 3.86-3.14 7-7 7-3.86 0-7-3.14-7-7 0-3.86 3.14-7 7-7zm0 2a5 5 0 1 0 0 10A5 5 0 0 0 12 7zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/></svg>' },
+  { id:'qwen2.5-coder-32b-instruct',      name:'Qwen2.5 Coder 32B',   sub:'Alibaba · FREE · Code expert',          color:'#6366f1', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>' },
+  { id:'mistral-large-2411',              name:'Mistral Large',        sub:'Mistral · FREE · Reasoning · Powerful', color:'#ff7000', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><rect x="2" y="2" width="4.5" height="4.5"/><rect x="8.75" y="2" width="4.5" height="4.5"/><rect x="15.5" y="2" width="4.5" height="4.5"/><rect x="8.75" y="8.75" width="4.5" height="4.5"/><rect x="15.5" y="8.75" width="4.5" height="4.5"/><rect x="2" y="15.5" width="4.5" height="4.5"/><rect x="8.75" y="15.5" width="4.5" height="4.5"/><rect x="15.5" y="15.5" width="4.5" height="4.5"/></svg>' },
+  { id:'gemini-2.5-flash-lite',           name:'Gemini 2.5 Flash Lite',sub:'Google · FREE · Fast & smart',          color:'#4285f4', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><path d="M12 2L9.1 9.1 2 12l7.1 2.9L12 22l2.9-7.1L22 12l-7.1-2.9z"/></svg>' },
 ];
 
 
@@ -3963,7 +4110,7 @@ function renderModelSheet() {
       `<div style="padding:10px 16px 14px;border-top:1px solid var(--border);margin-top:6px">
         <button onclick="removeApiKeyAndSwitchFree()" style="width:100%;padding:12px;border-radius:14px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);font-family:var(--font-sans);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.15s">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.18"/></svg>
-          Remove API Key · Use Pollinations (Free)
+          Remove API Key · Use LLM7 (Free)
         </button>
       </div>`;
     return;
@@ -4052,13 +4199,13 @@ function renderModelSheet() {
     container.innerHTML =
       `<div style="padding:8px 16px 4px;font-family:var(--font-sans);font-size:10px;font-weight:800;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase">Helix Personas</div>` +
       personaHtml +
-      `<div style="padding:10px 16px 4px;font-family:var(--font-sans);font-size:10px;font-weight:800;color:#4ade80;letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid var(--border);margin-top:8px;display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:3px;height:10px;border-radius:2px;background:#4ade80;opacity:0.7"></span>☁️ Cloud Models · Pollinations (free)</div>` +
+      `<div style="padding:10px 16px 4px;font-family:var(--font-sans);font-size:10px;font-weight:800;color:#4ade80;letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid var(--border);margin-top:8px;display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:3px;height:10px;border-radius:2px;background:#4ade80;opacity:0.7"></span>☁️ Cloud Models · LLM7 (free)</div>` +
       cloudAutoHtml + cloudHtml;
   } else {
     container.innerHTML =
       `<div style="padding:8px 16px 4px;font-family:var(--font-sans);font-size:10px;font-weight:800;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase">Helix Personas</div>` +
       personaHtml +
-      `<div style="padding:10px 16px 4px;font-family:var(--font-sans);font-size:10px;font-weight:800;color:#4ade80;letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid var(--border);margin-top:8px;display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:3px;height:10px;border-radius:2px;background:#4ade80;opacity:0.7"></span>☁️ Cloud Models · Pollinations (free)</div>` +
+      `<div style="padding:10px 16px 4px;font-family:var(--font-sans);font-size:10px;font-weight:800;color:#4ade80;letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid var(--border);margin-top:8px;display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:3px;height:10px;border-radius:2px;background:#4ade80;opacity:0.7"></span>☁️ Cloud Models · LLM7 (free)</div>` +
       cloudAutoHtml + cloudHtml +
       `<div style="padding:10px 16px 4px;font-family:var(--font-sans);font-size:10px;font-weight:800;color:#a78bfa;letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid var(--border);margin-top:8px;display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:3px;height:10px;border-radius:2px;background:#a78bfa;opacity:0.8"></span>🖥 Local · On-device (WebGPU)</div>` +
       localHtml +
@@ -4112,7 +4259,7 @@ function removeApiKeyAndSwitchFree() {
   closeModelSheet();
   _updateApiKeySettingsSub();
   _updateModelPillLabel();
-  showToast('🔄 Switched to Pollinations (free)');
+  showToast('🔄 Switched to LLM7 (free)');
   haptic && haptic();
 }
 
@@ -4497,7 +4644,7 @@ async function generateImage(prompt) {
     }
   }
 
-  // ── Pollinations free image (no key, no CORS, reliable) ──
+  // ── Pollinations free image generation (no key, no CORS, reliable) ──
   // Model selection: poll_turbo = fast turbo, poll_realism = realistic, nano_banana = Nano Banana free, else default flux
   if (imgPref === 'poll_turbo') {
     try {
@@ -4525,7 +4672,35 @@ async function generateImage(prompt) {
       const nbRes = await fetch(nbUrl, { signal: sig });
       if (nbRes.ok) { const blob = await nbRes.blob(); if (blob.size > 1000) return URL.createObjectURL(blob); }
     } catch(e) { if (e.name === 'AbortError') throw e; console.warn('[IMG] Nano Banana failed:', e.message); }
-    // Fall through to default Pollinations flux
+    // Fall through to default Pollinations FLUX image
+  }
+
+  // ── Nano Banana 2 — Google Gemini 3.1 Flash Image (requires Gemini API key) ──
+  if (imgPref === 'nano_banana_2') {
+    const geminiKey = ls('geminiImgKey', '') || apiKeys?.gemini || '';
+    if (!geminiKey) throw new Error('Nano Banana 2 richiede una chiave Gemini API — aggiungila in Impostazioni \u2192 Generazione Immagini.');
+    const nb2Res = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=' + geminiKey,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseModalities: ['IMAGE', 'TEXT'] }
+        }),
+        signal: sig
+      }
+    );
+    if (!nb2Res.ok) {
+      const errTxt = await nb2Res.text().catch(() => nb2Res.statusText);
+      throw new Error('Nano Banana 2 ' + nb2Res.status + ': ' + errTxt.slice(0, 120));
+    }
+    const nb2Data = await nb2Res.json();
+    const imgPart = nb2Data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+    if (!imgPart?.inlineData?.data) throw new Error('Nessuna immagine restituita da Nano Banana 2.');
+    const byteArr = Uint8Array.from(atob(imgPart.inlineData.data), c => c.charCodeAt(0));
+    const blob2 = new Blob([byteArr], { type: imgPart.inlineData.mimeType || 'image/png' });
+    return URL.createObjectURL(blob2);
   }
 
   // ── Together AI image generation (requires Together API key) ──
@@ -4722,16 +4897,16 @@ function buildSystemPrompt(modelName) {
 ══════════════════════════════════════════ */
 
 /* ══════════════════════════════════════════
-   MODEL → ONLINE (Pollinations, free, no key)
+   MODEL → ONLINE (LLM7, free, no key)
    + OFFLINE FALLBACK (WebLLM, on-device)
 ══════════════════════════════════════════ */
 
-/* Map each Helix persona to a fast free-cloud model */
+/* Map each Helix persona to a fast free-cloud model (LLM7 IDs) */
 const ONLINE_MODELS = {
-  'Azur': { model:'llama',           label:'Llama 4 Scout · Cloud'     },
-  'Pyre': { model:'gemini',          label:'Gemini 2.5 Flash Lite · Cloud' },
-  'Quar': { model:'openai',          label:'GPT-4o mini · Cloud'      },
-  'Jade': { model:'qwen-coder',      label:'Qwen3 Coder · Cloud'       },
+  'Azur': { model:'llama-4-scout-17b-16e-instruct', label:'Llama 4 Scout · Cloud'     },
+  'Pyre': { model:'gemini-2.5-flash-lite',           label:'Gemini 2.5 Flash Lite · Cloud' },
+  'Quar': { model:'gpt-4o-mini-2024-07-18',          label:'GPT-4o mini · Cloud'       },
+  'Jade': { model:'qwen2.5-coder-32b-instruct',      label:'Qwen2.5 Coder 32B · Cloud' },
 };
 
 /* Fastest quantised on-device models for offline */
@@ -4742,7 +4917,7 @@ const WEBLLM_MODELS = {
   'Jade': 'Qwen2.5-0.5B-Instruct-q4f16_1-MLC',
 };
 
-/* ── Pollinations mode ── */
+/* ── Cloud/local mode ── */
 
 async function callAPI(userMessage, attachment, onChunk, systemAddendum) {
   abortController = new AbortController();
@@ -4847,16 +5022,16 @@ let _badgeTimeout = null;
 function _showInferenceBadge(mode) { /* disabled */ }
 
 /* ══════════════════════════════════════════
-   ONLINE — Pollinations.ai (free, no auth, streaming)
-   Multi-endpoint fallback — always anonymous, no key required
+   ONLINE — LLM7.io (free, no auth, streaming)
+   Anonymous, no key required
 ══════════════════════════════════════════ */
 
 /* Free anonymous endpoints, tried in order until one succeeds */
 const _FREE_ENDPOINTS = [
-  'https://text.pollinations.ai/openai',
-  'https://api.pollinations.ai/v1/chat/completions',
-  'https://gen.pollinations.ai/v1/chat/completions',
+  'https://api.llm7.io/v1/chat/completions',
 ];
+
+const _FREE_ENDPOINT_MODEL_MAP = {};
 
 async function _tryFetchCloud(bodyObj, sig) {
   // Build anonymous headers (no auth needed for free tier)
@@ -4865,28 +5040,42 @@ async function _tryFetchCloud(bodyObj, sig) {
     'Origin': location.origin || 'https://helix.local',
     'Referer': location.href || 'https://helix.local/',
   };
-  // If user voluntarily added a Pollinations key, use it (unlocks higher limits)
-  const _pollKey = (apiKeys && apiKeys['pollinations']) ? apiKeys['pollinations'].trim() : '';
-  if (_pollKey) headers['Authorization'] = 'Bearer ' + _pollKey;
 
   let lastErr = null;
   for (const endpoint of _FREE_ENDPOINTS) {
     try {
+      // Remap model ID if this endpoint needs different IDs
+      const modelMap = _FREE_ENDPOINT_MODEL_MAP[endpoint];
+      let body = bodyObj;
+      if (modelMap) {
+        const remapped = modelMap[bodyObj.model] || modelMap['__default__'];
+        if (remapped && remapped !== bodyObj.model) {
+          body = { ...bodyObj, model: remapped };
+        }
+      }
+
       const res = await fetch(endpoint, {
         method: 'POST',
         headers,
-        body: JSON.stringify(bodyObj),
+        body: JSON.stringify(body),
         signal: sig,
       });
       if (res.ok) return res;
-      // "balance too low" / 402 / 429 → try next endpoint
+      // 429 → wait 1s and retry same endpoint once before moving on
       const errText = await res.text().catch(() => res.statusText);
       const lower = errText.toLowerCase();
-      if (res.status === 402 || lower.includes('balance') || lower.includes('credit') || res.status === 429) {
-        lastErr = new Error(`${endpoint} ${res.status}: ${errText.slice(0,80)}`);
-        continue; // try next
+      if (res.status === 429) {
+        await new Promise(r => setTimeout(r, 1000));
+        const retry = await fetch(endpoint, { method:'POST', headers, body: JSON.stringify(body), signal: sig });
+        if (retry.ok) return retry;
+        lastErr = new Error(`${endpoint} 429 (retry failed)`);
+        continue;
       }
-      // Other HTTP errors — still try next endpoint
+      if (res.status === 402 || lower.includes('balance') || lower.includes('credit')) {
+        lastErr = new Error(`${endpoint} ${res.status}: ${errText.slice(0,80)}`);
+        continue;
+      }
+      // Other HTTP errors — try next endpoint
       lastErr = new Error(`${endpoint} ${res.status}: ${errText.slice(0,80)}`);
     } catch(e) {
       if (e.name === 'AbortError') throw e;
@@ -6050,12 +6239,12 @@ function updateProviderUI() {
   // Provider status sub
   const sub = document.getElementById('providerStatusSub');
   if (sub) {
-    const labels = { auto:'Auto · Cloud online, Local offline', cloud:'Cloud Only (Pollinations)', local:'Local Only (WebGPU)' };
+    const labels = { auto:'Auto · Cloud online, Local offline', cloud:'Cloud Only (LLM7)', local:'Local Only (WebGPU)' };
     sub.textContent = customApiKey?.key
       ? '<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em;flex-shrink:0"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.77-7.77zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> Custom API Key · ' + (PROVIDER_MODELS[customApiKey.provider]?.name || customApiKey.provider)
       : labels[pollinationsMode] || '';
   }
-  // Arena button: disable when cloud-only mode (Pollinations can't run two parallel sessions)
+  // Arena button: disable when cloud-only mode (LLM7 can't run two parallel sessions)
   _syncArenaAvailability();
 }
 
@@ -6288,7 +6477,7 @@ const _GIST_FILENAME = 'helix-data.json';
 const _GIST_DESC     = 'helix-sync-v1';
 const _SYNC_KEYS = [
   'apiKeys','customApiKey','hfToken','falKey','stabilityKey',
-  'braveSearchKey','togetherImgKey',
+  'braveSearchKey','togetherImgKey','geminiImgKey',
   'pollinationsMode','selectedCloudModelId','selectedLocalModelId',
   'customEndpoint','systemPromptOverride','aiTemperature','aiMaxTokens',
   'uiLang','colorIdx','fontIdx','user_name','searchEnabled',
@@ -6597,12 +6786,19 @@ function _refreshImageTab() {
   const ideogramSt = document.getElementById('ideogramKeyStatus');
   if (ideogramSt) { ideogramSt.textContent = ideogramKey ? '✅ Set' : ''; ideogramSt.style.color = '#30d158'; }
 
+  // Gemini image key
+  const geminiImgKey = ls('geminiImgKey','');
+  const geminiImgInp = document.getElementById('geminiImgKeyInput');
+  if (geminiImgInp) geminiImgInp.value = geminiImgKey;
+  const geminiImgSt = document.getElementById('geminiImgKeyStatus');
+  if (geminiImgSt) { geminiImgSt.textContent = geminiImgKey ? '✅ Set' : ''; geminiImgSt.style.color = '#30d158'; }
+
   // Restore video model selection
   const vidPref = ls('videoModelPref','wan21');
   _refreshVideoModelList();
 
   const pref = ls('imageModelPref','flux_schnell');
-  ['flux_dev','flux_schnell','poll_turbo','poll_realism','nano_banana','sd35','fal_flux_pro','together_flux','ideogram','dalle3','local_flux_schnell','local_sd_turbo'].forEach(id => {
+  ['flux_dev','flux_schnell','poll_turbo','poll_realism','nano_banana','nano_banana_2','sd35','fal_flux_pro','together_flux','ideogram','dalle3','local_flux_schnell','local_sd_turbo'].forEach(id => {
     const el = document.getElementById('imgModel_' + id);
     if (!el) return;
     const sel = pref === id;
@@ -6613,8 +6809,9 @@ function _refreshImageTab() {
   });
 }
 
-function saveStabilityKey(val) { lsSet('stabilityKey', val.trim()); _refreshImageTab(); }
-function saveFalKey(val)       { lsSet('falKey', val.trim()); _refreshImageTab(); }
+function saveStabilityKey(val)  { lsSet('stabilityKey', val.trim()); _refreshImageTab(); }
+function saveFalKey(val)        { lsSet('falKey', val.trim()); _refreshImageTab(); }
+function saveGeminiImgKey(val)  { lsSet('geminiImgKey', val.trim()); _refreshImageTab(); }
 
 function setVideoModel(id) {
   const m = _VIDEO_MODELS_DEF.find(x => x.id === id);
@@ -6667,6 +6864,7 @@ function setImageModel(id) {
     poll_turbo:         '⚡ Pollinations Turbo selected (free)',
     poll_realism:       '📸 Pollinations Flux Realism selected (free)',
     nano_banana:        '🍌 Nano Banana selected (free)',
+    nano_banana_2:      '🍌✨ Nano Banana 2 selected (Gemini key)',
     sd35:               '🎨 Stable Diffusion 3.5 selected (requires Stability key)',
     fal_flux_pro:       '⚡ FLUX.1-pro (fal.ai) selected',
     together_flux:      '🤝 Together AI FLUX selected (requires Together key)',
@@ -6988,7 +7186,21 @@ function _renderApiModelGrid() {
   const prov = PROVIDER_MODELS[_selectedApiProvider];
   if (!prov) { section.style.display = 'none'; return; }
   section.style.display = 'block';
-  grid.innerHTML = prov.models.map(m => {
+
+  // Update key input placeholder
+  const keyInput = document.getElementById('apiKeyInput');
+  if (keyInput && prov.keyHint) keyInput.placeholder = prov.keyHint;
+
+  // Show error for providers that don't work from file://
+  let warnHtml = '';
+  if (_selectedApiProvider === 'cloudflare' && location.protocol === 'file:') {
+    warnHtml = `<div style="margin:0 0 10px;padding:10px 12px;border-radius:12px;background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.3);color:#ff3b30;font-size:12px;line-height:1.6">
+      ⛔ Cloudflare AI is not supported when running from a local file.<br>
+      Host this app on a web server (e.g. GitHub Pages, Netlify) to use this provider.
+    </div>`;
+  }
+
+  grid.innerHTML = warnHtml + prov.models.map(m => {
     const isRateLimited = m.free && (m.sub.toLowerCase().includes('limit') || m.sub.toLowerCase().includes('rate'));
     const nameColor = m.free ? (isRateLimited ? '#fbbf24' : '#30d158') : 'var(--text)';
     return `
@@ -7200,10 +7412,12 @@ async function _callAnthropicAPI(messages, stream, onChunk, sig, key, model) {
   });
   if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.error?.message || 'Anthropic error ' + res.status); }
   if (stream) {
-    const reader = res.body.getReader(); const dec = new TextDecoder(); let full = '';
+    const reader = res.body.getReader(); const dec = new TextDecoder(); let full = ''; let buf = '';
     while (true) {
       const { done, value } = await reader.read(); if (done || sig?.aborted) break;
-      for (const line of dec.decode(value, {stream:true}).split('\n')) {
+      buf += dec.decode(value, {stream:true});
+      const lines = buf.split('\n'); buf = lines.pop();
+      for (const line of lines) {
         if (!line.startsWith('data: ')) continue;
         try { const d = JSON.parse(line.slice(6)); const t = d.delta?.text || ''; if (t) { full += t; onChunk(t, full); } } catch(e) {}
       }
@@ -7227,10 +7441,12 @@ async function _callGeminiAPI(messages, stream, onChunk, sig, key, model) {
   const res = await fetch(ep, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body), signal:sig });
   if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.error?.message || 'Gemini error ' + res.status); }
   if (stream) {
-    const reader = res.body.getReader(); const dec = new TextDecoder(); let full = '';
+    const reader = res.body.getReader(); const dec = new TextDecoder(); let full = ''; let buf = '';
     while (true) {
       const { done, value } = await reader.read(); if (done || sig?.aborted) break;
-      for (const line of dec.decode(value, {stream:true}).split('\n')) {
+      buf += dec.decode(value, {stream:true});
+      const lines = buf.split('\n'); buf = lines.pop();
+      for (const line of lines) {
         if (!line.startsWith('data: ')) continue;
         try { const d = JSON.parse(line.slice(6)); const t = d.candidates?.[0]?.content?.parts?.[0]?.text || ''; if (t) { full += t; onChunk(t, full); } } catch(e) {}
       }
@@ -7242,9 +7458,18 @@ async function _callGeminiAPI(messages, stream, onChunk, sig, key, model) {
 }
 
 async function _callOpenAICompatible(endpoint, messages, stream, onChunk, sig, key, model) {
-  // Allow custom endpoint override from Advanced settings
-  const customEp = ls('customEndpoint', '');
-  const finalEndpoint = customEp || endpoint;
+  // Allow custom endpoint override ONLY for the free cloud (no-key) path — not for named providers
+  const isFreeCloud = !key || !key.trim();
+  const customEp = isFreeCloud ? ls('customEndpoint', '') : '';
+  let finalEndpoint = customEp || endpoint;
+  // Cloudflare Workers AI: key is stored as 'ACCOUNT_ID|API_TOKEN'
+  const isCF = finalEndpoint.includes('__CFID__');
+  if (isCF) {
+    const [cfId, cfToken] = (key || '').split('|');
+    finalEndpoint = finalEndpoint.replace('__CFID__', (cfId || '').trim());
+    key = (cfToken || cfId || '').trim();
+  }
+  const isNvidia = false;
   const body = { model, messages, stream, max_tokens: ls('aiMaxTokens',4096), temperature: ls('aiTemperature',0.7) };
   const headers = { 'Content-Type':'application/json' };
   // Only add Authorization header if key is non-empty
@@ -7257,11 +7482,13 @@ async function _callOpenAICompatible(endpoint, messages, stream, onChunk, sig, k
   const res = await fetch(finalEndpoint, { method:'POST', headers, body:JSON.stringify(body), signal:sig });
   if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.error?.message || 'API error ' + res.status); }
   if (stream) {
-    const reader = res.body.getReader(); const dec = new TextDecoder(); let full = '';
+    const reader = res.body.getReader(); const dec = new TextDecoder(); let full = ''; let buf = '';
     while (true) {
       const { done, value } = await reader.read(); if (done || sig?.aborted) break;
-      for (const line of dec.decode(value, {stream:true}).split('\n')) {
-        if (!line.startsWith('data: ') || line === 'data: [DONE]') continue;
+      buf += dec.decode(value, {stream:true});
+      const lines = buf.split('\n'); buf = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ') || line.trim() === 'data: [DONE]') continue;
         try { const d = JSON.parse(line.slice(6)); const t = d.choices?.[0]?.delta?.content || ''; if (t) { full += t; onChunk(t, full); } } catch(e) {}
       }
     }
@@ -8993,6 +9220,10 @@ if (typeof marked !== 'undefined') {
           <div class="ks-img-model-name">Nano Banana 🍌</div>
           <div class="ks-img-model-sub">☁️ Free · Enhanced</div>
         </button>
+        <button class="ks-img-model-btn" id="imgModel-nano_banana_2" onclick="ksImgSelectModel('nano_banana_2',this)">
+          <div class="ks-img-model-name">Nano Banana 2 🍌✨</div>
+          <div class="ks-img-model-sub">🔑 Gemini key · Flash Image</div>
+        </button>
         <button class="ks-img-model-btn" id="imgModel-turbo" onclick="ksImgSelectModel('turbo',this)">
           <div class="ks-img-model-name">SDXL Turbo</div>
           <div class="ks-img-model-sub">☁️ Free · Pollinations</div>
@@ -9795,7 +10026,23 @@ async function ksImgGenerate() {
 
   try {
     let url;
-    if (_ksImgModel === 'flux' || _ksImgModel === 'turbo' || _ksImgModel === 'poll_turbo' || _ksImgModel === 'poll_realism' || _ksImgModel === 'nano_banana') {
+    if (_ksImgModel === 'nano_banana_2') {
+      const _gemK = ls('geminiImgKey','') || '';
+      if (!_gemK) { showToast('🔑 Chiave Gemini mancante — aggiungila in Impostazioni'); btn.disabled=false; btn.textContent='Genera Immagine'; return; }
+      try {
+        const _nb2R = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key='+_gemK, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({contents:[{parts:[{text:negPrompt?prompt+' | '+negPrompt:prompt}]}],generationConfig:{responseModalities:['IMAGE','TEXT']}}),
+          signal: _ksImgAbort.signal
+        });
+        if (!_nb2R.ok) throw new Error('Nano Banana 2: '+_nb2R.status);
+        const _nb2D = await _nb2R.json();
+        const _nb2P = _nb2D?.candidates?.[0]?.content?.parts?.find(p=>p.inlineData);
+        if (!_nb2P?.inlineData?.data) throw new Error('Nessuna immagine da Nano Banana 2');
+        const _nb2B = new Blob([Uint8Array.from(atob(_nb2P.inlineData.data),c=>c.charCodeAt(0))],{type:_nb2P.inlineData.mimeType||'image/png'});
+        url = URL.createObjectURL(_nb2B);
+      } catch(_nb2E) { if (_nb2E.name!=='AbortError') showToast('Nano Banana 2: '+_nb2E.message); if (_nb2E.name==='AbortError') throw _nb2E; }
+    } else if (_ksImgModel === 'flux' || _ksImgModel === 'turbo' || _ksImgModel === 'poll_turbo' || _ksImgModel === 'poll_realism' || _ksImgModel === 'nano_banana') {
       let modelParam = 'flux';
       if (_ksImgModel === 'turbo') modelParam = 'turbo';
       else if (_ksImgModel === 'poll_turbo') modelParam = 'turbo';
@@ -10369,6 +10616,7 @@ document.head.appendChild(_ksStyleEl);
           <button id="apiKeyTestBtn" onclick="testApiKey()" style="flex:1;padding:14px;border-radius:16px;border:1.5px solid var(--accent);background:rgba(var(--accentRgb),0.1);color:var(--accent);font-family:var(--font-sans);font-size:14px;font-weight:600;cursor:pointer">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em;margin-right:4px"><path d="M9 3h6m-3 0v6l-4 11h10L14 9V3"/></svg>Test
           </button>
+          <button id="apiKeyGetKeyBtn" onclick="(function(){const u=PROVIDER_KEY_URLS[_selectedApiProvider];if(u)window.open(u,'_blank');})()" style="flex:1;padding:14px;border-radius:16px;border:1.5px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:var(--text2);font-family:var(--font-sans);font-size:14px;font-weight:600;cursor:pointer">🔗 Get Key</button>
           <button onclick="saveApiKey()" style="flex:2;padding:14px;border-radius:16px;border:none;background:var(--accent);color:white;font-family:var(--font-sans);font-size:14px;font-weight:600;cursor:pointer">Save &amp; Use</button>
         </div>
         <div id="apiKeyTestStatus" style="display:none;font-family:var(--font-sans);font-size:12px;padding:8px 12px;border-radius:10px;background:var(--surface);border:1px solid var(--border);line-height:1.5"></div>
@@ -10597,6 +10845,19 @@ document.head.appendChild(_ksStyleEl);
               <div style="font-family:var(--font-sans);font-size:11px;color:var(--text3);margin-top:1px">Free · Enhanced prompt · No key needed</div>
             </div>
             <div class="api-model-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div id="imgModel_nano_banana_2" onclick="setImageModel('nano_banana_2')" style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:13px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer">
+            <div style="flex:1">
+              <div style="font-family:var(--font-sans);font-size:14px;font-weight:600;color:#34d399">Nano Banana 2 🍌✨</div>
+              <div style="font-family:var(--font-sans);font-size:11px;color:var(--text3);margin-top:1px">Google · gemini-3.1-flash-image · chiave Gemini richiesta</div>
+            </div>
+            <div class="api-model-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div style="margin:6px 0 10px;padding:0 2px">
+            <input id="geminiImgKeyInput" type="password" placeholder="AIza… (Google AI Studio API key)"
+              oninput="saveGeminiImgKey(this.value)"
+              style="width:100%;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:var(--font-sans);font-size:13px;box-sizing:border-box">
+            <div id="geminiImgKeyStatus" style="font-size:11px;color:var(--text3);margin-top:4px"></div>
           </div>
           <div id="imgModel_sd35" onclick="setImageModel('sd35')" style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:13px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer">
             <div style="flex:1">
