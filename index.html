@@ -1101,11 +1101,90 @@ button { touch-action: manipulation; }
 .pro-voice-required-title { font-family:var(--font-sans); font-size:14px; font-weight:600; color:#fbbf24; margin-bottom:4px; }
 .pro-voice-required-sub { font-family:var(--font-sans); font-size:13px; color:var(--text2); line-height:1.5; }
 .pro-voice-required-btn { display:inline-block; margin-top:10px; padding:8px 18px; border-radius:11px; border:none; background:var(--accent); color:white; font-family:var(--font-sans); font-size:13px; font-weight:600; cursor:pointer; }
+
+/* ── Generation Confirm Bar ── */
+#gen-confirm-bar {
+  position:fixed; bottom:0; left:0; right:0; z-index:9999;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px;
+  padding:14px 20px 18px;
+  background:var(--bg2);
+  border-top:1px solid var(--border);
+  box-shadow:0 -8px 32px rgba(0,0,0,0.35);
+  transform:translateY(100%);
+  transition:transform 0.28s cubic-bezier(0.34,1.4,0.64,1);
+  pointer-events:none;
+  will-change:transform;
+}
+#gen-confirm-bar.show {
+  transform:translateY(0);
+  pointer-events:all;
+}
+#gen-confirm-bar .gcb-icon {
+  font-size:22px; line-height:1; flex-shrink:0;
+}
+#gen-confirm-bar .gcb-text {
+  flex:1;
+  font-family:var(--font-sans);
+  font-size:14px;
+  color:var(--text);
+  line-height:1.4;
+}
+#gen-confirm-bar .gcb-text strong {
+  color:var(--accent);
+  font-weight:700;
+}
+#gen-confirm-bar .gcb-text small {
+  display:block;
+  font-size:11px;
+  color:var(--text3);
+  margin-top:1px;
+}
+#gen-confirm-bar .gcb-btns {
+  display:flex; gap:8px; flex-shrink:0;
+}
+#gen-confirm-bar .gcb-yes {
+  padding:9px 20px;
+  border-radius:22px;
+  border:none;
+  background:var(--accent);
+  color:#fff;
+  font-family:var(--font-sans);
+  font-size:13px; font-weight:700;
+  cursor:pointer;
+  transition:opacity 0.15s;
+}
+#gen-confirm-bar .gcb-yes:active { opacity:0.75; }
+#gen-confirm-bar .gcb-no {
+  padding:9px 18px;
+  border-radius:22px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text2);
+  font-family:var(--font-sans);
+  font-size:13px; font-weight:600;
+  cursor:pointer;
+  transition:background 0.15s;
+}
+#gen-confirm-bar .gcb-no:active { background:var(--surface2); }
 </style>
 </head>
 <body>
 
 <!-- file input removed -->
+
+<!-- ══ GENERATION CONFIRM BAR ══ -->
+<div id="gen-confirm-bar" role="dialog" aria-modal="true">
+  <div class="gcb-icon" id="gcb-icon">🖼️</div>
+  <div class="gcb-text">
+    <span id="gcb-label">Did you want to generate an <strong id="gcb-type">image</strong>?</span>
+    <small id="gcb-sub">Tap <em>No</em> to get a text answer instead</small>
+  </div>
+  <div class="gcb-btns">
+    <button class="gcb-no"  id="gcb-no-btn">No</button>
+    <button class="gcb-yes" id="gcb-yes-btn">Yes</button>
+  </div>
+</div>
 
 <!-- ══ WELCOME SCREEN ══ -->
 <div class="welcome-screen" id="welcomeScreen" style="display:none">
@@ -5442,6 +5521,44 @@ function renderSearchResults(results) {
 /* ══════════════════════════════════════════
    SEND MESSAGE (streaming + search)
 ══════════════════════════════════════════ */
+// ── Generation Confirmation Bar ──────────────────────────────────────────
+const GEN_TYPES = {
+  image: { icon:'🖼️', label:'image',  labelIt:'un\'immagine', sub:'Tap No to get a text answer instead' },
+  video: { icon:'🎬', label:'video',  labelIt:'un video',     sub:'Tap No to get a text answer instead' },
+  music: { icon:'🎵', label:'music',  labelIt:'della musica', sub:'Tap No to get a text answer instead' },
+  audio: { icon:'🔊', label:'audio',  labelIt:'dell\'audio',  sub:'Tap No to get a text answer instead' },
+};
+
+function showGenConfirm(type) {
+  return new Promise(resolve => {
+    const bar  = document.getElementById('gen-confirm-bar');
+    const icon = document.getElementById('gcb-icon');
+    const lbl  = document.getElementById('gcb-type');
+    const sub  = document.getElementById('gcb-sub');
+    const yes  = document.getElementById('gcb-yes-btn');
+    const no   = document.getElementById('gcb-no-btn');
+    const def  = GEN_TYPES[type] || GEN_TYPES.image;
+
+    icon.textContent = def.icon;
+    lbl.textContent  = def.label;
+    sub.textContent  = def.sub;
+
+    bar.classList.add('show');
+
+    function cleanup(result) {
+      bar.classList.remove('show');
+      yes.removeEventListener('click', onYes);
+      no.removeEventListener('click',  onNo);
+      resolve(result);
+    }
+    function onYes() { haptic && haptic(); cleanup(true);  }
+    function onNo()  { haptic && haptic(); cleanup(false); }
+
+    yes.addEventListener('click', onYes);
+    no.addEventListener('click',  onNo);
+  });
+}
+
 async function sendMsg() {
   const inp = document.getElementById('msgInput');
   const txt = inp.value.trim();
@@ -5460,38 +5577,46 @@ async function sendMsg() {
 
   // ── Video generation ──────────────────────────
   if (isVideoRequest(txt) && !attachment) {
-    addTyping('Generating video…');
-    try {
-      const videoUrl = await generateVideo(txt);
-      removeTyping(); addVideoMsg(videoUrl, txt);
-    } catch (err) {
-      removeTyping();
-      if (err.name !== 'AbortError') addError(err.message);
+    const confirmedVideo = await showGenConfirm('video');
+    if (confirmedVideo) {
+      addTyping('Generating video…');
+      try {
+        const videoUrl = await generateVideo(txt);
+        removeTyping(); addVideoMsg(videoUrl, txt);
+      } catch (err) {
+        removeTyping();
+        if (err.name !== 'AbortError') addError(err.message);
+      }
+      isTyping = false; abortController = null; showStopBtn(false);
+      return;
     }
-    isTyping = false; abortController = null; showStopBtn(false);
-    return;
+    // confirmedVideo === false → fall through to text response below
   }
 
   // ── Image generation ──────────────────────────
   if ((isImageRequest(txt) || isImageEditRequest(txt)) && !attachment) {
-    addTyping('Generating image…');
-    // Build prompt: combine with previous if this is an edit
-    const finalPrompt = isImageEditRequest(txt) && lastImagePrompt
-      ? lastImagePrompt + ', ' + txt
-      : txt;
-    try {
-      const imgUrl = await generateImage(finalPrompt);
-      lastImagePrompt = finalPrompt;
-      removeTyping(); addImageMsg(imgUrl, finalPrompt);
-    } catch (err) {
-      removeTyping();
-      if (err.name !== 'AbortError') {
-        if (err.message === 'PRO_REQUIRED') addProRequiredMsg();
-        else addError(err.message);
+    const confirmedImage = await showGenConfirm('image');
+    if (confirmedImage) {
+      addTyping('Generating image…');
+      // Build prompt: combine with previous if this is an edit
+      const finalPrompt = isImageEditRequest(txt) && lastImagePrompt
+        ? lastImagePrompt + ', ' + txt
+        : txt;
+      try {
+        const imgUrl = await generateImage(finalPrompt);
+        lastImagePrompt = finalPrompt;
+        removeTyping(); addImageMsg(imgUrl, finalPrompt);
+      } catch (err) {
+        removeTyping();
+        if (err.name !== 'AbortError') {
+          if (err.message === 'PRO_REQUIRED') addProRequiredMsg();
+          else addError(err.message);
+        }
       }
+      isTyping = false; abortController = null; showStopBtn(false);
+      return;
     }
-    isTyping = false; abortController = null; showStopBtn(false);
-    return;
+    // confirmedImage === false → fall through to text response below
   }
 
   // ── Streaming AI response ─────────────────────
