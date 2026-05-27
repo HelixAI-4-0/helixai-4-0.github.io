@@ -97,12 +97,7 @@ function stripPollinationsNotice(text) {
   return text || text;
 }
 </script>
-<script type="module">
-  import { KokoroTTS } from 'https://esm.sh/kokoro-js';
-  window._KokoroTTS = KokoroTTS;
-  window._kokoroJsReady = true;
-  window.dispatchEvent(new Event('kokoro-js-ready'));
-</script>
+<!-- Kokoro-js is loaded lazily on first use via dynamic import() — no eager preload to avoid freezing -->
 <script type="module">
   import * as webllm from "https://esm.run/@mlc-ai/web-llm";
   window.webllm = webllm;
@@ -1103,32 +1098,45 @@ button { touch-action: manipulation; }
 .pro-voice-required-btn { display:inline-block; margin-top:10px; padding:8px 18px; border-radius:11px; border:none; background:var(--accent); color:white; font-family:var(--font-sans); font-size:13px; font-weight:600; cursor:pointer; }
 
 /* ── Generation Confirm Bar ── */
-#gen-confirm-bar {
-  position:fixed; bottom:0; left:0; right:0; z-index:9999;
-  display:flex; align-items:center; justify-content:space-between;
-  gap:12px;
-  padding:14px 20px 18px;
-  background:var(--bg2);
-  border-top:1px solid var(--border);
-  box-shadow:0 -8px 32px rgba(0,0,0,0.35);
-  transform:translateY(100%);
-  transition:transform 0.28s cubic-bezier(0.34,1.4,0.64,1);
+/* ── Generation Confirm — centred modal + backdrop ── */
+#gen-confirm-overlay {
+  position:fixed; inset:0; z-index:9999;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,0);
   pointer-events:none;
-  will-change:transform;
+  transition:background 0.22s ease;
 }
-#gen-confirm-bar.show {
-  transform:translateY(0);
+#gen-confirm-overlay.show {
+  background:rgba(0,0,0,0.62);
   pointer-events:all;
 }
+#gen-confirm-bar {
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:24px;
+  box-shadow:0 24px 64px rgba(0,0,0,0.5);
+  padding:32px 28px 24px;
+  width:min(88vw, 340px);
+  display:flex; flex-direction:column; align-items:center; gap:0;
+  text-align:center;
+  transform:scale(0.88) translateY(12px);
+  opacity:0;
+  transition:transform 0.28s cubic-bezier(0.34,1.4,0.64,1), opacity 0.22s ease;
+  will-change:transform,opacity;
+}
+#gen-confirm-overlay.show #gen-confirm-bar {
+  transform:scale(1) translateY(0);
+  opacity:1;
+}
 #gen-confirm-bar .gcb-icon {
-  font-size:22px; line-height:1; flex-shrink:0;
+  font-size:44px; line-height:1; margin-bottom:14px;
 }
 #gen-confirm-bar .gcb-text {
-  flex:1;
   font-family:var(--font-sans);
-  font-size:14px;
+  font-size:18px; font-weight:600;
   color:var(--text);
-  line-height:1.4;
+  line-height:1.35;
+  margin-bottom:6px;
 }
 #gen-confirm-bar .gcb-text strong {
   color:var(--accent);
@@ -1136,35 +1144,30 @@ button { touch-action: manipulation; }
 }
 #gen-confirm-bar .gcb-text small {
   display:block;
-  font-size:11px;
+  font-size:13px; font-weight:400;
   color:var(--text3);
-  margin-top:1px;
+  margin-top:6px; line-height:1.4;
 }
 #gen-confirm-bar .gcb-btns {
-  display:flex; gap:8px; flex-shrink:0;
+  display:flex; gap:10px; margin-top:22px; width:100%;
 }
 #gen-confirm-bar .gcb-yes {
-  padding:9px 20px;
-  border-radius:22px;
-  border:none;
-  background:var(--accent);
-  color:#fff;
+  flex:1; padding:14px 0;
+  border-radius:16px; border:none;
+  background:var(--accent); color:#fff;
   font-family:var(--font-sans);
-  font-size:13px; font-weight:700;
-  cursor:pointer;
-  transition:opacity 0.15s;
+  font-size:16px; font-weight:700;
+  cursor:pointer; transition:opacity 0.15s;
 }
 #gen-confirm-bar .gcb-yes:active { opacity:0.75; }
 #gen-confirm-bar .gcb-no {
-  padding:9px 18px;
-  border-radius:22px;
-  border:1px solid var(--border);
-  background:var(--surface);
-  color:var(--text2);
+  flex:1; padding:14px 0;
+  border-radius:16px;
+  border:1.5px solid var(--border);
+  background:var(--surface); color:var(--text2);
   font-family:var(--font-sans);
-  font-size:13px; font-weight:600;
-  cursor:pointer;
-  transition:background 0.15s;
+  font-size:16px; font-weight:600;
+  cursor:pointer; transition:background 0.15s;
 }
 #gen-confirm-bar .gcb-no:active { background:var(--surface2); }
 </style>
@@ -1173,16 +1176,18 @@ button { touch-action: manipulation; }
 
 <!-- file input removed -->
 
-<!-- ══ GENERATION CONFIRM BAR ══ -->
-<div id="gen-confirm-bar" role="dialog" aria-modal="true">
-  <div class="gcb-icon" id="gcb-icon">🖼️</div>
-  <div class="gcb-text">
-    <span id="gcb-label">Did you want to generate an <strong id="gcb-type">image</strong>?</span>
-    <small id="gcb-sub">Tap <em>No</em> to get a text answer instead</small>
-  </div>
-  <div class="gcb-btns">
-    <button class="gcb-no"  id="gcb-no-btn">No</button>
-    <button class="gcb-yes" id="gcb-yes-btn">Yes</button>
+<!-- ══ GENERATION CONFIRM MODAL ══ -->
+<div id="gen-confirm-overlay">
+  <div id="gen-confirm-bar" role="dialog" aria-modal="true">
+    <div class="gcb-icon" id="gcb-icon">🖼️</div>
+    <div class="gcb-text">
+      <span id="gcb-label"></span>
+      <small id="gcb-sub"></small>
+    </div>
+    <div class="gcb-btns">
+      <button class="gcb-no"  id="gcb-no-btn"></button>
+      <button class="gcb-yes" id="gcb-yes-btn"></button>
+    </div>
   </div>
 </div>
 
@@ -1847,6 +1852,10 @@ const I18N = {
     vidNoApiSub:'Works only from the official website.', vidNoApiOpen:'Open website',
     vidNoApiQ:'Do you want to open the site?', vidNoApiCancel:'No, cancel',
     vidFree:'Free', vidFalPay:'fal.ai · pay',
+    genQ_image:'Generate an <strong>image</strong>?', genQ_video:'Generate a <strong>video</strong>?',
+    genQ_music:'Generate <strong>music</strong>?', genQ_audio:'Generate <strong>audio</strong>?',
+    genConfirmSub:'Tap No for a text answer instead',
+    genConfirmYes:'Yes, generate', genConfirmNo:'No',
   },
   it: {
     tapToSpeak:'Tocca per parlare', listening:'In ascolto…', thinking:'Sto pensando…',
@@ -1886,6 +1895,10 @@ const I18N = {
     vidNoApiSub:'Funziona solo dal sito ufficiale.', vidNoApiOpen:'Apri sito',
     vidNoApiQ:'Vuoi aprire il sito?', vidNoApiCancel:'No, annulla',
     vidFree:'Gratis', vidFalPay:'fal.ai · pay',
+    genQ_image:'Genera un\'<strong>immagine</strong>?', genQ_video:'Genera un <strong>video</strong>?',
+    genQ_music:'Genera della <strong>musica</strong>?', genQ_audio:'Genera dell\'<strong>audio</strong>?',
+    genConfirmSub:'Premi No per ricevere una risposta testuale',
+    genConfirmYes:'Sì, genera', genConfirmNo:'No',
   },
   es: {
     tapToSpeak:'Toca para hablar', listening:'Escuchando…', thinking:'Pensando…',
@@ -1925,6 +1938,10 @@ const I18N = {
     vidNoApiSub:'Solo funciona desde el sitio oficial.', vidNoApiOpen:'Abrir sitio',
     vidNoApiQ:'¿Quieres abrir el sitio?', vidNoApiCancel:'No, cancelar',
     vidFree:'Gratis', vidFalPay:'fal.ai · pago',
+    genQ_image:'¿Generar una <strong>imagen</strong>?', genQ_video:'¿Generar un <strong>vídeo</strong>?',
+    genQ_music:'¿Generar <strong>música</strong>?', genQ_audio:'¿Generar <strong>audio</strong>?',
+    genConfirmSub:'Pulsa No para obtener una respuesta de texto',
+    genConfirmYes:'Sí, generar', genConfirmNo:'No',
   },
   fr: {
     tapToSpeak:'Appuyer pour parler', listening:'Écoute…', thinking:'Réflexion…',
@@ -1964,6 +1981,10 @@ const I18N = {
     vidNoApiSub:'Fonctionne uniquement depuis le site officiel.', vidNoApiOpen:'Ouvrir le site',
     vidNoApiQ:'Voulez-vous ouvrir le site ?', vidNoApiCancel:'Non, annuler',
     vidFree:'Gratuit', vidFalPay:'fal.ai · payant',
+    genQ_image:'Générer une <strong>image</strong>?', genQ_video:'Générer une <strong>vidéo</strong>?',
+    genQ_music:'Générer de la <strong>musique</strong>?', genQ_audio:'Générer de l\'<strong>audio</strong>?',
+    genConfirmSub:'Appuie sur Non pour une réponse textuelle',
+    genConfirmYes:'Oui, générer', genConfirmNo:'Non',
   },
   de: {
     tapToSpeak:'Tippen zum Sprechen', listening:'Zuhören…', thinking:'Denken…',
@@ -2003,6 +2024,10 @@ const I18N = {
     vidNoApiSub:'Funktioniert nur über die offizielle Website.', vidNoApiOpen:'Website öffnen',
     vidNoApiQ:'Website öffnen?', vidNoApiCancel:'Nein, abbrechen',
     vidFree:'Kostenlos', vidFalPay:'fal.ai · kostenpflichtig',
+    genQ_image:'Ein <strong>Bild</strong> generieren?', genQ_video:'Ein <strong>Video</strong> generieren?',
+    genQ_music:'<strong>Musik</strong> generieren?', genQ_audio:'<strong>Audio</strong> generieren?',
+    genConfirmSub:'Tippe Nein für eine Textantwort',
+    genConfirmYes:'Ja, generieren', genConfirmNo:'Nein',
   },
   pt: {
     tapToSpeak:'Toque para falar', listening:'Ouvindo…', thinking:'Pensando…',
@@ -2042,6 +2067,10 @@ const I18N = {
     vidNoApiSub:'Funciona apenas pelo site oficial.', vidNoApiOpen:'Abrir site',
     vidNoApiQ:'Deseja abrir o site?', vidNoApiCancel:'Não, cancelar',
     vidFree:'Grátis', vidFalPay:'fal.ai · pago',
+    genQ_image:'Gerar uma <strong>imagem</strong>?', genQ_video:'Gerar um <strong>vídeo</strong>?',
+    genQ_music:'Gerar <strong>música</strong>?', genQ_audio:'Gerar <strong>áudio</strong>?',
+    genConfirmSub:'Pressione Não para uma resposta textual',
+    genConfirmYes:'Sim, gerar', genConfirmNo:'Não',
   },
   zh: {
     tapToSpeak:'点击说话', listening:'聆听中…', thinking:'思考中…',
@@ -2081,6 +2110,10 @@ const I18N = {
     vidNoApiSub:'仅可通过官方网站使用。', vidNoApiOpen:'打开网站',
     vidNoApiQ:'是否打开网站？', vidNoApiCancel:'否，取消',
     vidFree:'免费', vidFalPay:'fal.ai · 付费',
+    genQ_image:'生成一张<strong>图片</strong>？', genQ_video:'生成一段<strong>视频</strong>？',
+    genQ_music:'生成<strong>音乐</strong>？', genQ_audio:'生成<strong>音频</strong>？',
+    genConfirmSub:'点击"否"获取文字回答',
+    genConfirmYes:'是，生成', genConfirmNo:'否',
   },
   ja: {
     tapToSpeak:'タップして話す', listening:'聴取中…', thinking:'考え中…',
@@ -2120,6 +2153,10 @@ const I18N = {
     vidNoApiSub:'公式サイトからのみ使用可能です。', vidNoApiOpen:'サイトを開く',
     vidNoApiQ:'サイトを開きますか？', vidNoApiCancel:'いいえ、キャンセル',
     vidFree:'無料', vidFalPay:'fal.ai · 有料',
+    genQ_image:'<strong>画像</strong>を生成しますか？', genQ_video:'<strong>動画</strong>を生成しますか？',
+    genQ_music:'<strong>音楽</strong>を生成しますか？', genQ_audio:'<strong>音声</strong>を生成しますか？',
+    genConfirmSub:'「いいえ」でテキスト回答を取得',
+    genConfirmYes:'はい、生成', genConfirmNo:'いいえ',
   },
   ko: {
     tapToSpeak:'탭하여 말하기', listening:'듣는 중…', thinking:'생각 중…',
@@ -2159,6 +2196,10 @@ const I18N = {
     vidNoApiSub:'공식 사이트에서만 사용 가능합니다.', vidNoApiOpen:'사이트 열기',
     vidNoApiQ:'사이트를 열겠습니까?', vidNoApiCancel:'아니요, 취소',
     vidFree:'무료', vidFalPay:'fal.ai · 유료',
+    genQ_image:'<strong>이미지</strong>를 생성할까요?', genQ_video:'<strong>비디오</strong>를 생성할까요?',
+    genQ_music:'<strong>음악</strong>을 생성할까요?', genQ_audio:'<strong>오디오</strong>를 생성할까요?',
+    genConfirmSub:'아니오를 누르면 텍스트 답변을 받습니다',
+    genConfirmYes:'예, 생성', genConfirmNo:'아니오',
   },
 };
 function t(key) { return (I18N[uiLang]||I18N.en)[key] || I18N.en[key] || key; }
@@ -3319,16 +3360,24 @@ function renderCloudModelSheet() {
   //  VOICE PANEL — TTS + STT + Local
   // ══════════════════════════════════════
   const ttsProvNow = ls('customTtsProvider', 'none');
-  const ttsFreeRow = `<div class="sheet-option" onclick="_switchToCloudTts('none')">
-    <div class="sheet-option-left">
-      <div class="sheet-model-swatch" style="background:rgba(16,163,127,0.12);color:#10a37f;font-size:15px">🗣</div>
-      <div class="sheet-option-info">
-        <span class="sheet-option-name" style="color:#10a37f">Kokoro / Web Speech</span>
-        <div class="sheet-option-sub">Free · Offline · Built-in</div>
+
+  const _ttsFreeNoKeyRow = (id, label, sub, color, icon) => {
+    const isSel = ttsProvNow === id;
+    return `<div class="sheet-option" onclick="_switchToCloudTts('${id}')" style="${isSel ? 'border-left:3px solid var(--accent)' : ''}">
+      <div class="sheet-option-left">
+        <div class="sheet-model-swatch" style="background:${color}22;color:${color};font-size:15px">${icon}</div>
+        <div class="sheet-option-info">
+          <span class="sheet-option-name" style="color:${color}">${label}</span>
+          <div class="sheet-option-sub">${sub}</div>
+        </div>
       </div>
-    </div>
-    ${_check(ttsProvNow === 'none')}
-  </div>`;
+      ${isSel ? _check(true) : `<span style="font-size:10px;font-weight:700;color:#4ade80;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.25);padding:2px 7px;border-radius:6px;flex-shrink:0">Gratis</span>`}
+    </div>`;
+  };
+
+  const ttsFreeRow = _ttsFreeNoKeyRow('none', 'Kokoro / Web Speech', 'Gratis · Offline · Built-in', '#10a37f', '🗣') +
+    _ttsFreeNoKeyRow('streamelements',   'StreamElements TTS',  'Free · No Key · EN/ES/FR online', '#4ade80', '🎙') +
+    _ttsFreeNoKeyRow('pollinations_tts', 'Pollinations TTS',    'Free · No Key · Powered by OpenAI', '#06b6d4', '✨');
 
   const _ttsRow = (id, label, sub, color) => {
     const k = ls('ttsKey_' + id, '');
@@ -3429,9 +3478,11 @@ function renderCloudModelSheet() {
   </div>`;
 
   const voicePanel = `<div data-tab-panel="voice" style="display:none">
-    ${_hdr('🗣 TTS · Text-to-Speech', '#10a37f')}
-    ${ttsFreeRow}${ttsKeyRows}
-    ${_localSubHdr('🗣 TTS · On-device (Kokoro)', '#10a37f')}
+    ${_hdr('🆓 TTS · Free · No Key', '#4ade80')}
+    ${ttsFreeRow}
+    ${_hdr('🔒 TTS · Con chiave API', '#f59e0b')}
+    ${ttsKeyRows}
+    ${_localSubHdr('🧠 TTS · On-device (Kokoro)', '#a78bfa')}
     ${localTtsHtml}
     ${_localSubHdr('🎤 STT · Speech-to-Text', '#6366f1')}
     ${localSttHtml}
@@ -4505,6 +4556,8 @@ async function generateVideo(prompt) {
 
   const HF_VIDEO_MODELS = [
     m.hfModel || 'damo-vilab/text-to-video-ms-1.7b',
+    'Lightricks/LTX-Video',
+    'ByteDance/AnimateDiff-Lightning',
     'ali-vilab/text-to-video-ms-1.7b-legacy',
   ].filter(Boolean);
 
@@ -5523,39 +5576,44 @@ function renderSearchResults(results) {
 ══════════════════════════════════════════ */
 // ── Generation Confirmation Bar ──────────────────────────────────────────
 const GEN_TYPES = {
-  image: { icon:'🖼️', label:'image',  labelIt:'un\'immagine', sub:'Tap No to get a text answer instead' },
-  video: { icon:'🎬', label:'video',  labelIt:'un video',     sub:'Tap No to get a text answer instead' },
-  music: { icon:'🎵', label:'music',  labelIt:'della musica', sub:'Tap No to get a text answer instead' },
-  audio: { icon:'🔊', label:'audio',  labelIt:'dell\'audio',  sub:'Tap No to get a text answer instead' },
+  image: { icon:'🖼️', label:'immagine', labelIt:'un\'immagine', sub:'Premi No per ricevere una risposta testuale' },
+  video: { icon:'🎬', label:'video',    labelIt:'un video',     sub:'Premi No per ricevere una risposta testuale' },
+  music: { icon:'🎵', label:'musica',   labelIt:'della musica', sub:'Premi No per ricevere una risposta testuale' },
+  audio: { icon:'🔊', label:'audio',    labelIt:'dell\'audio',  sub:'Premi No per ricevere una risposta testuale' },
 };
 
 function showGenConfirm(type) {
   return new Promise(resolve => {
-    const bar  = document.getElementById('gen-confirm-bar');
+    const overlay = document.getElementById('gen-confirm-overlay');
     const icon = document.getElementById('gcb-icon');
-    const lbl  = document.getElementById('gcb-type');
+    const lbl  = document.getElementById('gcb-label');
     const sub  = document.getElementById('gcb-sub');
     const yes  = document.getElementById('gcb-yes-btn');
     const no   = document.getElementById('gcb-no-btn');
     const def  = GEN_TYPES[type] || GEN_TYPES.image;
 
     icon.textContent = def.icon;
-    lbl.textContent  = def.label;
-    sub.textContent  = def.sub;
+    lbl.innerHTML    = t('genQ_' + type) || def.icon + ' ' + (def.label || type) + '?';
+    sub.textContent  = t('genConfirmSub');
+    yes.textContent  = t('genConfirmYes');
+    no.textContent   = t('genConfirmNo');
 
-    bar.classList.add('show');
+    overlay.classList.add('show');
 
     function cleanup(result) {
-      bar.classList.remove('show');
+      overlay.classList.remove('show');
       yes.removeEventListener('click', onYes);
       no.removeEventListener('click',  onNo);
+      overlay.removeEventListener('click', onOverlay);
       resolve(result);
     }
     function onYes() { haptic && haptic(); cleanup(true);  }
     function onNo()  { haptic && haptic(); cleanup(false); }
+    function onOverlay(e) { if (e.target === overlay) { haptic && haptic(); cleanup(false); } }
 
     yes.addEventListener('click', onYes);
     no.addEventListener('click',  onNo);
+    overlay.addEventListener('click', onOverlay);
   });
 }
 
@@ -6967,7 +7025,17 @@ function resetAdvancedSettings() {
    TTS PROVIDER SYSTEM
 ══════════════════════════════════════════ */
 const TTS_PROVIDERS = {
-  none:       { name:'Kokoro / WebSpeech', keyPlaceholder:'', info:'', needsKey:false, needsVoiceId:false },
+  none:            { name:'Kokoro / WebSpeech', keyPlaceholder:'', info:'', needsKey:false, needsVoiceId:false },
+  streamelements:  {
+    name:'StreamElements TTS', keyPlaceholder:'',
+    info:'Gratuito · Nessuna chiave richiesta · Voci naturali inglesi/multilingua via StreamElements',
+    needsKey:false, needsVoiceId:false, free:true,
+  },
+  pollinations_tts: {
+    name:'Pollinations TTS', keyPlaceholder:'',
+    info:'Gratuito · Nessuna chiave richiesta · Powered by OpenAI TTS via Pollinations.ai',
+    needsKey:false, needsVoiceId:false, free:true,
+  },
   elevenlabs: {
     name:'ElevenLabs', keyPlaceholder:'sk_…',
     info:'Get the key at <a href="https://elevenlabs.io" target="_blank" style="color:var(--accent)">elevenlabs.io</a> · 10k chars/month free',
@@ -7144,8 +7212,12 @@ const _origSpeakText = typeof speakText !== 'undefined' ? speakText : null;
 async function _tryCustomTts(text, btn) {
   const provId = ls('customTtsProvider', 'none');
   if (provId === 'none') return false;
-  const key = ls('ttsKey_' + provId, '');
-  if (!key) return false;
+  const prov = TTS_PROVIDERS[provId];
+  // Free providers don't need a key; keyed providers need one
+  if (prov?.needsKey !== false) {
+    const key = ls('ttsKey_' + provId, '');
+    if (!key) return false;
+  }
 
   if (btn) { btn.classList.add('speaking'); btn.dataset.speaking = '1'; activeSpeakBtn = btn; }
   const stopBtn = btn;
@@ -7157,8 +7229,30 @@ async function _tryCustomTts(text, btn) {
 
   try {
     let audioUrl = null;
+    const key = ls('ttsKey_' + provId, '');
 
-    if (provId === 'elevenlabs') {
+    // ── Free providers (no key needed) ──
+    if (provId === 'streamelements') {
+      const seVoice = ls('seVoice', 'Brian');
+      const encoded = encodeURIComponent(text.slice(0, 500));
+      const res = await fetch(`https://api.streamelements.com/kappa/v2/speech?voice=${seVoice}&text=${encoded}`);
+      if (!res.ok) throw new Error('StreamElements: ' + res.status);
+      const blob = await res.blob();
+      audioUrl = URL.createObjectURL(blob);
+
+    } else if (provId === 'pollinations_tts') {
+      const pollVoice = ls('pollinationsTtsVoice', 'alloy');
+      const res = await fetch('https://text.pollinations.ai/openai/audio/speech', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model:'tts-1', input: text.slice(0, 1000), voice: pollVoice })
+      });
+      if (!res.ok) throw new Error('Pollinations TTS: ' + res.status);
+      const blob = await res.blob();
+      audioUrl = URL.createObjectURL(blob);
+
+    // ── Keyed providers ──
+    } else if (provId === 'elevenlabs') {
       const voiceId = ls('ttsVoiceId_elevenlabs', '21m00Tcm4TlvDq8ikWAM');
       const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`, {
         method:'POST',
@@ -7764,15 +7858,13 @@ async function _loadKokoroJS() {
 
   _kokoroLoadPromise = (async () => {
     try {
-      // Wait for kokoro-js ESM module to load
-      if (!window._kokoroJsReady) {
-        await new Promise((res, rej) => {
-          if (window._kokoroJsReady) return res();
-          window.addEventListener('kokoro-js-ready', res, { once: true });
-          setTimeout(() => rej(new Error('kokoro-js timeout — check your connection and reload')), 30000);
-        });
+      // Lazy-import kokoro-js only when first needed — avoids page freeze on load
+      if (!window._KokoroTTS) {
+        _kkdlSetStatus('Downloading kokoro-js library…');
+        const mod = await import('https://esm.sh/kokoro-js');
+        window._KokoroTTS = mod.KokoroTTS;
       }
-      if (!window._KokoroTTS) throw new Error('kokoro-js unavailable — reload the page');
+      if (!window._KokoroTTS) throw new Error('kokoro-js unavailable — check your connection');
 
       // Update Kokoro Studio progress bars
       const _ksUpdateBar = (pct) => {
@@ -7975,9 +8067,12 @@ async function speakText(text, btn) {
   const clean = cleanForTTS(text).slice(0, 600);
   if (!clean) return;
 
-  // ── Custom cloud TTS (ElevenLabs, OpenAI, Deepgram, Fish Audio) ──
+  // ── Custom cloud TTS (ElevenLabs, OpenAI, Deepgram, Fish Audio, StreamElements, Pollinations) ──
   const customProvId = ls('customTtsProvider', 'none');
-  if (customProvId !== 'none' && ls('ttsKey_' + customProvId, '')) {
+  const customProv = TTS_PROVIDERS[customProvId];
+  const hasCustomKey = customProvId !== 'none' && ls('ttsKey_' + customProvId, '');
+  const isFreeCustom = customProvId !== 'none' && customProv?.needsKey === false;
+  if (isFreeCustom || hasCustomKey) {
     await _tryCustomTts(clean, btn);
     return;
   }
@@ -9659,33 +9754,43 @@ let _ksVidUrl    = null;
 
 /* ── Master video model registry ── */
 const _VIDEO_MODELS_DEF = [
-  /* ── FREE / no key ── */
+  /* ── FREE / no key — HuggingFace ── */
   { id:'hf_damo',    name:'Damo-Vilab',         icon:'🆓', color:'#4ade80',
-    sub:'HuggingFace · free · 256×256 · low quality',
+    sub:'HuggingFace · gratuito · 256×256 · qualità bassa',
     free:true, needsKey:false, falEndpoint:null,
     hfModel:'damo-vilab/text-to-video-ms-1.7b',
     body: p => ({ inputs:p }), resultPath: null },
+  { id:'hf_ltx',     name:'LTX-Video (HF)',      icon:'🆓', color:'#4ade80',
+    sub:'HuggingFace · gratuito · 704×480 · veloce · Lightricks',
+    free:true, needsKey:false, falEndpoint:null,
+    hfModel:'Lightricks/LTX-Video',
+    body: p => ({ inputs:p }), resultPath: null },
+  { id:'hf_animdiff',name:'AnimateDiff Lightning',icon:'🆓', color:'#86efac',
+    sub:'HuggingFace · gratuito · 8 steps · ByteDance',
+    free:true, needsKey:false, falEndpoint:null,
+    hfModel:'ByteDance/AnimateDiff-Lightning',
+    body: p => ({ inputs:p }), resultPath: null },
 
-  /* ── fal.ai – key required (pay per use) ── */
+  /* ── fal.ai – chiave richiesta (pay per use) ── */
   { id:'wan21',      name:'Wan 2.1',             icon:'🎥', color:'#ef4444',
     sub:'~$0.05/5s · 480p · open-source · fal.ai',
     free:false, needsKey:true, falEndpoint:'fal-ai/wan/v2.1/t2v',
     body: p => ({ prompt:p, num_frames:49, fps:16, num_inference_steps:30 }),
     resultPath: r => r.video?.url },
   { id:'ltx',        name:'LTX-2.3 Fast',        icon:'⚡', color:'#06b6d4',
-    sub:'~$0.02/5s · ultra-fast · open-source · fal.ai',
+    sub:'~$0.02/5s · ultra-veloce · open-source · fal.ai',
     free:false, needsKey:true, falEndpoint:'fal-ai/ltx-video-2/text-to-video',
     body: p => ({ prompt:p }), resultPath: r => r.video?.url },
   { id:'hunyuan',    name:'HuanyuanVideo',        icon:'🎬', color:'#a855f7',
-    sub:'~$0.08/5s · cinematic · Tencent · fal.ai',
+    sub:'~$0.08/5s · cinematografico · Tencent · fal.ai',
     free:false, needsKey:true, falEndpoint:'fal-ai/hunyuan-video',
     body: p => ({ prompt:p }), resultPath: r => r.video?.url },
   { id:'hunyuan15',  name:'HuanyuanVideo 1.5',    icon:'🎬', color:'#8b5cf6',
-    sub:'~$0.06/5s · 8.3B · lightweight · Tencent · fal.ai',
+    sub:'~$0.06/5s · 8.3B · leggero · Tencent · fal.ai',
     free:false, needsKey:true, falEndpoint:'fal-ai/hunyuan-video-1.5',
     body: p => ({ prompt:p }), resultPath: r => r.video?.url },
   { id:'kling26',    name:'Kling 2.6 Pro',        icon:'🎬', color:'#f97316',
-    sub:'$0.07/s · native audio · 720p · Kuaishou · fal.ai',
+    sub:'$0.07/s · audio nativo · 720p · Kuaishou · fal.ai',
     free:false, needsKey:true, falEndpoint:'fal-ai/kling-video/v2.6/pro/text-to-video',
     body: p => ({ prompt:p, duration:'5', aspect_ratio:'16:9' }),
     resultPath: r => r.video?.url },
@@ -9698,26 +9803,39 @@ const _VIDEO_MODELS_DEF = [
     sub:'$0.49/video · 1080p · MiniMax · fal.ai',
     free:false, needsKey:true, falEndpoint:'fal-ai/minimax-video/text-to-video',
     body: p => ({ prompt:p }), resultPath: r => r.video?.url },
+  { id:'luma_ray',   name:'Luma Ray 2',           icon:'🌙', color:'#818cf8',
+    sub:'~$0.32/5s · realismo · Luma AI · fal.ai',
+    free:false, needsKey:true, falEndpoint:'fal-ai/luma-dream-machine',
+    body: p => ({ prompt:p }), resultPath: r => r.video?.url },
   { id:'veo3',       name:'Veo 3.1',              icon:'🚀', color:'#4285f4',
     sub:'~$2/5s · audio+video · Google · fal.ai 💀',
     free:false, needsKey:true, falEndpoint:'fal-ai/veo3',
     body: p => ({ prompt:p }), resultPath: r => r.video?.url },
 
-  /* ── API non disponibile – solo sito ── */
-  { id:'noapi_fal_signup', name:'fal.ai — $20 free',    icon:'💰', color:'#30d158',
-    sub:'$20 signup credits · then pay-per-use · all models above',
+  /* ── Solo sito — no API disponibile ── */
+  { id:'noapi_fal_signup',  name:'fal.ai — $20 gratis',   icon:'💰', color:'#30d158',
+    sub:'$20 crediti iscrizione · poi pay-per-use · tutti i modelli sopra',
     noApi:true, siteUrl:'https://fal.ai' },
-  { id:'noapi_kling',      name:'Kling AI — 66/day',    icon:'🎁', color:'#f97316',
-    sub:'66 free daily credits · refills every day · site only',
+  { id:'noapi_kling',       name:'Kling AI — 66/giorno',  icon:'🎁', color:'#f97316',
+    sub:'66 crediti gratuiti al giorno · si ricaricano · solo sito',
     noApi:true, siteUrl:'https://klingai.com' },
-  { id:'noapi_pixverse',   name:'PixVerse — daily credits', icon:'🎁', color:'#a78bfa',
-    sub:'Free daily credits · refills daily · site only',
+  { id:'noapi_pixverse',    name:'PixVerse — crediti giornalieri', icon:'🎁', color:'#a78bfa',
+    sub:'Crediti giornalieri gratuiti · si ricaricano · solo sito',
     noApi:true, siteUrl:'https://pixverse.ai' },
-  { id:'noapi_hailuo_site',name:'Hailuo — welcome credits', icon:'🎁', color:'#ec4899',
-    sub:'Free signup credits · 1080p · site only',
+  { id:'noapi_hailuo_site', name:'Hailuo — crediti benvenuto', icon:'🎁', color:'#ec4899',
+    sub:'Crediti gratis all\'iscrizione · 1080p · solo sito',
     noApi:true, siteUrl:'https://hailuoai.video' },
-  { id:'noapi_zsky',       name:'ZSky AI — unlimited',   icon:'♾️', color:'#4ade80',
-    sub:'Unlimited ad-supported · 1080p · audio included · site only',
+  { id:'noapi_runway',      name:'Runway Gen-4',          icon:'✈️', color:'#60a5fa',
+    sub:'Crediti gratis mensili · 1080p · solo sito',
+    noApi:true, siteUrl:'https://app.runwayml.com' },
+  { id:'noapi_pika',        name:'Pika 2.2',              icon:'⚡', color:'#f472b6',
+    sub:'Piano gratis · effetti unici · solo sito',
+    noApi:true, siteUrl:'https://pika.art' },
+  { id:'noapi_luma_site',   name:'Luma Dream Machine',    icon:'🌙', color:'#818cf8',
+    sub:'30 generazioni gratis al mese · solo sito',
+    noApi:true, siteUrl:'https://lumalabs.ai/dream-machine' },
+  { id:'noapi_zsky',        name:'ZSky AI — illimitato',  icon:'♾️', color:'#4ade80',
+    sub:'Illimitato con ads · 1080p · audio incluso · solo sito',
     noApi:true, siteUrl:'https://zsky.ai' },
 ];
 /* alias per AI Studio (usa lo stesso array) */
@@ -11651,16 +11769,18 @@ function _libSelectText(modelId) {
 function _renderLibAudio(body) {
   const activeProv = ls('customTtsProvider', 'none');
   const TTS_AUDIO_LIST = [
-    { id:'none',        name:'Kokoro TTS',      sub:'Offline · Built-in · No key needed',    color:'#10a37f', icon:'🗣',  note:'offline' },
-    { id:'webspeech',   name:'Web Speech',      sub:'Browser built-in TTS · Free · Always available', color:'#6366f1', icon:'🔊', note:'offline' },
-    { id:'elevenlabs',  name:'ElevenLabs',      sub:'High quality · 10k chars/mo free',      color:'#f59e0b', icon:'✨', note:'key' },
-    { id:'openai',      name:'OpenAI TTS',      sub:'tts-1 / tts-1-hd · ~$0.015/1k chars',  color:'#10a37f', icon:'🤖', note:'key' },
-    { id:'deepgram',    name:'Deepgram Aura',   sub:'Natural voices · $200 free credits',    color:'#4299e1', icon:'🌊', note:'key' },
-    { id:'fishaudio',   name:'Fish Audio',      sub:'Expressive · 10k chars free',           color:'#f97316', icon:'🐟', note:'key' },
+    { id:'none',             name:'Kokoro TTS',          sub:'Offline · On-device · 82M · Alta qualità',             color:'#a78bfa', icon:'🧠', note:'offline' },
+    { id:'webspeech',        name:'Web Speech',           sub:'Browser integrato · Gratuito · Sempre disponibile',    color:'#6366f1', icon:'🔊', note:'offline' },
+    { id:'streamelements',   name:'StreamElements TTS',   sub:'Gratuito · Nessuna chiave · Voci EN/ES/FR/IT online',  color:'#4ade80', icon:'🎙', note:'free' },
+    { id:'pollinations_tts', name:'Pollinations TTS',     sub:'Gratuito · Nessuna chiave · Powered by OpenAI TTS',   color:'#10a37f', icon:'✨', note:'free' },
+    { id:'elevenlabs',       name:'ElevenLabs',           sub:'Alta qualità · 10k chars/mese gratis',                 color:'#f59e0b', icon:'⭐', note:'key' },
+    { id:'openai',           name:'OpenAI TTS',           sub:'tts-1 / tts-1-hd · ~$0.015/1k chars',                 color:'#10a37f', icon:'🤖', note:'key' },
+    { id:'deepgram',         name:'Deepgram Aura',        sub:'Voci naturali · $200 free credits',                   color:'#4299e1', icon:'🌊', note:'key' },
+    { id:'fishaudio',        name:'Fish Audio',           sub:'Espressivo · 10k chars gratis',                       color:'#f97316', icon:'🐟', note:'key' },
   ];
   const sttList = [
-    { id:'webspeech-stt', name:'Web Speech STT', sub:'Browser built-in · Free · Works offline', color:'#6366f1', icon:'👂', note:'offline' },
-    { id:'whisper',       name:'Whisper Tiny',   sub:'OpenAI · Offline STT · Coming soon',       color:'#f97316', icon:'👂', note:'soon' },
+    { id:'webspeech-stt', name:'Web Speech STT', sub:'Browser integrato · Gratuito · Funziona offline', color:'#6366f1', icon:'👂', note:'offline' },
+    { id:'whisper',       name:'Whisper Tiny',   sub:'OpenAI · Offline STT · Prossimamente',             color:'#f97316', icon:'👂', note:'soon' },
   ];
 
   body.innerHTML = `
@@ -11671,12 +11791,12 @@ function _renderLibAudio(body) {
     TTS_AUDIO_LIST.map(m => {
       const isActive = activeProv === m.id;
       const badge = isActive
-        ? `<span class="lib-model-badge" style="background:rgba(16,163,127,0.18);border:1px solid rgba(16,163,127,0.3);color:#10a37f">✓ Active</span>`
+        ? `<span class="lib-model-badge" style="background:rgba(16,163,127,0.18);border:1px solid rgba(16,163,127,0.3);color:#10a37f">✓ Attivo</span>`
         : m.note === 'soon'
           ? `<span class="lib-model-badge" style="background:var(--surface);border:1px solid var(--border);color:var(--text3)">Soon</span>`
           : m.note === 'key'
             ? `<span class="lib-model-badge" style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25);color:#818cf8">Key</span>`
-            : `<span class="lib-model-badge" style="background:var(--surface);border:1px solid var(--border);color:var(--text3)">Free</span>`;
+            : `<span class="lib-model-badge" style="background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.25);color:#4ade80">Gratis</span>`;
       return `<div class="lib-model-card" onclick="_libAudioAction('${m.id}')" style="${isActive ? 'border-color:var(--accent);background:rgba(var(--accentRgb),0.06)' : ''}">
         <div class="lib-model-icon" style="background:${m.color}1a;color:${m.color}">${m.icon}</div>
         <div class="lib-model-info">
@@ -11692,7 +11812,7 @@ function _renderLibAudio(body) {
     sttList.map(m => {
       const badge = m.note === 'soon'
         ? `<span class="lib-model-badge" style="background:var(--surface);border:1px solid var(--border);color:var(--text3)">Soon</span>`
-        : `<span class="lib-model-badge" style="background:rgba(16,163,127,0.18);border:1px solid rgba(16,163,127,0.3);color:#10a37f">✓ Active</span>`;
+        : `<span class="lib-model-badge" style="background:rgba(16,163,127,0.18);border:1px solid rgba(16,163,127,0.3);color:#10a37f">✓ Attivo</span>`;
       return `<div class="lib-model-card" onclick="_libAudioAction('${m.id}')">
         <div class="lib-model-icon" style="background:${m.color}1a;color:${m.color}">${m.icon}</div>
         <div class="lib-model-info">
@@ -11704,9 +11824,11 @@ function _renderLibAudio(body) {
 }
 
 function _libAudioAction(id) {
-  if (id === 'none')    { setTtsProvider('none'); _renderLibTab('audio'); return; }
+  if (id === 'none')             { setTtsProvider('none'); _renderLibTab('audio'); return; }
   if (id === 'webspeech' || id === 'webspeech-stt') { setTtsProvider('none'); _renderLibTab('audio'); return; }
-  if (id === 'whisper') { alert('Whisper STT coming in a future Helix update.'); return; }
+  if (id === 'whisper')          { alert('Whisper STT in arrivo in un futuro aggiornamento di Helix.'); return; }
+  if (id === 'streamelements')   { setTtsProvider('streamelements'); _renderLibTab('audio'); return; }
+  if (id === 'pollinations_tts') { setTtsProvider('pollinations_tts'); _renderLibTab('audio'); return; }
   // Keyed providers: set and re-render so user sees active state
   setTtsProvider(id);
   _renderLibTab('audio');
