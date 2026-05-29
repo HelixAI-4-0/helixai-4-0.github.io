@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Helix AI</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23131211'/%3E%3Cpath d='M368 92 A180 215 0 0 0 144 420' stroke='%23d4714a' stroke-width='72' stroke-linecap='round' fill='none' opacity='0.55'/%3E%3Cpath d='M144 92 A180 215 0 0 1 368 420' stroke='%23d4714a' stroke-width='72' stroke-linecap='round' fill='none'/%3E%3Cpath d='M256 154 C302 219 302 293 256 364 C210 293 210 219 256 154 Z' fill='%23f5f3f0'/%3E%3C/svg%3E">
+<meta name="description" content="Helix AI — your personal AI assistant combining local on-device models with the world's top cloud providers. Voice, text, image generation, and more in one beautiful app.">
+<meta property="og:title" content="Helix AI">
+<meta property="og:description" content="Your personal AI assistant — local & cloud, voice & text. Powered by WebLLM, OpenAI, Anthropic, Gemini, and more.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23131211'/%3E%3Cpath d='M368 92 A180 215 0 0 0 144 420' stroke='%23d4714a' stroke-width='72' stroke-linecap='round' fill='none' opacity='0.55'/%3E%3Cpath d='M144 92 A180 215 0 0 1 368 420' stroke='%23d4714a' stroke-width='72' stroke-linecap='round' fill='none'/%3E%3Cpath d='M256 154 C302 219 302 293 256 364 C210 293 210 219 256 154 Z' fill='%23f5f3f0'/%3E%3C/svg%3E">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Helix AI">
+<meta name="twitter:description" content="Your personal AI assistant — local & cloud, voice & text.">
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <script>
 // ── PWA Manifest (inline blob so single-file works) ──
@@ -19,7 +28,7 @@
     theme_color: "#d4714a",
     icons: [
       { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23131211'/%3E%3Cpath d='M368 92 A180 215 0 0 0 144 420' stroke='%23d4714a' stroke-width='72' stroke-linecap='round' fill='none' opacity='0.55'/%3E%3Cpath d='M144 92 A180 215 0 0 1 368 420' stroke='%23d4714a' stroke-width='72' stroke-linecap='round' fill='none'/%3E%3Cpath d='M256 154 C302 219 302 293 256 364 C210 293 210 219 256 154 Z' fill='%23f5f3f0'/%3E%3C/svg%3E", sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" },
-      { src: "data:image/png;base64,iVBORw0KGgo=", sizes: "192x192", type: "image/png" }
+      { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23131211'/%3E%3Cpath d='M368 92 A180 215 0 0 0 144 420' stroke='%23d4714a' stroke-width='72' stroke-linecap='round' fill='none' opacity='0.55'/%3E%3Cpath d='M144 92 A180 215 0 0 1 368 420' stroke='%23d4714a' stroke-width='72' stroke-linecap='round' fill='none'/%3E%3Cpath d='M256 154 C302 219 302 293 256 364 C210 293 210 219 256 154 Z' fill='%23f5f3f0'/%3E%3C/svg%3E", sizes: "192x192", type: "image/svg+xml", purpose: "any maskable" }
     ],
     shortcuts: [
       { name: "New Chat", short_name: "Chat", description: "Start a new conversation", url: "./" }
@@ -36,48 +45,7 @@
 // ── Service Worker ──
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    const swCode = `
-const CACHE = 'helix-v9';
-const OFFLINE_ASSETS = [self.location.pathname];
-self.addEventListener('install', e => e.waitUntil(
-  caches.open(CACHE)
-    .then(c => c.addAll(OFFLINE_ASSETS))
-    .then(() => self.skipWaiting())
-));
-self.addEventListener('activate', e => e.waitUntil(
-  caches.keys()
-    .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
-    .then(() => self.clients.claim())
-));
-self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
-  const url = new URL(e.request.url);
-  // Only cache same-origin requests (not CDN, not HuggingFace)
-  if (url.origin !== self.location.origin) return;
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
-        if (res && res.status === 200) {
-          const clone = res.clone();
-          caches.open(CACHE).then(cache => cache.put(e.request, clone));
-        }
-        return res;
-      }).catch(() => cached);
-    })
-  );
-});`;
-    try {
-      // data: URL avoids blob: URL restrictions in Firefox/Safari for SW registration
-      const b64 = btoa(unescape(encodeURIComponent(swCode)));
-      const swUrl = `data:application/javascript;base64,${b64}`;
-      navigator.serviceWorker.register(swUrl, { scope: './' }).catch(() => {
-        // data: URL also rejected (e.g. Chrome) → fall back to blob:
-        const swBlob = new Blob([swCode], { type: 'application/javascript' });
-        const blobUrl = URL.createObjectURL(swBlob);
-        navigator.serviceWorker.register(blobUrl, { scope: './' }).catch(() => {});
-      });
-    } catch(e) {}
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
   });
 }
 </script>
@@ -97,12 +65,15 @@ function stripPollinationsNotice(text) {
   return text || text;
 }
 </script>
-<!-- Kokoro-js is loaded lazily on first use via dynamic import() — no eager preload to avoid freezing -->
-<script type="module">
-  import * as webllm from "https://esm.run/@mlc-ai/web-llm";
+<!-- WebLLM is loaded lazily on first use via dynamic import() — no eager preload to avoid freezing -->
+<script>
+async function loadWebLLMDynamically() {
+  if (window.webllm) return;
+  const webllm = await import("https://esm.run/@mlc-ai/web-llm");
   window.webllm = webllm;
   window._webllmReady = true;
   window.dispatchEvent(new Event('webllm-ready'));
+}
 </script>
 <style>
 :root {
@@ -1743,7 +1714,7 @@ const MODELS = {
     system:`Your name is Azur. You are a fast, precise AI assistant. You answer concisely and accurately. You think before responding but keep answers focused and direct.`,
     theme:{ bg:'#090c14', bg2:'#0d1220', bg3:'#111828', surface:'#161e30', surface2:'#1c2640', border:'#223050', accent:'#3b82f6', accent2:'#60a5fa', accentRgb:'59,130,246', text:'#eef2ff', text2:'#8ba5e0', text3:'#4a5f8a', logo:'#3b82f6' },
     icon:'◈', nameColor:'#60a5fa', swatchBg:'rgba(59,130,246,0.15)', swatchColor:'#3b82f6',
-    version:'1.5B', sub:'Fast · Low latency · Qwen2.5',
+    version:'30B (MoE)', sub:'Fast · Qwen3 MoE',
   },
   'Pyre': {
     display:'Pyre',
@@ -1751,7 +1722,7 @@ const MODELS = {
     system:`Your name is Pyre. You are a powerful AI built for complex reasoning. You work through problems step by step. You are thorough, analytical, and precise.`,
     theme:{ bg:'#110a0a', bg2:'#1a0e0e', bg3:'#201414', surface:'#2a1818', surface2:'#351e1e', border:'#422424', accent:'#ef4444', accent2:'#f87171', accentRgb:'239,68,68', text:'#fff1f0', text2:'#b08080', text3:'#6a4040', logo:'#ef4444' },
     icon:'◉', nameColor:'#f87171', swatchBg:'rgba(239,68,68,0.15)', swatchColor:'#ef4444',
-    version:'Phi-3.5', sub:'Powerful · Deep reasoning',
+    version:'35B (Reasoning)', sub:'Deep Reasoning · Qwen3.6 Claude Distilled',
   },
   'Quar': {
     display:'Quar',
@@ -1759,7 +1730,7 @@ const MODELS = {
     system:`Your name is Quar. You are a balanced AI assistant. You produce high-quality, well-structured responses. You are reliable, accurate, and clear.`,
     theme:{ bg:'#0e0e0e', bg2:'#151515', bg3:'#1c1c1c', surface:'#222222', surface2:'#2a2a2a', border:'#333333', accent:'#d4d4d4', accent2:'#efefef', accentRgb:'212,212,212', text:'#f5f5f5', text2:'#888888', text3:'#555555', logo:'#d4d4d4' },
     icon:'◇', nameColor:'#efefef', swatchBg:'rgba(212,212,212,0.12)', swatchColor:'#d4d4d4',
-    version:'3B', sub:'Balanced · All-purpose · Llama 3.2',
+    version:'72B', sub:'Balanced · All-purpose · Qwen2.5',
   },
   'Jade': {
     display:'Jade',
@@ -1767,7 +1738,7 @@ const MODELS = {
     system:`Your name is Jade. You are a creative and analytical AI assistant. You excel at coding, creative tasks, and structured thinking. You are thorough yet approachable.`,
     theme:{ bg:'#090f0a', bg2:'#0e1510', bg3:'#131c15', surface:'#172419', surface2:'#1d2d1f', border:'#243726', accent:'#22c55e', accent2:'#4ade80', accentRgb:'34,197,94', text:'#f0fff4', text2:'#7aab86', text3:'#3d6645', logo:'#22c55e' },
     icon:'✦', nameColor:'#4ade80', swatchBg:'rgba(34,197,94,0.15)', swatchColor:'#22c55e',
-    version:'1.5B', sub:'Creative · Code & analysis · Qwen2.5 Coder',
+    version:'32B (Coder)', sub:'Code & Analysis · Qwen2.5 Coder',
   }
 };
 
@@ -1782,7 +1753,7 @@ let abortController     = null;
 let pendingAttachment   = null;
 let lightMode           = false;
 let colorIdx            = 0;
-let hapticEnabled       = false;
+let hapticEnabled       = true;
 let fontIdx             = 0;
 let currentChatId       = null;
 let currentArtifactId   = null;
@@ -2502,14 +2473,16 @@ function updateUserUI() {
 
 function promptChangeName() {
   const current = getUserName() || '';
-  const newName = window.prompt('Enter your name:', current);
-  if (newName === null) return; // cancelled
-  const trimmed = newName.trim();
-  setUserName(trimmed || null);
-  updateUserUI();
-  setGreeting();
-  buildSystemPrompt && showToast(trimmed ? `Name set to ${trimmed}` : 'Name cleared');
-  haptic && haptic();
+  _showHelixModal({ title: 'Your Name', body: 'How should Helix address you?', input: true, inputDefault: current, confirmLabel: 'Save' })
+    .then(newName => {
+      if (newName === null) return;
+      const trimmed = newName.trim();
+      setUserName(trimmed || null);
+      updateUserUI();
+      setGreeting();
+      buildSystemPrompt && showToast(trimmed ? `Name set to ${trimmed}` : 'Name cleared');
+      haptic && haptic();
+    }).catch(() => {});
 }
 
 /* ══════════════════════════════════════════
@@ -2816,7 +2789,29 @@ function switchArtTab(tab) {
 function renderArtifactContent(art, tab) {
   const body = document.getElementById('artifactBody');
   if (tab === 'code' || !['html','mermaid','svg','markdown'].includes(art.type)) {
-    body.innerHTML = `<pre class="artifact-code-pane">${escHtml(art.content)}</pre>`;
+    const langMap = { html:'html', js:'javascript', javascript:'javascript', css:'css', python:'python', json:'json', ts:'typescript', typescript:'typescript', svg:'markup', markdown:'markdown', md:'markdown', bash:'bash', sh:'bash', sql:'sql', jsx:'jsx', tsx:'tsx' };
+    const lang = langMap[art.type] || 'markup';
+    body.innerHTML = `<pre class="artifact-code-pane language-${lang}"><code class="language-${lang}">${escHtml(art.content)}</code></pre>`;
+    // Lazy-load Prism.js syntax highlighting
+    function _applyPrism() {
+      if (window.Prism) { window.Prism.highlightAllUnder(body); return; }
+      if (!document.getElementById('prism-css')) {
+        const css = document.createElement('link');
+        css.id = 'prism-css'; css.rel = 'stylesheet';
+        css.href = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css';
+        document.head.appendChild(css);
+      }
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js';
+      s.onload = () => {
+        const auto = document.createElement('script');
+        auto.src = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js';
+        auto.onload = () => window.Prism && window.Prism.highlightAllUnder(body);
+        document.head.appendChild(auto);
+      };
+      document.head.appendChild(s);
+    }
+    _applyPrism();
     return;
   }
   // Preview tab
@@ -2920,12 +2915,15 @@ function applyTheme(modelName) {
   if (!lightMode) {
     const props = {
       '--bg':t.bg,'--bg2':t.bg2,'--bg3':t.bg3,'--surface':t.surface,
-      '--surface2':t.surface2,'--border':t.border,'--accent':t.accent,
-      '--accent2':t.accent2,'--accentRgb':t.accentRgb,
+      '--surface2':t.surface2,'--border':t.border,
       '--text':t.text,'--text2':t.text2,'--text3':t.text3
     };
     for (const [k,v] of Object.entries(props)) r.setProperty(k, v);
   }
+  // Always apply accent props so light mode updates instantly on model switch
+  r.setProperty('--accent', t.accent);
+  r.setProperty('--accent2', t.accent2);
+  r.setProperty('--accentRgb', t.accentRgb);
   document.querySelectorAll('.model-dot, #personaDot').forEach(md => { md.style.background = t.accent; md.style.boxShadow = `0 0 6px ${t.accent}`; });
   applyLogoColors(modelName);
 }
@@ -3203,7 +3201,7 @@ function renderCloudModelSheet() {
     const sizePill = `<span style="font-size:10px;font-weight:600;color:var(--text3);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);padding:2px 7px;border-radius:7px;white-space:nowrap">💾 ${m.size}</span>`;
     const statusBadge = isLoaded
       ? `<span style="font-size:10px;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.3);color:#a78bfa;padding:2px 7px;border-radius:6px;font-weight:700">⚡ Loaded</span>`
-      : `<button onclick="event.stopPropagation();downloadLocalModel('${m.id}', this)" style="padding:4px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-family:var(--font-sans);font-size:11px;cursor:pointer;white-space:nowrap;font-weight:600" id="dlbtn_${m.id.replace(/[^a-z0-9]/gi,'_')}">↓ Cache</button>`;
+      : `<button onclick="event.stopPropagation();downloadLocalModel('${m.id}', this)" style="padding:4px 10px;border-radius:8px;border:1px solid rgba(167,139,250,0.35);background:rgba(167,139,250,0.1);color:#a78bfa;font-family:var(--font-sans);font-size:11px;cursor:pointer;white-space:nowrap;font-weight:700" id="dlbtn_${m.id.replace(/[^a-z0-9]/gi,'_')}">↓ Get</button>`;
     const brandIcon  = LOCAL_MODEL_ICONS[m.brand] || LOCAL_MODEL_ICONS.llama;
     const brandColor = m.color || '#a78bfa';
     return `<div class="sheet-option" onclick="selectLocalModelCloud('${m.id}')">
@@ -3230,6 +3228,7 @@ function renderCloudModelSheet() {
   const falK       = ls('falKey', '');
   const geminiImgK = ls('geminiImgKey', '');
   const oaiK       = apiKeys.openai || '';
+  const orK        = apiKeys.openrouter || '';
 
   const _imgRow = (id, label, sub, color, locked) => {
     const isSel = imgPref === id;
@@ -3260,21 +3259,35 @@ function renderCloudModelSheet() {
     _imgRow('fal_flux_pro',  'FLUX.1-pro ⚡',            'Ultra fast · fal.ai key',                      '#f97316', !falK) +
     _imgRow('together_flux', 'Together FLUX 🤝',         'Fast · Together AI key',                       '#06b6d4', !ls('togetherImgKey','')) +
     _imgRow('ideogram',      'Ideogram v2 🎨',           'Best text-in-image · Ideogram key',            '#ec4899', !ls('ideogramKey','')) +
-    _imgRow('dalle3',        'DALL-E 3 🖼',              'Excellent prompt following · OpenAI key',       '#10a37f', !oaiK);
+    _imgRow('dalle3',        'DALL-E 3 🖼',              'Excellent prompt following · OpenAI key',       '#10a37f', !oaiK) +
+    // ── Pollinations advanced ──
+    _imgRow('poll_kontext',   'FLUX.1 Kontext ✏️',        'Free · Pollinations · Inpainting / edit',        '#f59e0b', false) +
+    _imgRow('wan_27',         'Wan 2.7 Image 🌊',         'Free · Pollinations · Open-source detail',       '#22d3ee', false) +
+    _imgRow('qwen_img',       'Qwen Image Plus 📸',       'Free · Pollinations · Alibaba · Photorealistic', '#6366f1', false) +
+    _imgRow('seedream',       'Seedream 4.0 🌸',          'Freemium · Pollinations login · Artistic',       '#ec4899', false) +
+    _imgRow('grok_img',       'Grok Imagine 🤖',          'Freemium · Pollinations login · xAI Realism',   '#ffffff', false) +
+    // ── OpenRouter advanced ──
+    _imgRow('or_recraft',     'Recraft v3 🎨',            'Vector/graphic design · OpenRouter key',        '#f97316', !orK) +
+    _imgRow('or_imagen4',     'Imagen 4.0 🖼',            'Google · Best quality · OpenRouter key',         '#4285f4', !orK) +
+    _imgRow('or_midjourney',  'Midjourney v7 🎭',         'Art quality · OpenRouter key',                   '#a78bfa', !orK);
 
   const localImgHtml = LOCAL_IMAGE_MODELS.map(m => {
     const isSel = imgPref === m.id;
-    return `<div class="sheet-option" onclick="_selectLocalImgFromSheet('${m.id}')">
+    const c = m.color || '#f59e0b';
+    const imgGetBtn = isSel
+      ? _check(true)
+      : `<button onclick="event.stopPropagation();_selectLocalImgFromSheet('${m.id}')" style="padding:4px 10px;border-radius:8px;border:1px solid ${c}55;background:${c}18;color:${c};font-family:var(--font-sans);font-size:11px;cursor:pointer;white-space:nowrap;font-weight:700">↓ Get</button>`;
+    return `<div class="sheet-option" onclick="_selectLocalImgFromSheet('${m.id}')" style="${isSel ? 'border-left:3px solid '+c : ''}">
       <div class="sheet-option-left">
-        <div class="sheet-model-swatch" style="background:${m.color||'#f59e0b'}22;color:${m.color||'#f59e0b'};font-size:15px">🖼</div>
+        <div class="sheet-model-swatch" style="background:${c}22;color:${c};font-size:15px">🖼</div>
         <div class="sheet-option-info">
-          <span class="sheet-option-name" style="color:${m.color||'#f59e0b'}">${m.name}</span>
+          <span class="sheet-option-name" style="color:${c}">${m.name}</span>
           <div class="sheet-option-sub">${m.sub}</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
         <span style="font-size:10px;font-weight:600;color:var(--text3);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);padding:2px 7px;border-radius:7px">💾 ${m.size}</span>
-        ${_check(isSel)}
+        ${imgGetBtn}
       </div>
     </div>`;
   }).join('');
@@ -3348,7 +3361,14 @@ function renderCloudModelSheet() {
     _vidRow('kling26',   'Kling 2.6 Pro',      '$0.07/s · native audio · 720p · fal.ai', '#f97316', false) +
     _vidRow('kling30',   'Kling 3.0 Pro',      '$0.112/s · top-tier · fal.ai',            '#eab308', false) +
     _vidRow('hailuo',    'Hailuo 02 Pro',      '$0.49/video · 1080p · fal.ai',            '#ec4899', false) +
-    _vidRow('veo3',      'Veo 3.1 💀',         '~$2/5s · audio+video · fal.ai',           '#4285f4', false);
+    _vidRow('veo3',        'Veo 3.1',            '~$2/5s · audio+video · fal.ai',           '#4285f4', false) +
+    _vidRow('wan27_vid',   'Wan 2.7 T2V',        '~$0.04/5s · 720p · open-source · fal.ai', '#22d3ee', false) +
+    _vidRow('ltx097',      'LTX-Video 0.9.7',    '~$0.01/5s · ultra-veloce · fal.ai',       '#06b6d4', false) +
+    _vidRow('cogvideo',    'CogVideoX 5B',        '~$0.06/5s · Zhipu AI · fal.ai',           '#8b5cf6', false) +
+    _vidRow('pixverse4',   'PixVerse V4',         '~$0.08/5s · 1080p · VFX · fal.ai',        '#a78bfa', false) +
+    _vidRow('runway_t2v',  'Runway Gen-4 Turbo',  '~$0.10/5s · 1080p · Runway · fal.ai',    '#60a5fa', false) +
+    _vidRow('luma_ray2f',  'Luma Ray 2 Flash',    '~$0.14/5s · veloce · Luma · fal.ai',      '#818cf8', false) +
+    _vidRow('pika22',      'Pika 2.2',             '~$0.08/5s · effetti unici · fal.ai',      '#f472b6', false);
   const vidNoApiHtml  =
     _noApiRow('noapi_fal_signup',  'fal.ai — $20 free',         '$20 signup credits · then pay-per-use', '#30d158') +
     _noApiRow('noapi_kling',       'Kling AI — 66/day',          '66 free daily credits · refills daily', '#f97316') +
@@ -3375,9 +3395,17 @@ function renderCloudModelSheet() {
     </div>`;
   };
 
-  const ttsFreeRow = _ttsFreeNoKeyRow('none', 'Kokoro / Web Speech', 'Gratis · Offline · Built-in', '#10a37f', '🗣') +
-    _ttsFreeNoKeyRow('streamelements',   'StreamElements TTS',  'Free · No Key · EN/ES/FR online', '#4ade80', '🎙') +
-    _ttsFreeNoKeyRow('pollinations_tts', 'Pollinations TTS',    'Free · No Key · Powered by OpenAI', '#06b6d4', '✨');
+  const ttsFreeRow =
+    _ttsFreeNoKeyRow('none',               'Kokoro / Web Speech',                    'Gratis · Offline · Built-in',                    '#10a37f', '🗣') +
+    _ttsFreeNoKeyRow('streamelements',     'StreamElements TTS',                     'Free · No Key · EN/ES/FR online',                '#4ade80', '🎙') +
+    _ttsFreeNoKeyRow('pollinations_tts',   'Pollinations TTS (OpenAI)',              'Free · No Key · OpenAI tts-1 via Pollinations',  '#06b6d4', '✨') +
+    _ttsFreeNoKeyRow('poll_qwen_tts',      'Pollinations · Qwen3-TTS Flash',         'Free · No Key · Multilingua · qwen-tts',         '#a78bfa', '🗣') +
+    _ttsFreeNoKeyRow('poll_universal2',    'Pollinations · AssemblyAI Universal-2',  'Free · No Key · universal-2',                   '#22d3ee', '🎙') +
+    _ttsFreeNoKeyRow('poll_whisper',       'Pollinations · Whisper V3 (Alpha)',       'Alpha · No Key · STT / trascrizione',            '#f59e0b', '🎙') +
+    _ttsFreeNoKeyRow('poll_qwen_tts_instruct', 'Pollinations · Qwen3-TTS Instruct 💎', 'Freemium · pollen · istruzioni stile',        '#ec4899', '✨') +
+    _ttsFreeNoKeyRow('poll_universal3',    'Pollinations · Universal-3 Pro 💎',      'Freemium · pollen · STT Premium',               '#4285f4', '🎙') +
+    _ttsFreeNoKeyRow('poll_scribe2',       'Pollinations · Scribe v2 💎',            'Freemium · pollen · Scribe STT',                '#818cf8', '🎙') +
+    _ttsFreeNoKeyRow('poll_elevenlabs',    'Pollinations · ElevenLabs v3 💎 (Alpha)','Alpha · pollen · qualità premium',               '#f97316', '✨');
 
   const _ttsRow = (id, label, sub, color) => {
     const k = ls('ttsKey_' + id, '');
@@ -3400,7 +3428,9 @@ function renderCloudModelSheet() {
     _ttsRow('elevenlabs', 'ElevenLabs',     '10k chars/mo free',                  '#f59e0b') +
     _ttsRow('openai',     'OpenAI TTS',     'tts-1 · ~$0.015/1k chars',           '#10a37f') +
     _ttsRow('deepgram',   'Deepgram Aura',  'Natural voices · $200 free credits', '#4299e1') +
-    _ttsRow('fishaudio',  'Fish Audio',     'Expressive · 10k chars free',        '#f97316');
+    _ttsRow('fishaudio',  'Fish Audio',     'Expressive · 10k chars free',        '#f97316') +
+    _ttsRow('grok_voice', 'Grok Voice 🤖',  'xAI · Streaming · Real-time conv',   '#ffffff') +
+    _ttsRow('gemini_tts', 'Gemini Live TTS 💎', 'Google · Streaming · Gemini key', '#4285f4');
 
   const localTtsHtml = LOCAL_TTS_MODELS.map(m => {
     return `<div class="sheet-option" onclick="_selectLocalTtsFromSheet('${m.id}')">
@@ -3465,16 +3495,61 @@ function renderCloudModelSheet() {
     ${localImgHtml}
   </div>`;
 
+  const soraK = apiKeys.openai || '';
   const videoPanel = `<div data-tab-panel="video" style="display:none">
     ${_hdr('🆓 Free · HuggingFace', '#4ade80', hfVidToken
       ? `<button onclick="event.stopPropagation();openApiKeySheet()" style="border:none;background:rgba(251,191,36,0.15);color:#fbbf24;font-size:10px;font-family:var(--font-sans);cursor:pointer;padding:3px 10px;border-radius:8px;font-weight:700">🔑 HF Key ✓</button>`
       : `<button onclick="event.stopPropagation();openApiKeySheet()" style="border:none;background:rgba(99,102,241,0.15);color:#818cf8;font-size:10px;font-family:var(--font-sans);cursor:pointer;padding:3px 10px;border-radius:8px;font-weight:700">+ HF Key</button>`
     )}
     ${vidFreeHtml}
-    ${_hdr('🔑 fal.ai Key · Pay-per-use', '#06b6d4', falK ? '' : `<button onclick="event.stopPropagation();openApiKeySheet()" style="border:none;background:rgba(99,102,241,0.15);color:#818cf8;font-size:10px;font-family:var(--font-sans);cursor:pointer;padding:3px 10px;border-radius:8px;font-weight:700">+ Add Key</button>`)}
-    ${vidFalHtml}
-    ${_hdr('🌐 Site only · No API needed', '#4ade80')}
-    ${vidNoApiHtml}
+    ${_hdr('✨ Pollinations · Freemium', '#d4714a', '<span style="font-size:10px;font-weight:700;padding:1px 8px;border-radius:6px;background:rgba(212,113,74,0.15);color:#d4714a;border:1px solid rgba(212,113,74,0.3)">No fal.ai key</span>')}
+    ${(() => {
+      const vp = ls('videoModelPref','wan21');
+      return [
+        {id:'poll_ltx23',         name:'LTX-Video 2.3 ⚡',        sub:'Pollinations · Lightricks · ultra-fast · free', c:'#06b6d4'},
+        {id:'poll_seedance',      name:'Seedance 1.0 🌸',          sub:'Pollinations · ByteDance · animato · login req.', c:'#d4714a'},
+        {id:'poll_seedance_lite', name:'Seedance Pro 🌸✨',         sub:'Pollinations · ByteDance · alta qualità · login req.', c:'#f472b6'},
+        {id:'poll_veo',           name:'Veo 2 Alpha 🔬',           sub:'Google via Pollinations · Alpha · login req.', c:'#4285f4'},
+      ].map(m => {
+        const isSel = vp === m.id;
+        return '<div class="sheet-option" onclick="_switchToCloudVideo(\'' + m.id + '\')" style="' + (isSel ? 'border-left:3px solid '+m.c : '') + '">' +
+          '<div class="sheet-option-left">' +
+            '<div class="sheet-model-swatch" style="background:'+m.c+'22;color:'+m.c+';font-size:15px">🎬</div>' +
+            '<div class="sheet-option-info">' +
+              '<span class="sheet-option-name" style="color:'+m.c+'">'+m.name+'</span>' +
+              '<div class="sheet-option-sub">'+m.sub+'</div>' +
+            '</div>' +
+          '</div>' +
+          '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">' +
+            '<span style="font-size:10px;font-weight:600;background:'+m.c+'1a;color:'+m.c+';border:1px solid '+m.c+'44;padding:2px 7px;border-radius:6px;flex-shrink:0">Freemium</span>' +
+            (isSel ? '<div class="sheet-check" style="opacity:1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>' : '') +
+          '</div>' +
+        '</div>';
+      }).join('');
+    })()}
+    ${_hdr('🔑 OpenAI Key · Pay-per-use', '#10a37f', soraK ? '' : '<button onclick="event.stopPropagation();openApiKeySheet()" style="border:none;background:rgba(99,102,241,0.15);color:#818cf8;font-size:10px;font-family:var(--font-sans);cursor:pointer;padding:3px 10px;border-radius:8px;font-weight:700">+ Add Key</button>')}
+    ${(() => {
+      const vp = ls('videoModelPref','wan21');
+      return [
+        {id:'sora2',     name:'Sora 2 🎥',      sub:'OpenAI · 1080p · audio sync · Pay-per-use'},
+        {id:'sora2_pro', name:'Sora 2 Pro 🔥',  sub:'OpenAI · Max quality · 4K · audio sync'},
+      ].map(m => {
+        const isSel = vp === m.id;
+        return '<div class="sheet-option" onclick="' + (soraK ? "_switchToCloudVideo('" + m.id + "')" : 'openApiKeySheet()') + '" style="' + (!soraK ? 'opacity:0.55' : '') + '">' +
+          '<div class="sheet-option-left">' +
+            '<div class="sheet-model-swatch" style="background:#10a37f22;color:#10a37f;font-size:15px">🎬</div>' +
+            '<div class="sheet-option-info">' +
+              '<span class="sheet-option-name" style="color:#10a37f">'+m.name+'</span>' +
+              '<div class="sheet-option-sub">'+m.sub+'</div>' +
+            '</div>' +
+          '</div>' +
+          '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">' +
+            '<span style="font-size:10px;font-weight:600;background:rgba(255,255,255,0.05);color:var(--text3);border:1px solid rgba(255,255,255,0.09);padding:2px 7px;border-radius:6px;flex-shrink:0">' + (soraK ? '🔑 Key' : '🔒 Key') + '</span>' +
+            (isSel ? '<div class="sheet-check" style="opacity:1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>' : '') +
+          '</div>' +
+        '</div>';
+      }).join('');
+    })()}
   </div>`;
 
   const voicePanel = `<div data-tab-panel="voice" style="display:none">
@@ -3484,7 +3559,25 @@ function renderCloudModelSheet() {
     ${ttsKeyRows}
     ${_localSubHdr('🧠 TTS · On-device (Kokoro)', '#a78bfa')}
     ${localTtsHtml}
-    ${_localSubHdr('🎤 STT · Speech-to-Text', '#6366f1')}
+    ${_hdr('☁️ STT · Cloud · API key', '#39c5cf', '')}
+    ${(() => {
+      const cohereK = ls('ttsKey_cohere', '');
+      const cohereActive = ttsProvNow === 'cohere_stt';
+      const badge = cohereK
+        ? (cohereActive ? '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:rgba(57,197,207,0.18);border:1px solid rgba(57,197,207,0.3);color:#39c5cf;flex-shrink:0">✓ Active</span>' : '<div class="sheet-check" style="opacity:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>')
+        : '<span style="font-size:10px;font-weight:700;color:var(--text3);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);padding:2px 7px;border-radius:6px;flex-shrink:0">🔒 Key</span>';
+      return '<div class="sheet-option" onclick="' + (cohereK ? "_switchToCloudTts('cohere_stt')" : 'openApiKeySheet()') + '" style="' + (!cohereK ? 'opacity:0.5' : '') + '">' +
+        '<div class="sheet-option-left">' +
+          '<div class="sheet-model-swatch" style="background:#39c5cf22;color:#39c5cf;font-size:15px">🎤</div>' +
+          '<div class="sheet-option-info">' +
+            '<span class="sheet-option-name" style="color:#39c5cf">Cohere Transcribe</span>' +
+            '<div class="sheet-option-sub">Enterprise STT · Cohere key</div>' +
+          '</div>' +
+        '</div>' +
+        badge +
+      '</div>';
+    })()}
+    ${_localSubHdr('🎤 STT · On-device', '#6366f1')}
     ${localSttHtml}
     <div style="padding:6px 16px 20px;font-family:var(--font-sans);font-size:11px;color:var(--text3)">Local models require WebGPU · download once</div>
   </div>`;
@@ -3518,7 +3611,7 @@ function _selectLocalSttFromSheet(id) {
 function _switchToCloudImg(id) {
   lsSet('imageModelPref', id);
   _refreshImageTab && _refreshImageTab();
-  const names = { flux_schnell:'FLUX.1-schnell (free)', poll_turbo:'Pollinations Turbo (free)', poll_realism:'Flux Realism (free)', nano_banana:'Nano Banana (free)', nano_banana_2:'Nano Banana 2 (Gemini)', flux_dev:'FLUX.1-dev (HF token)', sd35:'SD 3.5 (Stability)', fal_flux_pro:'FLUX.1-pro (fal.ai)', together_flux:'Together FLUX', ideogram:'Ideogram v2', dalle3:'DALL-E 3 (OpenAI)' };
+  const names = { flux_schnell:'FLUX.1-schnell (free)', poll_turbo:'Pollinations Turbo (free)', poll_realism:'Flux Realism (free)', nano_banana:'Nano Banana (free)', nano_banana_2:'Nano Banana 2 (Gemini)', flux_dev:'FLUX.1-dev (HF token)', sd35:'SD 3.5 (Stability)', fal_flux_pro:'FLUX.1-pro (fal.ai)', together_flux:'Together FLUX', ideogram:'Ideogram v2', dalle3:'DALL-E 3 (OpenAI)', poll_kontext:'FLUX.1 Kontext (free)', wan_27:'Wan 2.7 Image (free)', qwen_img:'Qwen Image Plus (free)', seedream:'Seedream 4.0 (Pollinations)', grok_img:'Grok Imagine (Pollinations)', or_recraft:'Recraft v3 (OpenRouter)', or_imagen4:'Imagen 4.0 (OpenRouter)', or_midjourney:'Midjourney v7 (OpenRouter)' };
   showToast('🖼 Image: ' + (names[id] || id));
   haptic && haptic();
   closeCloudModelSheet();
@@ -3654,6 +3747,8 @@ const PROVIDER_MODELS = {
       { id:'gpt-5.5',       name:'GPT-5.5',        free:false, sub:'Latest flagship · 1M ctx · Apr 2026' },
       { id:'gpt-5.5-pro',   name:'GPT-5.5 Pro',    free:false, sub:'Max reasoning · 1M ctx · Apr 2026' },
       { id:'gpt-5',         name:'GPT-5',           free:false, sub:'Powerful · 400k ctx · Aug 2025' },
+      { id:'gpt-5-mini',    name:'GPT-5 mini',      free:false, sub:'Efficient · $0.40/1M in' },
+      { id:'gpt-5-nano',    name:'GPT-5 nano',      free:false, sub:'Cheapest · $0.10/1M in' },
       { id:'gpt-4.1',       name:'GPT-4.1',         free:false, sub:'Stable · 1M ctx · $2/1M in' },
       { id:'gpt-4.1-mini',  name:'GPT-4.1 mini',   free:false, sub:'Efficient · 1M ctx · $0.40/1M in' },
       { id:'gpt-4.1-nano',  name:'GPT-4.1 nano',   free:false, sub:'Cheapest · 1M ctx · $0.10/1M in' },
@@ -3673,6 +3768,7 @@ const PROVIDER_MODELS = {
       { id:'claude-sonnet-4-6',          name:'Claude Sonnet 4.6', free:false, sub:'Speed + intelligence · 1M ctx · $3/1M in' },
       { id:'claude-haiku-4-5-20251001',  name:'Claude Haiku 4.5',  free:false, sub:'Fastest · 200k ctx · $1/1M in' },
       { id:'claude-opus-4-6',            name:'Claude Opus 4.6',   free:false, sub:'Legacy · superseded by 4.7 · $5/1M in' },
+      { id:'claude-sonnet-4-5',          name:'Claude Sonnet 4.5',  free:false, sub:'Stable · 200k ctx · $3/1M in' },
       { id:'claude-3-5-sonnet-20241022', name:'Claude 3.5 Sonnet', free:false, sub:'Legacy stable · 200k ctx · $3/1M in' },
     ]
   },
@@ -3685,9 +3781,13 @@ const PROVIDER_MODELS = {
       { id:'llama-3.3-70b-versatile',                   name:'Llama 3.3 70B',   free:false, sub:'Meta · 128k ctx · 280 t/s · $0.59/1M in' },
       { id:'llama-3.1-8b-instant',                      name:'Llama 3.1 8B',    free:false, sub:'Fastest · 560 t/s · 128k ctx · $0.05/1M in' },
       { id:'meta-llama/llama-4-scout-17b-16e-instruct', name:'Llama 4 Scout',   free:false, sub:'Preview · Meta · 750 t/s · $0.11/1M in' },
-      { id:'qwen/qwen3-32b',                            name:'Qwen 3 32B',      free:false, sub:'Preview · Alibaba · 400 t/s · $0.29/1M in' },
+      { id:'qwen/qwen3-32b',                            name:'Qwen 3 32B',            free:false, sub:'Preview · Alibaba · 400 t/s · $0.29/1M in' },
+      { id:'meta-llama/llama-3.2-90b-vision-preview',    name:'Llama 3.2 90B Vision',  free:false, sub:'Meta · Vision · 128k ctx · $0.90/1M in' },
+      { id:'meta-llama/llama-3.2-11b-vision-preview',    name:'Llama 3.2 11B Vision',  free:false, sub:'Meta · Vision · Efficient · $0.18/1M in' },
+      { id:'meta-llama/llama-3.1-70b-versatile',         name:'Llama 3.1 70B',         free:false, sub:'Meta · Stable · 128k ctx · $0.59/1M in' },
       { id:'groq/compound',                             name:'Compound',        free:false, sub:'Groq system · Agentic · Search+Code · rate limited' },
       { id:'groq/compound-mini',                        name:'Compound Mini',   free:false, sub:'Groq system · Lighter agentic · rate limited' },
+      { id:'canopy/orpheus-arabic-saudi',               name:'Orpheus Arabic SA', free:false, sub:'Canopy Labs · Arabic · Saudi dialect' },
     ]
   },
   gemini: {
@@ -3699,7 +3799,9 @@ const PROVIDER_MODELS = {
       { id:'gemini-3.1-flash-lite', name:'Gemini 3.1 Flash-Lite', free:true,  sub:'Stable GA · Fast · FREE w/ limits' },
       { id:'gemini-2.5-pro',        name:'Gemini 2.5 Pro',        free:false, sub:'Stable · Thinking · 1M ctx · $1.25/1M in' },
       { id:'gemini-2.5-flash',      name:'Gemini 2.5 Flash',      free:true,  sub:'FREE 500 req/day · Smart & fast' },
-      { id:'gemini-2.5-flash-lite', name:'Gemini 2.5 Flash-Lite', free:true,  sub:'FREE 1500 req/day · Cheapest · $0.10/1M in' },
+      { id:'gemini-2.5-flash-lite',      name:'Gemini 2.5 Flash-Lite',  free:true,  sub:'FREE 1500 req/day · Cheapest · $0.10/1M in' },
+      { id:'gemini-3.1-flash-live',      name:'Gemini 3.1 Flash Live',  free:true,  sub:'Streaming dialog · Audio · FREE w/ limits' },
+      { id:'gemini-3.1-flash-image-preview', name:'Gemini 3.1 Flash Image', free:true, sub:'Native image gen · FREE w/ limits' },
     ]
   },
   openrouter: {
@@ -3709,10 +3811,15 @@ const PROVIDER_MODELS = {
       { id:'anthropic/claude-opus-4-7',              name:'Claude Opus 4.7',    free:false, sub:'Anthropic · Newest · $5/1M in' },
       { id:'anthropic/claude-sonnet-4-6',            name:'Claude Sonnet 4.6',  free:false, sub:'Anthropic · Balanced · $3/1M in' },
       { id:'anthropic/claude-haiku-4-5',             name:'Claude Haiku 4.5',   free:false, sub:'Anthropic · Fast · $1/1M in' },
-      { id:'openai/gpt-5.5',                         name:'GPT-5.5',            free:false, sub:'OpenAI · Latest flagship' },
+      { id:'openai/gpt-5.5',                         name:'GPT-5.5',            free:false, sub:'OpenAI · Latest flagship · Apr 2026' },
+      { id:'openai/gpt-5.5-pro',                     name:'GPT-5.5 Pro',        free:false, sub:'OpenAI · Max reasoning · Apr 2026' },
       { id:'openai/gpt-5',                           name:'GPT-5',              free:false, sub:'OpenAI · Powerful · Aug 2025' },
+      { id:'openai/gpt-5-mini',                      name:'GPT-5 mini',         free:false, sub:'OpenAI · Efficient · $0.40/1M in' },
       { id:'openai/gpt-4.1',                         name:'GPT-4.1',            free:false, sub:'OpenAI · Stable · $2/1M in' },
+      { id:'openai/gpt-4.1-mini',                    name:'GPT-4.1 mini',       free:false, sub:'OpenAI · Efficient · $0.40/1M in' },
+      { id:'openai/gpt-4.1-nano',                    name:'GPT-4.1 nano',       free:false, sub:'OpenAI · Cheapest · $0.10/1M in' },
       { id:'openai/o3',                              name:'o3',                 free:false, sub:'OpenAI · Reasoning · $10/1M in' },
+      { id:'openai/o3-mini',                         name:'o3-mini',            free:false, sub:'OpenAI · Fast reasoning · $1.10/1M in' },
       { id:'google/gemini-3.5-flash',                name:'Gemini 3.5 Flash',   free:false, sub:'Google · Newest GA' },
       { id:'google/gemini-3.1-pro',                  name:'Gemini 3.1 Pro',     free:false, sub:'Google · Best reasoning · $2/1M in' },
       { id:'google/gemini-2.5-pro',                  name:'Gemini 2.5 Pro',     free:false, sub:'Google · Stable · $1.25/1M in' },
@@ -3720,22 +3827,31 @@ const PROVIDER_MODELS = {
       { id:'meta-llama/llama-4-scout',               name:'Llama 4 Scout',      free:false, sub:'Meta · Latest · $0.09/1M in' },
       { id:'mistralai/mistral-small-3.2',            name:'Mistral Small 3.2',  free:false, sub:'Mistral · Efficient · $0.10/1M in' },
       { id:'x-ai/grok-3-mini-beta',                  name:'Grok 3 mini',        free:false, sub:'xAI · Reasoning · $0.30/1M in' },
+      { id:'meta-llama/llama-4-maverick',               name:'Llama 4 Maverick',   free:false, sub:'Meta · Latest multimodal · $0.22/1M in' },
+      { id:'qwen/qwen3-coder-480b-a35b-instruct',       name:'Qwen3 Coder 480B',   free:false, sub:'Alibaba · Code specialist · $0.22/1M in' },
+      { id:'qwen/qwen3-235b-a22b',                      name:'Qwen 3 235B',        free:false, sub:'Alibaba · MoE · $0.22/1M in' },
       { id:'meta-llama/llama-3.3-70b-instruct:free', name:'Llama 3.3 70B',      free:true,  sub:'Meta · FREE (rate limited)' },
       { id:'deepseek/deepseek-r1:free',              name:'DeepSeek R1',        free:true,  sub:'DeepSeek · Reasoning · FREE (rate limited)' },
       { id:'google/gemma-3-27b-it:free',             name:'Gemma 3 27B',        free:true,  sub:'Google · Open · FREE (rate limited)' },
       { id:'qwen/qwen3-235b-a22b:free',              name:'Qwen 3 235B',        free:true,  sub:'Alibaba · MoE · FREE (rate limited)' },
+      { id:'mistralai/mistral-small-3.2-24b-instruct:free', name:'Mistral Small 3.2', free:true, sub:'Mistral · Vision · FREE (rate limited)' },
+      { id:'microsoft/phi-4:free',                   name:'Phi-4',              free:true,  sub:'Microsoft · 14B · FREE (rate limited)' },
+      { id:'meta-llama/llama-4-scout:free',          name:'Llama 4 Scout',      free:true,  sub:'Meta · Vision · FREE (rate limited)' },
     ]
   },
   mistral: {
     name:'Mistral', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><rect x="2" y="2" width="4.5" height="4.5"/><rect x="8.75" y="2" width="4.5" height="4.5"/><rect x="15.5" y="2" width="4.5" height="4.5"/><rect x="8.75" y="8.75" width="4.5" height="4.5"/><rect x="15.5" y="8.75" width="4.5" height="4.5"/><rect x="2" y="15.5" width="4.5" height="4.5"/><rect x="8.75" y="15.5" width="4.5" height="4.5"/><rect x="15.5" y="15.5" width="4.5" height="4.5"/></svg>', color:'#ff7000',
     endpoint:'https://api.mistral.ai/v1/chat/completions',
     models:[
-      { id:'mistral-large-latest',  name:'Mistral Large 2',   free:false, sub:'Best · 128k ctx · $2/1M in' },
-      { id:'mistral-medium-latest', name:'Mistral Medium 3',  free:false, sub:'Balanced · 128k ctx · $0.40/1M in' },
-      { id:'mistral-small-latest',  name:'Mistral Small 3.2', free:false, sub:'Efficient · 32k ctx · $0.10/1M in' },
-      { id:'codestral-latest',      name:'Codestral 2501',    free:false, sub:'Code specialist · 256k ctx · $0.30/1M in' },
-      { id:'ministral-8b-latest',   name:'Ministral 8B',      free:false, sub:'Lightweight · 128k ctx · $0.10/1M in' },
-      { id:'ministral-3b-latest',   name:'Ministral 3B',      free:false, sub:'Tiny & fast · 128k ctx · $0.04/1M in' },
+      { id:'mistral-large-latest',    name:'Mistral Large 3',   free:false, sub:'Best · 128k ctx · $2/1M in' },
+      { id:'mistral-medium-latest',  name:'Mistral Medium 3',  free:false, sub:'Balanced · 128k ctx · $0.40/1M in' },
+      { id:'mistral-small-latest',   name:'Mistral Small 4',   free:false, sub:'Efficient · 32k ctx · $0.10/1M in' },
+      { id:'pixtral-large-latest',   name:'Pixtral Large',     free:false, sub:'Vision · 128k ctx · $2/1M in' },
+      { id:'pixtral-12b-2409',       name:'Pixtral 12B',       free:false, sub:'Vision · 128k ctx · $0.15/1M in' },
+      { id:'codestral-latest',       name:'Codestral',         free:false, sub:'Code specialist · 256k ctx · $0.30/1M in' },
+      { id:'ministral-8b-latest',    name:'Ministral 8B',      free:false, sub:'Lightweight · 128k ctx · $0.10/1M in' },
+      { id:'ministral-3b-latest',    name:'Ministral 3B',      free:false, sub:'Tiny & fast · 128k ctx · $0.04/1M in' },
+      { id:'mistral-moderation-latest', name:'Mistral Moderation 2', free:false, sub:'Safety · Content moderation · $0.10/1M in' },
       { id:'open-mistral-nemo',     name:'Mistral NeMo',      free:true,  sub:'Apache 2.0 · FREE w/ limits · 128k ctx' },
       { id:'open-codestral-mamba',  name:'Codestral Mamba',   free:true,  sub:'Code · Apache 2.0 · FREE w/ limits' },
     ]
@@ -3744,6 +3860,7 @@ const PROVIDER_MODELS = {
     name:'xAI (Grok)', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.737-8.83L1.724 2.25H8.2l4.26 5.63 5.784-5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>', color:'#ffffff',
     endpoint:'https://api.x.ai/v1/chat/completions',
     models:[
+      { id:'grok-4',                 name:'Grok 4',           free:false, sub:'xAI · Most powerful · Apr 2026' },
       { id:'grok-3-beta',           name:'Grok 3',           free:false, sub:'Most powerful · 131k ctx · $3/1M in' },
       { id:'grok-3-mini-beta',      name:'Grok 3 mini',      free:false, sub:'Fast reasoning · 131k ctx · $0.30/1M in' },
       { id:'grok-2-1212',           name:'Grok 2',           free:false, sub:'Stable · Balanced · $2/1M in' },
@@ -3756,8 +3873,8 @@ const PROVIDER_MODELS = {
     name:'DeepSeek', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><path d="M21.5 9.5c-.4-1.6-1.2-3-2.4-4.1-.4-.4-.9-.3-1.2.1-.3.4-.2.9.1 1.2.9.8 1.5 1.9 1.8 3.1.1.5.6.8 1.1.7.5-.1.8-.6.6-1zM18 4c-.4-.3-.9-.3-1.2.1l-.1.1c-1.4-1.4-3.4-2.2-5.7-2.2C5.7 2 2 5.7 2 11c0 1.6.5 3.1 1.3 4.4l-1 3.3c-.1.5.2.9.7.9.1 0 .3 0 .4-.1l3.3-1.2c1.2.7 2.7 1.1 4.3 1.1 5.3 0 9-3.7 9-9 0-2.3-.8-4.4-2-6zm-7 12.5c-1.3 0-2.5-.3-3.5-.9-.2-.1-.5-.2-.7-.1l-2.1.8.7-2.2c.1-.2 0-.5-.1-.7C4.5 12.5 4 11.8 4 11c0-3.7 3.1-7 7-7 3.9 0 7 3.1 7 7 0 3.9-3.1 7.5-7 7.5z"/></svg>', color:'#4299e1',
     endpoint:'https://api.deepseek.com/v1/chat/completions',
     models:[
-      { id:'deepseek-chat',     name:'DeepSeek V3', free:false, sub:'Flagship · 64k ctx · $0.27/1M in' },
-      { id:'deepseek-reasoner', name:'DeepSeek R1', free:false, sub:'671B reasoning · 64k ctx · $0.55/1M in' },
+      { id:'deepseek-chat',           name:'DeepSeek V3',      free:false, sub:'Flagship · 64k ctx · $0.27/1M in' },
+      { id:'deepseek-reasoner',       name:'DeepSeek R1',      free:false, sub:'671B reasoning · 64k ctx · $0.55/1M in' },
     ]
   },
   together: {
@@ -3775,13 +3892,18 @@ const PROVIDER_MODELS = {
       { id:'google/gemma-2-27b-it',                               name:'Gemma 2 27B',         free:false, sub:'Google · Open · $0.80/1M in' },
       { id:'mistralai/Mixtral-8x22B-Instruct-v0.1',              name:'Mixtral 8x22B',       free:false, sub:'Mistral · MoE · $1.20/1M in' },
       { id:'microsoft/phi-4',                                     name:'Phi-4',               free:false, sub:'Microsoft · 14B · $0.07/1M in' },
+      { id:'microsoft/phi-4-multimodal-instruct',                 name:'Phi-4 Multimodal',    free:false, sub:'Microsoft · Vision · $0.12/1M in' },
+      { id:'mistralai/Mixtral-8x7B-Instruct-v0.1',               name:'Mixtral 8x7B',        free:false, sub:'Mistral · MoE · 32k ctx · $0.60/1M in' },
+      { id:'nvidia/Llama-3.1-Nemotron-70B-Instruct-HF',          name:'Nemotron 70B',        free:false, sub:'NVIDIA · Aligned · $0.90/1M in' },
     ]
   },
   cohere: {
     name:'Cohere', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 3a7 7 0 1 1 0 14A7 7 0 0 1 12 5zm0 2.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9zm0 2a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z"/></svg>', color:'#39d353',
     endpoint:'https://api.cohere.ai/compatibility/v1/chat/completions',
     models:[
-      { id:'command-a-03-2025',   name:'Command A',       free:false, sub:'Latest · 256k ctx · $2.50/1M in' },
+      { id:'command-a-plus',       name:'Command A+',      free:false, sub:'Most capable · Enterprise agents · $5/1M in' },
+      { id:'command-a-03-2025',     name:'Command A',       free:false, sub:'Latest · 256k ctx · $2.50/1M in' },
+      { id:'command-a-reasoning',   name:'Command A Reasoning', free:false, sub:'Logical CoT · $3/1M in' },
       { id:'command-r-plus',      name:'Command R+',      free:false, sub:'Powerful · RAG · 128k ctx · $2.50/1M in' },
       { id:'command-r',           name:'Command R',       free:false, sub:'Balanced · 128k ctx · $0.15/1M in' },
       { id:'command-r7b-12-2024', name:'Command R7B',     free:false, sub:'Lightweight · 128k ctx · $0.04/1M in' },
@@ -3808,6 +3930,7 @@ const PROVIDER_MODELS = {
       { id:'sonar-reasoning',     name:'Sonar Reasoning',     free:false, sub:'Reasoning + search · $1/1M in' },
       { id:'sonar-deep-research', name:'Sonar Deep Research', free:false, sub:'Multi-step research · $2/request' },
       { id:'r1-1776',             name:'R1-1776',             free:false, sub:'Offline · No search · $2/1M in' },
+      { id:'sonar-turbo',          name:'Sonar Turbo',          free:false, sub:'Fastest · Web search · $0.60/1M in' },
     ]
   },
   fireworks: {
@@ -3822,9 +3945,13 @@ const PROVIDER_MODELS = {
       { id:'accounts/fireworks/models/deepseek-v3',                   name:'DeepSeek V3',      free:false, sub:'Flagship · $0.90/1M in' },
       { id:'accounts/fireworks/models/qwen3-235b-a22b',               name:'Qwen 3 235B',      free:false, sub:'MoE · Alibaba · $0.22/1M in' },
       { id:'accounts/fireworks/models/qwen3-30b-a3b',                 name:'Qwen 3 30B MoE',   free:false, sub:'Efficient · $0.15/1M in' },
+      { id:'accounts/fireworks/models/deepseek-r1-0528',          name:'DeepSeek R1 (May)',  free:false, sub:'Latest reasoning · $0.55/1M in' },
+      { id:'accounts/fireworks/models/llama-v3p2-11b-vision-instruct', name:'Llama 3.2 11B Vision', free:false, sub:'Meta · Vision · $0.20/1M in' },
       { id:'accounts/fireworks/models/mixtral-8x22b-instruct-hf',     name:'Mixtral 8x22B',    free:false, sub:'Mistral · MoE · $0.90/1M in' },
       { id:'accounts/fireworks/models/phi-4-multimodal-instruct',     name:'Phi-4 Multimodal', free:false, sub:'Microsoft · Vision · $0.15/1M in' },
       { id:'accounts/fireworks/models/gemma2-9b-it',                  name:'Gemma 2 9B',       free:false, sub:'Google · Efficient · $0.20/1M in' },
+      { id:'accounts/fireworks/models/mistral-small-3p2',              name:'Mistral Small 3.2', free:false, sub:'Mistral · Efficient · $0.10/1M in' },
+      { id:'accounts/fireworks/models/whisper-v3-turbo',               name:'Whisper v3 Turbo',  free:false, sub:'OpenAI · STT · $0.003/min' },
     ]
   },
   novita: {
@@ -3833,6 +3960,8 @@ const PROVIDER_MODELS = {
     models:[
       { id:'meta-llama/llama-4-maverick',         name:'Llama 4 Maverick',   free:false, sub:'Meta · Latest · $0.18/1M in' },
       { id:'meta-llama/llama-4-scout',            name:'Llama 4 Scout',      free:false, sub:'Meta · Efficient · $0.10/1M in' },
+      { id:'meta-llama/llama-3.3-70b-instruct',   name:'Llama 3.3 70B',      free:false, sub:'Meta · Reliable · $0.42/1M in' },
+      { id:'meta-llama/llama-3.2-11b-vision-instruct', name:'Llama 3.2 11B Vision', free:false, sub:'Meta · Multimodal · $0.06/1M in' },
       { id:'deepseek/deepseek-r1',                name:'DeepSeek R1',        free:false, sub:'Reasoning · $0.55/1M in' },
       { id:'deepseek/deepseek-v3-0324',           name:'DeepSeek V3',        free:false, sub:'Flagship · $0.28/1M in' },
       { id:'qwen/qwen3-235b-a22b',                name:'Qwen 3 235B',        free:false, sub:'MoE · Massive · $0.22/1M in' },
@@ -3840,6 +3969,8 @@ const PROVIDER_MODELS = {
       { id:'google/gemma-3-27b-it',               name:'Gemma 3 27B',        free:false, sub:'Google · Open · $0.10/1M in' },
       { id:'microsoft/phi-4-multimodal-instruct', name:'Phi-4 Multimodal',   free:false, sub:'Microsoft · Vision · $0.07/1M in' },
       { id:'gryphe/mythomax-l2-13b',              name:'MythoMax 13B',       free:false, sub:'Creative · Roleplay · $0.06/1M in' },
+      { id:'qwen/qwen3-14b',                      name:'Qwen 3 14B',         free:false, sub:'Alibaba · Dense · $0.07/1M in' },
+      { id:'meta-llama/llama-3.1-8b-instruct',    name:'Llama 3.1 8B',       free:false, sub:'Meta · Lightweight · $0.03/1M in' },
     ]
   },
   sambanova: {
@@ -3886,12 +4017,8 @@ const PROVIDER_MODELS = {
     name:'Pollinations', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><circle cx="12" cy="12" r="2"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4m-3.17-7.07-2.83 2.83M7 17l-2.83 2.83M4.93 4.93 7.76 7.76M17 17l2.83 2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>', color:'#d4714a',
     endpoint:'https://gen.pollinations.ai/v1/chat/completions',
     models:[
-      { id:'openai',        name:'GPT-4o mini',          free:true, sub:'OpenAI · FREE · Fast & balanced' },
-      { id:'openai-large',  name:'GPT-4.1',               free:true, sub:'OpenAI · FREE · Most powerful' },
-      { id:'openai-fast',   name:'GPT-4o nano',           free:true, sub:'OpenAI · FREE · Ultra fast' },
       { id:'qwen-coder',    name:'Qwen3 Coder 30B',       free:true, sub:'Alibaba · FREE · Code expert' },
       { id:'mistral',       name:'Mistral Small 3.2',     free:true, sub:'Mistral · FREE · Efficient' },
-      { id:'gemini-fast',   name:'Gemini 2.5 Flash Lite', free:true, sub:'Google · FREE · Search+Code' },
       { id:'grok',          name:'Grok 4.20',             free:true, sub:'xAI · FREE · Multimodal' },
       { id:'llama',         name:'Llama 3.3 70B',         free:true, sub:'Meta · FREE · Reliable' },
       { id:'llama-4-scout', name:'Llama 4 Scout',         free:true, sub:'Meta · FREE · Vision' },
@@ -3899,7 +4026,41 @@ const PROVIDER_MODELS = {
       { id:'mistral-large', name:'Mistral Large 3',       free:true, sub:'Mistral · FREE · Reasoning' },
       { id:'claude-haiku',  name:'Claude Haiku 4.5',      free:true, sub:'Anthropic · FREE · Fast' },
       { id:'minimax',       name:'MiniMax M2.7',          free:true, sub:'MiniMax · FREE · Reasoning' },
-      { id:'nova',          name:'Nova Micro',            free:true, sub:'Amazon · FREE · Tiny & fast' },
+      { id:'nova',          name:'Nova Micro',            free:true,  sub:'Amazon · FREE · Tiny & fast' },
+      { id:'glm-5.1',                      name:'Z.ai GLM-5.1',                      free:false, sub:'Z.ai · Pollen · GLM-5.1' },
+      { id:'qwen-guard',                   name:'Qwen3Guard 8B',                     free:true,  sub:'Alibaba · FREE · Safety · 200K ctx' },
+      { id:'qwen-plus',                    name:'Qwen3.6 Plus',                      free:true,  sub:'Alibaba · FREE · Vision · Reasoning' },
+      { id:'qwen-vl',                      name:'Qwen3 VL 30B A3B',                  free:true,  sub:'Alibaba · FREE · Vision' },
+      { id:'qwen-vl-large',                name:'Qwen3 VL 235B Thinking',            free:false, sub:'Alibaba · Pollen · Vision · Reasoning' },
+      { id:'qwen-coder-next',              name:'Qwen3 Coder Next',                  free:true,  sub:'Alibaba · FREE · Code · Latest' },
+      { id:'polly',                        name:'Polly',                             free:true,  sub:'@Itachi-1824 · ALPHA · Vision · Search · Code' },
+      { id:'sonar-reasoning',              name:'Perplexity Sonar Reasoning',        free:false, sub:'Perplexity · Pollen · Vision · Reasoning · Search' },
+      { id:'nova-lite',                    name:'Nova 2 Lite',                       free:true,  sub:'Amazon · FREE · Vision · Reasoning' },
+      { id:'kimi-k2.6',                    name:'Moonshot Kimi K2.6',                free:true,  sub:'Moonshot · FREE · Vision · Reasoning' },
+      { id:'kimi',                         name:'Moonshot Kimi K2.5',                free:true,  sub:'Moonshot · FREE · Vision · Reasoning' },
+      { id:'mistral-small-4',              name:'Mistral Small 4',                   free:true,  sub:'Mistral · FREE · Vision · Latest' },
+      { id:'midijourney-large',            name:'MIDIjourney Large',                 free:true,  sub:'Pollinations · FREE · Music · Creative' },
+      { id:'llama-4-maverick',             name:'Meta Llama 4 Maverick',             free:false, sub:'Meta · PAID · Vision · Multimodal' },
+      { id:'grok-4.3',                     name:'Grok 4.3',                          free:true,  sub:'xAI · FREE · Vision · Reasoning · NEW' },
+      { id:'grok-reasoning',               name:'Grok 4.20 Reasoning',               free:true,  sub:'xAI · FREE · Vision · Thinking mode' },
+      { id:'openai-5.5',                   name:'GPT-5.5',                           free:true,  sub:'OpenAI · FREE · Vision · Reasoning' },
+      { id:'openai-large',                 name:'GPT-5.4',                           free:true,  sub:'OpenAI · FREE · Vision · Reasoning' },
+      { id:'openai',                       name:'GPT-5.4 Nano',                      free:true,  sub:'OpenAI · FREE · Vision · Balanced' },
+      { id:'openai-fast',                  name:'GPT-5 Nano',                        free:true,  sub:'OpenAI · FREE · Vision · Ultra fast' },
+      { id:'openai-5.4-mini',              name:'GPT-5.4 Mini',                      free:true,  sub:'OpenAI · FREE · Vision · Efficient' },
+      { id:'openai-audio',                 name:'GPT Audio Mini',                    free:true,  sub:'OpenAI · FREE · Audio generation' },
+      { id:'openai-audio-large',           name:'GPT Audio 1.5',                     free:true,  sub:'OpenAI · FREE · TTS · Premium' },
+      { id:'gemma',                        name:'Gemma 4 26B A4B',                   free:true,  sub:'Google · FREE · Vision · Reasoning · Open' },
+      { id:'gemini-3.5-flash',             name:'Gemini 3.5 Flash',                  free:false, sub:'Google · PAID · NEW · Vision · Reasoning · Search' },
+      { id:'gemini-3.5-flash-search',      name:'Gemini 3.5 Flash Search',           free:false, sub:'Google · PAID · NEW · Vision · Search · Code' },
+      { id:'gemini-pro',                   name:'Gemini 3.1 Pro',                    free:false, sub:'Google · PAID · Vision · Reasoning · Search' },
+      { id:'gemini-flash-lite-3.1',        name:'Gemini 3.1 Flash Lite',             free:false, sub:'Google · PAID · Vision · Search · Code' },
+      { id:'gemini-flash-lite-3.1-search', name:'Gemini 3.1 Flash Lite Search',      free:false, sub:'Google · PAID · Vision · Search · Code' },
+      { id:'gemini',                       name:'Gemini 3 Flash',                    free:false, sub:'Google · PAID · Vision · Search · Code' },
+      { id:'deepseek-pro',                 name:'DeepSeek V4 Pro',                   free:true,  sub:'DeepSeek · FREE · Reasoning · Latest' },
+      { id:'deepseek',                     name:'DeepSeek V4 Flash',                 free:true,  sub:'DeepSeek · FREE · Reasoning · Fast' },
+      { id:'claude-sonnet',                name:'Claude Sonnet 4.6',                 free:false, sub:'Anthropic · PAID · Vision · Balanced' },
+      { id:'claude-opus',                  name:'Claude Opus 4.7',                   free:false, sub:'Anthropic · PAID · Vision · Latest' },
     ]
   },
   venice: {
@@ -4243,7 +4404,7 @@ function renderModelSheet() {
     const sizePill = `<span style="font-size:10px;font-weight:600;color:var(--text3);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);padding:2px 7px;border-radius:7px;white-space:nowrap">💾 ${m.size}</span>`;
     const statusBadge = isLoaded
       ? `<span style="font-size:10px;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.3);color:#a78bfa;padding:2px 7px;border-radius:6px;font-weight:700">⚡ Loaded</span>`
-      : `<button onclick="event.stopPropagation();downloadLocalModel('${m.id}', this)" style="padding:4px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-family:var(--font-sans);font-size:11px;cursor:pointer;white-space:nowrap;font-weight:600" id="dlbtn_${m.id.replace(/[^a-z0-9]/gi,'_')}">↓ Cache</button>`;
+      : `<button onclick="event.stopPropagation();downloadLocalModel('${m.id}', this)" style="padding:4px 10px;border-radius:8px;border:1px solid rgba(167,139,250,0.35);background:rgba(167,139,250,0.1);color:#a78bfa;font-family:var(--font-sans);font-size:11px;cursor:pointer;white-space:nowrap;font-weight:700" id="dlbtn_${m.id.replace(/[^a-z0-9]/gi,'_')}">↓ Get</button>`;
     return `<div class="sheet-option" onclick="selectLocalModel('${m.id}')">
       <div class="sheet-option-left">
         <div class="sheet-model-swatch" style="background:rgba(139,92,246,0.12);color:#a78bfa;font-size:15px">🖥</div>
@@ -4426,16 +4587,22 @@ function cycleFontStyle() {
   haptic();
 }
 
-function haptic(ms) {}
+function haptic(ms = 10) {
+  if (hapticEnabled && navigator.vibrate) {
+    navigator.vibrate(ms);
+  }
+}
 
 function clearAllData() {
-  if (!confirm('Clear all conversations, projects, and memories?')) return;
-  localStorage.clear();
-  newChat();
-  showToast('All data cleared');
-  renderMemoriesSettings();
-  loadRecentChats();
-  loadArtifactLibrary();
+  _showHelixModal({ title: 'Clear All Data', body: 'Clear all conversations, projects, and memories? This cannot be undone.', confirmLabel: 'Clear All', cancelLabel: 'Cancel', danger: true })
+    .then(() => {
+      localStorage.clear();
+      newChat();
+      showToast('All data cleared');
+      renderMemoriesSettings();
+      loadRecentChats();
+      loadArtifactLibrary();
+    }).catch(() => {});
 }
 
 /* ══════════════════════════════════════════
@@ -4498,7 +4665,84 @@ async function generateVideo(prompt) {
   const sig    = abortController?.signal;
   const falKey = ls('falKey','');
   const vidId  = ls('videoModelPref', 'wan21');
-  const m      = _VIDEO_MODELS_DEF.find(x => x.id === vidId) || _VIDEO_MODELS_DEF.find(x => x.id === 'wan21');
+
+  // ══════════════════════════════════════════════════════
+  // EARLY EXITS — modelli non-fal.ai gestiti subito
+  // (devono venire PRIMA del lookup _VIDEO_MODELS_DEF
+  //  altrimenti cadono nel blocco fal.ai per errore)
+  // ══════════════════════════════════════════════════════
+
+  // ── Pollinations video (Seedance, LTX-2.3, Veo — freemium) ──
+  if (vidId === 'poll_seedance' || vidId === 'poll_seedance_lite' || vidId === 'poll_veo' || vidId === 'poll_ltx23') {
+    const modelParam = vidId === 'poll_seedance_lite' ? 'seedance-pro'
+                     : vidId === 'poll_veo'           ? 'veo'
+                     : vidId === 'poll_ltx23'         ? 'ltx-2'
+                     :                                  'seedance';
+    try {
+      const pollToken = ls('pollinationsToken', '');
+      const headers = {};
+      if (pollToken) headers['Authorization'] = 'Bearer ' + pollToken;
+      const res = await fetch('https://gen.pollinations.ai/image/' + encodeURIComponent(prompt) + '?model=' + modelParam + '&nologo=true&seed=' + Math.floor(Math.random()*999999), {
+        method: 'GET', headers, signal: sig
+      });
+      if (res.ok) {
+        const ct = res.headers.get('content-type') || '';
+        if (ct.includes('video') || ct.includes('octet-stream')) {
+          const blob = await res.blob();
+          if (blob.size > 2000) return URL.createObjectURL(new Blob([await blob.arrayBuffer()], {type:'video/mp4'}));
+        }
+        // Try JSON response with URL
+        const text = await res.text();
+        try {
+          const json = JSON.parse(text);
+          const url = json.url || json.video_url || json.video?.url || (json.urls && json.urls[0]);
+          if (url) return url;
+        } catch(_) {}
+        // Fallback: treat as blob
+        const blob = new Blob([text], {type:'video/mp4'});
+        if (blob.size > 2000) return URL.createObjectURL(blob);
+      }
+      const errTxt = await res.text().catch(() => res.statusText);
+      throw new Error('Pollinations video ' + res.status + ': ' + errTxt.slice(0, 120));
+    } catch(e) {
+      if (e.name === 'AbortError') throw e;
+      throw new Error('Pollinations video fallito: ' + e.message);
+    }
+  }
+
+  // ── Sora 2 / Sora 2 Pro (OpenAI key) ──
+  if (vidId === 'sora2' || vidId === 'sora2_pro') {
+    const oaiKey = ls('openAIKey', '') || apiKeys?.openai || '';
+    if (!oaiKey) throw new Error('Sora 2 richiede una chiave OpenAI — aggiungila in Impostazioni → Chiavi API.');
+    const soraModel = vidId === 'sora2_pro' ? 'sora-2-pro' : 'sora-2';
+    try {
+      const res = await fetch('https://api.openai.com/v1/videos/generations', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + oaiKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: soraModel, prompt, resolution: vidId === 'sora2_pro' ? '1080p' : '480p', n: 1 }),
+        signal: sig
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const vidUrl = data?.data?.[0]?.url || data?.data?.[0]?.video?.url;
+        if (vidUrl) {
+          const vidRes = await fetch(vidUrl, { signal: sig });
+          if (vidRes.ok) return URL.createObjectURL(await vidRes.blob());
+          return vidUrl;
+        }
+      }
+      const errTxt = await res.text().catch(() => res.statusText);
+      throw new Error('Sora 2 ' + res.status + ': ' + errTxt.slice(0, 120));
+    } catch(e) {
+      if (e.name === 'AbortError') throw e;
+      throw new Error('Sora 2 fallito: ' + e.message);
+    }
+  }
+
+  // ══════════════════════════════════════════════════════
+  // FAL.AI MODELS — lookup dal catalogo
+  // ══════════════════════════════════════════════════════
+  const m = _VIDEO_MODELS_DEF.find(x => x.id === vidId) || _VIDEO_MODELS_DEF.find(x => x.id === 'wan21');
 
   // ── fal.ai models ──
   if (!m.free && m.needsKey) {
@@ -4588,15 +4832,18 @@ async function generateVideo(prompt) {
   // Smart final error based on what the user has configured
   const curProv = customApiKey?.provider;
   const curProvName = PROVIDER_MODELS[curProv]?.name;
+  const isHfModel = m?.free && !m?.needsKey && !m?.noApi;
   let suggestion = '';
-  if (curProv === 'huggingface') {
-    suggestion = `\n\nYour HuggingFace key is active — try adding your HF token in Settings → API Keys → Image tab to improve video quality.`;
+  if (isHfModel) {
+    suggestion = `\n\nI modelli HuggingFace richiedono un token HF per funzionare.\nAggiungilo in Impostazioni → Chiavi API → tab Immagine → HuggingFace Token.\n\nIn alternativa usa un modello Pollinations (sezione Freemium) che non richiede chiavi.`;
+  } else if (curProv === 'huggingface') {
+    suggestion = `\n\nIl tuo testo usa HuggingFace. Per il video aggiungi un HF Token in Impostazioni → Chiavi API → tab Immagine.`;
   } else if (curProv) {
-    suggestion = `\n\nYou're using ${curProvName} for text. For video:\n• Free: add your HuggingFace token in Settings → API Keys → Image tab\n• Quality: add a fal.ai key in Settings → API Keys → Image tab`;
+    suggestion = `\n\nUsi ${curProvName} per il testo. Per il video:\n• Gratis: aggiungi un token HuggingFace in Impostazioni → Chiavi API\n• Qualità: aggiungi una chiave fal.ai in Impostazioni → Chiavi API`;
   } else {
-    suggestion = `\n\nTo enable video generation:\n• Free: add a HuggingFace token in Settings → API Keys → Image tab\n• Quality models: add a fal.ai key in Settings → API Keys → Image tab`;
+    suggestion = `\n\nPer abilitare la generazione video:\n• Gratis: aggiungi un token HuggingFace in Impostazioni → Chiavi API\n• Modelli di qualità: aggiungi una chiave fal.ai in Impostazioni → Chiavi API`;
   }
-  throw new Error('Video generation failed — no provider available.' + suggestion);
+  throw new Error('Generazione video fallita — nessun provider disponibile.' + suggestion);
 }
 
 /* Display a generated video in the chat */
@@ -4833,6 +5080,116 @@ async function generateImage(prompt) {
     } catch(e) {
       if (e.name === 'AbortError') throw e;
       throw new Error('Ideogram image generation failed: ' + e.message);
+    }
+  }
+
+  // ── FLUX.1 Kontext (free Pollinations) ──
+  if (imgPref === 'poll_kontext') {
+    try {
+      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=flux-kontext&seed=' + Math.floor(Math.random()*999999);
+      const polRes = await fetch(polUrl, { signal: sig });
+      if (polRes.ok) { const blob = await polRes.blob(); if (blob.size > 1000) return URL.createObjectURL(blob); }
+    } catch(e) { if (e.name === 'AbortError') throw e; }
+  }
+
+  // ── Wan 2.7 Image (free Pollinations) ──
+  if (imgPref === 'wan_27') {
+    try {
+      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=wan-2.7&seed=' + Math.floor(Math.random()*999999);
+      const polRes = await fetch(polUrl, { signal: sig });
+      if (polRes.ok) { const blob = await polRes.blob(); if (blob.size > 1000) return URL.createObjectURL(blob); }
+    } catch(e) { if (e.name === 'AbortError') throw e; }
+  }
+
+  // ── Qwen Image Plus (free Pollinations) ──
+  if (imgPref === 'qwen_img') {
+    try {
+      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=qwen-vl-plus&seed=' + Math.floor(Math.random()*999999);
+      const polRes = await fetch(polUrl, { signal: sig });
+      if (polRes.ok) { const blob = await polRes.blob(); if (blob.size > 1000) return URL.createObjectURL(blob); }
+    } catch(e) { if (e.name === 'AbortError') throw e; }
+  }
+
+  // ── Seedream 4.0 (Pollinations freemium) ──
+  if (imgPref === 'seedream') {
+    try {
+      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=seedream-4&seed=' + Math.floor(Math.random()*999999);
+      const polRes = await fetch(polUrl, { signal: sig });
+      if (polRes.ok) { const blob = await polRes.blob(); if (blob.size > 1000) return URL.createObjectURL(blob); }
+    } catch(e) { if (e.name === 'AbortError') throw e; }
+  }
+
+  // ── Grok Imagine (Pollinations freemium) ──
+  if (imgPref === 'grok_img') {
+    try {
+      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=grok-imagine&seed=' + Math.floor(Math.random()*999999);
+      const polRes = await fetch(polUrl, { signal: sig });
+      if (polRes.ok) { const blob = await polRes.blob(); if (blob.size > 1000) return URL.createObjectURL(blob); }
+    } catch(e) { if (e.name === 'AbortError') throw e; }
+  }
+
+  // ── OpenRouter image generation (Recraft, Imagen 4, Midjourney, SD 3.5, GPT Image 2) ──
+  const orImgModels = {
+    or_recraft:    { model: 'recraft-ai/recraft-v3',                 provider: 'Recraft v3'          },
+    or_imagen4:    { model: 'google/imagen-4',                       provider: 'Imagen 4.0'          },
+    or_midjourney: { model: 'midjourney/midjourney-v7',              provider: 'Midjourney v7'       },
+    or_sd35:       { model: 'stability-ai/stable-diffusion-3-5-large', provider: 'SD 3.5 Large'      },
+    or_gpt_img2:   { model: 'openai/gpt-image-2',                    provider: 'GPT Image 2'         },
+  };
+  if (orImgModels[imgPref]) {
+    const orKey2 = ls('openRouterKey', '') || ls('orKey', '');
+    if (!orKey2) throw new Error('OpenRouter image generation requires an OpenRouter API key — add it in Settings.');
+    const orMeta = orImgModels[imgPref];
+    try {
+      const res = await fetch('https://openrouter.ai/api/v1/images/generations', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + orKey2, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: orMeta.model, prompt, n: 1 }),
+        signal: sig
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const imgUrl = data?.data?.[0]?.url || data?.data?.[0]?.b64_json;
+        if (imgUrl) {
+          if (imgUrl.startsWith('http')) {
+            const imgRes = await fetch(imgUrl, { signal: sig });
+            if (imgRes.ok) return URL.createObjectURL(await imgRes.blob());
+            return imgUrl;
+          }
+          const byteStr = atob(imgUrl); const arr = new Uint8Array(byteStr.length);
+          for (let i = 0; i < byteStr.length; i++) arr[i] = byteStr.charCodeAt(i);
+          return URL.createObjectURL(new Blob([arr], { type: 'image/png' }));
+        }
+      }
+      const errText = await res.text().catch(() => '');
+      throw new Error(orMeta.provider + ': ' + res.status + ' ' + errText.slice(0, 100));
+    } catch(e) {
+      if (e.name === 'AbortError') throw e;
+      throw new Error(orMeta.provider + ' image generation failed: ' + e.message);
+    }
+  }
+
+  // ── DALL-E 3 (OpenAI key) ──
+  if (imgPref === 'dalle3') {
+    const oaiKey2 = ls('openAIKey', '') || ls('oaiKey', '');
+    if (!oaiKey2) throw new Error('DALL-E 3 requires an OpenAI API key — add it in Settings → Image Generation.');
+    try {
+      const res = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + oaiKey2, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'dall-e-3', prompt, n: 1, size: '1024x1024', quality: 'standard' }),
+        signal: sig
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const imgUrl = data?.data?.[0]?.url;
+        if (imgUrl) { const imgRes = await fetch(imgUrl, { signal: sig }); if (imgRes.ok) return URL.createObjectURL(await imgRes.blob()); return imgUrl; }
+      }
+      const errText = await res.text().catch(() => '');
+      throw new Error('DALL-E 3: ' + res.status + ' ' + errText.slice(0, 100));
+    } catch(e) {
+      if (e.name === 'AbortError') throw e;
+      throw new Error('DALL-E 3 generation failed: ' + e.message);
     }
   }
 
@@ -5298,6 +5655,7 @@ async function _getWebLLMEngine(modelId) {
 
   try {
     if (!window.webllm) {
+      loadWebLLMDynamically(); // trigger the lazy import now that we actually need it
       await new Promise((res, rej) => {
         if (window._webllmReady) return res();
         window.addEventListener('webllm-ready', res, { once: true });
@@ -6041,7 +6399,7 @@ function _initScrollFab() {
     fab.classList.toggle('visible', !atBottom && body.scrollHeight > body.clientHeight + 200);
   }, { passive:true });
 }
-function escHtml(s)      { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escHtml(s)      { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function escAttr(s)      { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // ── UI state helpers ─────────────────────────────────────────────────────────
@@ -6922,7 +7280,7 @@ function _refreshImageTab() {
   _refreshVideoModelList();
 
   const pref = ls('imageModelPref','flux_schnell');
-  ['flux_dev','flux_schnell','poll_turbo','poll_realism','nano_banana','nano_banana_2','sd35','fal_flux_pro','together_flux','ideogram','dalle3','local_flux_schnell','local_sd_turbo'].forEach(id => {
+  ['flux_dev','flux_schnell','poll_turbo','poll_realism','nano_banana','nano_banana_2','sd35','fal_flux_pro','together_flux','ideogram','dalle3','local_flux_schnell','local_sd_turbo','poll_kontext','wan_27','wan_27_pro','qwen_img','seedream','seedream_45','seedream_50','grok_img','grok_img_pro','flux2_klein','nan_ban_pro','gpt_img1_mini','gpt_img2','z_image_turbo','nova_canvas','pruna','or_recraft','or_imagen4','or_midjourney','or_sd35','or_gpt_img2'].forEach(id => {
     const el = document.getElementById('imgModel_' + id);
     if (!el) return;
     const sel = pref === id;
@@ -6994,6 +7352,27 @@ function setImageModel(id) {
     together_flux:      '🤝 Together AI FLUX selected (requires Together key)',
     ideogram:           '🎨 Ideogram v2 selected (requires Ideogram key)',
     dalle3:             '🖼 DALL-E 3 selected (requires OpenAI key)',
+    poll_kontext:       '✏️ FLUX.1 Kontext selected (free)',
+    wan_27:             '🌊 Wan 2.7 Image selected (free)',
+    wan_27_pro:         '🌊 Wan 2.7 Pro selected (Pollinations login)',
+    qwen_img:           '📸 Qwen Image Plus selected (free)',
+    seedream:           '🌸 Seedream 4.0 selected (Pollinations login)',
+    seedream_45:        '🌸 Seedream 4.5 Pro selected (requires Pollinations pollen 💎)',
+    seedream_50:        '🌸 Seedream 5.0 Lite selected (Pollinations login)',
+    grok_img:           '🤖 Grok Imagine selected (Pollinations login)',
+    grok_img_pro:       '🤖 Grok Imagine Pro selected (requires Pollinations pollen 💎)',
+    flux2_klein:        '⚡ FLUX.2 Klein 4B selected (free)',
+    nan_ban_pro:        '🍌 NanaBanana Pro selected (requires Pollinations pollen 💎)',
+    gpt_img1_mini:      '🖼 GPT Image 1 Mini selected (requires Pollinations pollen 💎)',
+    gpt_img2:           '🖼 GPT Image 2 selected (requires Pollinations pollen 💎)',
+    z_image_turbo:      '⚡ Z-Image Turbo selected (free)',
+    nova_canvas:        '🎨 Nova Canvas selected (free)',
+    pruna:              '🖌 Pruna selected (free)',
+    or_recraft:         '🎨 Recraft v3 selected (requires OpenRouter key)',
+    or_imagen4:         '🖼 Imagen 4.0 selected (requires OpenRouter key)',
+    or_midjourney:      '🎭 Midjourney v7 selected (requires OpenRouter key)',
+    or_sd35:            '🔷 Stable Diffusion 3.5 selected (requires OpenRouter key)',
+    or_gpt_img2:        '🖼 GPT Image 2 (OR) selected (requires OpenRouter key)',
     local_flux_schnell: '🖥 FLUX.1-schnell Local selected (downloads ~1.7GB on first use)',
     local_sd_turbo:     '🖥 SD-Turbo Local selected (downloads ~800MB on first use)',
   };
@@ -7032,9 +7411,44 @@ const TTS_PROVIDERS = {
     needsKey:false, needsVoiceId:false, free:true,
   },
   pollinations_tts: {
-    name:'Pollinations TTS', keyPlaceholder:'',
-    info:'Gratuito · Nessuna chiave richiesta · Powered by OpenAI TTS via Pollinations.ai',
+    name:'Pollinations TTS (OpenAI)', keyPlaceholder:'',
+    info:'Gratuito · Nessuna chiave · Powered by OpenAI TTS via Pollinations.ai',
     needsKey:false, needsVoiceId:false, free:true,
+  },
+  poll_qwen_tts: {
+    name:'Pollinations · Qwen3-TTS Flash', keyPlaceholder:'',
+    info:'Gratuito · Nessuna chiave · Qwen3-TTS Flash via Pollinations.ai · Multilingua',
+    needsKey:false, needsVoiceId:false, free:true,
+  },
+  poll_universal2: {
+    name:'Pollinations · AssemblyAI Universal-2', keyPlaceholder:'',
+    info:'Gratuito · Nessuna chiave · Universal-2 via Pollinations.ai · STT+TTS',
+    needsKey:false, needsVoiceId:false, free:true,
+  },
+  poll_whisper: {
+    name:'Pollinations · Whisper Large V3', keyPlaceholder:'',
+    info:'Alpha · Nessuna chiave · Whisper Large V3 via Pollinations.ai · Trascrizione',
+    needsKey:false, needsVoiceId:false, free:true,
+  },
+  poll_qwen_tts_instruct: {
+    name:'Pollinations · Qwen3-TTS Instruct', keyPlaceholder:'pollinations-token',
+    info:'💎 Paid (pollen) · Qwen3-TTS Instruct via Pollinations.ai · Alta qualità · istruzioni stile',
+    needsKey:false, needsVoiceId:false, free:false, freemium:true,
+  },
+  poll_universal3: {
+    name:'Pollinations · AssemblyAI Universal-3 Pro', keyPlaceholder:'pollinations-token',
+    info:'💎 Paid (pollen) · Universal-3 Pro via Pollinations.ai · Massima qualità STT',
+    needsKey:false, needsVoiceId:false, free:false, freemium:true,
+  },
+  poll_scribe2: {
+    name:'Pollinations · Scribe v2', keyPlaceholder:'pollinations-token',
+    info:'💎 Paid (pollen) · Scribe v2 via Pollinations.ai · STT accurato',
+    needsKey:false, needsVoiceId:false, free:false, freemium:true,
+  },
+  poll_elevenlabs: {
+    name:'Pollinations · ElevenLabs v3 TTS', keyPlaceholder:'pollinations-token',
+    info:'💎 Paid (pollen) · Alpha · ElevenLabs v3 via Pollinations.ai · Qualità premium',
+    needsKey:false, needsVoiceId:false, free:false, freemium:true,
   },
   elevenlabs: {
     name:'ElevenLabs', keyPlaceholder:'sk_…',
@@ -7057,6 +7471,21 @@ const TTS_PROVIDERS = {
     info:'Get key at <a href="https://fish.audio" target="_blank" style="color:var(--accent)">fish.audio</a> · 10k chars free',
     needsKey:true, needsVoiceId:true,
     voiceIdInfo:'Reference Model ID from the Fish Audio catalogue. Leave empty for the default voice.',
+  },
+  grok_voice: {
+    name:'Grok Voice', keyPlaceholder:'xai-…',
+    info:'Use your xAI key · Streaming real-time conversation · <a href="https://console.x.ai/" target="_blank" style="color:var(--accent)">console.x.ai</a>',
+    needsKey:true, needsVoiceId:false,
+  },
+  gemini_tts: {
+    name:'Gemini Live TTS', keyPlaceholder:'AIzaSy…',
+    info:'Use your Google Gemini key · Streaming synthesis · <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--accent)">aistudio.google.com</a>',
+    needsKey:true, needsVoiceId:false,
+  },
+  cohere_stt: {
+    name:'Cohere Transcribe', keyPlaceholder:'your-cohere-key',
+    info:'Use your Cohere key · Enterprise STT · <a href="https://dashboard.cohere.com/api-keys" target="_blank" style="color:var(--accent)">dashboard.cohere.com</a>',
+    needsKey:true, needsVoiceId:false,
   },
 };
 
@@ -7248,6 +7677,74 @@ async function _tryCustomTts(text, btn) {
         body: JSON.stringify({ model:'tts-1', input: text.slice(0, 1000), voice: pollVoice })
       });
       if (!res.ok) throw new Error('Pollinations TTS: ' + res.status);
+      const blob = await res.blob();
+      audioUrl = URL.createObjectURL(blob);
+
+    } else if (provId === 'poll_qwen_tts' || provId === 'poll_qwen_tts_instruct') {
+      // Qwen3-TTS Flash (free) o Instruct (paid/pollen)
+      const model = provId === 'poll_qwen_tts_instruct' ? 'qwen-tts-instruct' : 'qwen-tts';
+      const pollToken = ls('pollinationsToken', '');
+      const headers = { 'Content-Type': 'application/json' };
+      if (pollToken) headers['Authorization'] = 'Bearer ' + pollToken;
+      const res = await fetch('https://text.pollinations.ai/openai/audio/speech', {
+        method: 'POST', headers,
+        body: JSON.stringify({ model, input: text.slice(0, 2000), voice: 'alloy' })
+      });
+      if (!res.ok) throw new Error('Pollinations Qwen3-TTS: ' + res.status);
+      const blob = await res.blob();
+      audioUrl = URL.createObjectURL(blob);
+
+    } else if (provId === 'poll_universal2' || provId === 'poll_universal3') {
+      // AssemblyAI Universal-2 (free) / Universal-3 Pro (paid/pollen) — STT endpoint
+      const model = provId === 'poll_universal3' ? 'universal-3-pro' : 'universal-2';
+      const pollToken = ls('pollinationsToken', '');
+      const headers = { 'Content-Type': 'application/json' };
+      if (pollToken) headers['Authorization'] = 'Bearer ' + pollToken;
+      // These are STT models — use Pollinations TTS endpoint with model param
+      const res = await fetch('https://text.pollinations.ai/openai/audio/speech', {
+        method: 'POST', headers,
+        body: JSON.stringify({ model, input: text.slice(0, 2000), voice: 'alloy' })
+      });
+      if (!res.ok) throw new Error('Pollinations Universal TTS: ' + res.status);
+      const blob = await res.blob();
+      audioUrl = URL.createObjectURL(blob);
+
+    } else if (provId === 'poll_scribe2') {
+      // Scribe v2 — paid/pollen
+      const pollToken = ls('pollinationsToken', '');
+      const headers = { 'Content-Type': 'application/json' };
+      if (pollToken) headers['Authorization'] = 'Bearer ' + pollToken;
+      const res = await fetch('https://text.pollinations.ai/openai/audio/speech', {
+        method: 'POST', headers,
+        body: JSON.stringify({ model: 'scribe', input: text.slice(0, 2000), voice: 'alloy' })
+      });
+      if (!res.ok) throw new Error('Pollinations Scribe: ' + res.status);
+      const blob = await res.blob();
+      audioUrl = URL.createObjectURL(blob);
+
+    } else if (provId === 'poll_elevenlabs') {
+      // ElevenLabs v3 via Pollinations — alpha + paid/pollen
+      const pollToken = ls('pollinationsToken', '');
+      const pollVoice = ls('pollinationsTtsVoice', 'alloy');
+      const headers = { 'Content-Type': 'application/json' };
+      if (pollToken) headers['Authorization'] = 'Bearer ' + pollToken;
+      const res = await fetch('https://text.pollinations.ai/openai/audio/speech', {
+        method: 'POST', headers,
+        body: JSON.stringify({ model: 'elevenlabs', input: text.slice(0, 2000), voice: pollVoice })
+      });
+      if (!res.ok) throw new Error('Pollinations ElevenLabs: ' + res.status);
+      const blob = await res.blob();
+      audioUrl = URL.createObjectURL(blob);
+
+    } else if (provId === 'poll_whisper') {
+      // Whisper Large V3 via Pollinations — alpha, usato per trascrizione
+      // Come TTS usa l'endpoint con model=whisper (alpha)
+      const headers = { 'Content-Type': 'application/json' };
+      const res = await fetch('https://text.pollinations.ai/openai/audio/speech', {
+        method: 'POST', headers,
+        body: JSON.stringify({ model: 'whisper', input: text.slice(0, 2000), voice: 'alloy' })
+      });
+      if (!res.ok) throw new Error('Pollinations Whisper: ' + res.status);
       const blob = await res.blob();
       audioUrl = URL.createObjectURL(blob);
 
@@ -7526,6 +8023,129 @@ async function testApiKey() {
   } finally {
     if (btn) { btn.textContent = '🧪 Test'; btn.disabled = false; }
   }
+}
+
+/* ══════════════════════════════════════════
+   TEST ALL MODELS
+══════════════════════════════════════════ */
+function testAllModels() {
+  const key  = document.getElementById('apiKeyInput')?.value.trim();
+  const prov = PROVIDER_MODELS[_selectedApiProvider];
+  if (!prov) { showToast('Select a provider first'); return; }
+  // For providers that need a key, warn but continue (noKey providers are fine)
+  if (!key && !prov.noKey) { showToast('Enter an API key first'); return; }
+
+  // Build or show the overlay panel
+  let overlay = document.getElementById('tamOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'tamOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:200000;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;padding-bottom:0';
+    overlay.innerHTML = `
+      <div id="tamPanel" style="background:var(--bg2);border:1px solid var(--border);border-radius:24px 24px 0 0;width:100%;max-width:540px;max-height:82vh;display:flex;flex-direction:column;overflow:hidden;font-family:var(--font-sans)">
+        <div style="width:36px;height:4px;border-radius:2px;background:var(--border);margin:10px auto 0;flex-shrink:0"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;flex-shrink:0;border-bottom:1px solid var(--border)">
+          <div>
+            <div id="tamTitle" style="font-size:15px;font-weight:700;color:var(--text)">Testing all models</div>
+            <div id="tamSub"   style="font-size:11px;color:var(--text3);margin-top:2px"></div>
+          </div>
+        <button onclick="document.getElementById('tamOverlay').remove()" style="background:var(--surface);border:none;color:var(--text2);border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
+        </div>
+        <div id="tamList" style="overflow-y:auto;flex:1;padding:10px 14px 20px;display:flex;flex-direction:column;gap:6px"></div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  }
+
+  const models = prov.models || [];
+  const titleEl = document.getElementById('tamTitle');
+  const subEl   = document.getElementById('tamSub');
+  const listEl  = document.getElementById('tamList');
+  if (titleEl) titleEl.textContent = 'Testing · ' + (prov.name || _selectedApiProvider);
+  if (subEl)   subEl.textContent   = models.length + ' models · tap ✕ to cancel';
+  if (listEl)  listEl.innerHTML    = '';
+
+  // Create a row for each model
+  const rows = models.map(m => {
+    const row = document.createElement('div');
+    row.id = 'tam_' + m.id.replace(/[^a-zA-Z0-9]/g,'_');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--surface);border:1px solid var(--border);transition:border-color 0.2s';
+    row.innerHTML = `
+      <div style="width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0;margin-top:2px;align-self:flex-start" class="tam-dot"></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.name}</div>
+        <div class="tam-log" style="font-size:11px;color:var(--text3);margin-top:1px;word-break:break-word;white-space:pre-wrap;line-height:1.4">Waiting…</div>
+      </div>
+      <div class="tam-badge" style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--bg3);color:var(--text3);flex-shrink:0">—</div>`;
+    listEl.appendChild(row);
+    return { m, row };
+  });
+
+  let cancelled = false;
+  const origClose = overlay.querySelector('button[onclick]');
+  if (origClose) {
+    origClose.onclick = () => { cancelled = true; overlay.remove(); };
+  }
+  window._tamRunning = true;
+
+  const testMessages = [
+    { role:'system', content:'Reply with only: OK' },
+    { role:'user',   content:'Say OK' }
+  ];
+
+  (async () => {
+    let passed = 0, failed = 0;
+    for (const { m, row } of rows) {
+      if (cancelled) break;
+      const dot   = row.querySelector('.tam-dot');
+      const log   = row.querySelector('.tam-log');
+      const badge = row.querySelector('.tam-badge');
+      // Running state
+      dot.style.background   = '#f59e0b';
+      log.textContent        = 'Testing…';
+      row.style.borderColor  = 'rgba(245,158,11,0.4)';
+      badge.style.background = 'rgba(245,158,11,0.15)';
+      badge.style.color      = '#f59e0b';
+      badge.textContent      = '⏳';
+      row.scrollIntoView({ behavior:'smooth', block:'nearest' });
+      const t0 = Date.now();
+      try {
+        let reply = '';
+        if (_selectedApiProvider === 'anthropic') {
+          reply = await _callAnthropicAPI(testMessages, false, null, null, key, m.id);
+        } else if (_selectedApiProvider === 'gemini') {
+          reply = await _callGeminiAPI(testMessages, false, null, null, key, m.id);
+        } else {
+          reply = await _callOpenAICompatible(prov.endpoint, testMessages, false, null, null, key, m.id);
+        }
+        const ms = Date.now() - t0;
+        dot.style.background   = '#30d158';
+        row.style.borderColor  = 'rgba(48,209,88,0.35)';
+        log.style.color        = '#30d158';
+        log.textContent        = '✅ ' + (reply||'').replace(/\n/g,' ') + ' · ' + ms + 'ms';
+        badge.style.background = 'rgba(48,209,88,0.15)';
+        badge.style.color      = '#30d158';
+        badge.textContent      = 'OK';
+        passed++;
+      } catch(e) {
+        const ms = Date.now() - t0;
+        dot.style.background   = '#ff453a';
+        row.style.borderColor  = 'rgba(255,69,58,0.35)';
+        log.style.color        = '#ff453a';
+        log.textContent        = '❌ ' + (e.message||'error') + ' · ' + ms + 'ms';
+        badge.style.background = 'rgba(255,69,58,0.15)';
+        badge.style.color      = '#ff453a';
+        badge.textContent      = 'ERR';
+        failed++;
+      }
+    }
+    window._tamRunning = false;
+    if (subEl && !cancelled) {
+      subEl.textContent = `Done · ${passed} OK · ${failed} failed`;
+      subEl.style.color = failed === 0 ? '#30d158' : passed === 0 ? '#ff453a' : '#f59e0b';
+    }
+    if (titleEl && !cancelled) titleEl.textContent = 'Results · ' + (prov.name || _selectedApiProvider);
+  })();
 }
 
 /* ══════════════════════════════════════════
@@ -9765,10 +10385,20 @@ const _VIDEO_MODELS_DEF = [
     free:true, needsKey:false, falEndpoint:null,
     hfModel:'Lightricks/LTX-Video',
     body: p => ({ inputs:p }), resultPath: null },
-  { id:'hf_animdiff',name:'AnimateDiff Lightning',icon:'🆓', color:'#86efac',
+  { id:'hf_animdiff',name:'AnimateDiff Lightning', icon:'🆓', color:'#86efac',
     sub:'HuggingFace · gratuito · 8 steps · ByteDance',
     free:true, needsKey:false, falEndpoint:null,
     hfModel:'ByteDance/AnimateDiff-Lightning',
+    body: p => ({ inputs:p }), resultPath: null },
+  { id:'hf_cogvideo',name:'CogVideoX 5B (HF)',     icon:'🆓', color:'#a78bfa',
+    sub:'HuggingFace · gratuito · 720p · Zhipu AI',
+    free:true, needsKey:false, falEndpoint:null,
+    hfModel:'THUDM/CogVideoX-5b',
+    body: p => ({ inputs:p }), resultPath: null },
+  { id:'hf_wan21',   name:'Wan 2.1 (HF)',           icon:'🆓', color:'#22d3ee',
+    sub:'HuggingFace · gratuito · open-source · Wan-AI',
+    free:true, needsKey:false, falEndpoint:null,
+    hfModel:'Wan-AI/Wan2.1-T2V-14B',
     body: p => ({ inputs:p }), resultPath: null },
 
   /* ── fal.ai – chiave richiesta (pay per use) ── */
@@ -9808,9 +10438,58 @@ const _VIDEO_MODELS_DEF = [
     free:false, needsKey:true, falEndpoint:'fal-ai/luma-dream-machine',
     body: p => ({ prompt:p }), resultPath: r => r.video?.url },
   { id:'veo3',       name:'Veo 3.1',              icon:'🚀', color:'#4285f4',
-    sub:'~$2/5s · audio+video · Google · fal.ai 💀',
+    sub:'~$2/5s · audio+video · Google · fal.ai',
     free:false, needsKey:true, falEndpoint:'fal-ai/veo3',
     body: p => ({ prompt:p }), resultPath: r => r.video?.url },
+  { id:'wan27_vid',  name:'Wan 2.7 T2V',          icon:'🌊', color:'#22d3ee',
+    sub:'~$0.04/5s · 720p · open-source · fal.ai',
+    free:false, needsKey:true, falEndpoint:'fal-ai/wan/v2.7/t2v',
+    body: p => ({ prompt:p, num_frames:49, fps:16 }),
+    resultPath: r => r.video?.url },
+  { id:'ltx097',    name:'LTX-Video 0.9.7',       icon:'⚡', color:'#06b6d4',
+    sub:'~$0.01/5s · ultra-veloce · Lightricks · fal.ai',
+    free:false, needsKey:true, falEndpoint:'fal-ai/ltx-video/text-to-video',
+    body: p => ({ prompt:p }), resultPath: r => r.video?.url },
+  { id:'cogvideo',  name:'CogVideoX 5B',           icon:'🎥', color:'#8b5cf6',
+    sub:'~$0.06/5s · cinematografico · Zhipu AI · fal.ai',
+    free:false, needsKey:true, falEndpoint:'fal-ai/cogvideox-5b',
+    body: p => ({ prompt:p }), resultPath: r => r.video?.url },
+  { id:'pixverse4', name:'PixVerse V4',             icon:'🎬', color:'#a78bfa',
+    sub:'~$0.08/5s · VFX · 1080p · PixVerse · fal.ai',
+    free:false, needsKey:true, falEndpoint:'fal-ai/pixverse/v4',
+    body: p => ({ prompt:p, resolution:'1080p', duration:5 }),
+    resultPath: r => r.video?.url },
+  { id:'runway_t2v',name:'Runway Gen-4 Turbo',     icon:'✈️', color:'#60a5fa',
+    sub:'~$0.10/5s · 1080p · realismo · Runway · fal.ai',
+    free:false, needsKey:true, falEndpoint:'fal-ai/runway-gen4-turbo/text-to-video',
+    body: p => ({ prompt:p, ratio:'16:9', duration:5 }),
+    resultPath: r => r.video?.url },
+  { id:'luma_ray2f',name:'Luma Ray 2 Flash',       icon:'🌙', color:'#818cf8',
+    sub:'~$0.14/5s · veloce · Luma AI · fal.ai',
+    free:false, needsKey:true, falEndpoint:'fal-ai/luma-dream-machine/ray-2-flash',
+    body: p => ({ prompt:p }), resultPath: r => r.video?.url },
+  { id:'pika22',    name:'Pika 2.2',                icon:'⚡', color:'#f472b6',
+    sub:'~$0.08/5s · effetti unici · Pika · fal.ai',
+    free:false, needsKey:true, falEndpoint:'fal-ai/pika-labs/v2.2/text-to-video',
+    body: p => ({ prompt:p }), resultPath: r => r.video?.url },
+
+  /* ── Pollinations · Freemium (no fal.ai key needed) ── */
+  { id:'poll_ltx23',      name:'LTX-Video 2.3 ⚡',       icon:'⚡', color:'#06b6d4',
+    sub:'Pollinations · Lightricks · ultra-fast · freemium · no fal.ai key',
+    free:true, needsKey:false, falEndpoint:null,
+    body: p => ({ prompt:p }), resultPath: r => r?.video_url || r?.url },
+  { id:'poll_seedance',    name:'Seedance 1.0 🌸',        icon:'🌸', color:'#d4714a',
+    sub:'Pollinations · ByteDance · animato · freemium · login req.',
+    free:true, needsKey:false, falEndpoint:null,
+    body: p => ({ prompt:p }), resultPath: r => r?.video_url || r?.url },
+  { id:'poll_seedance_lite', name:'Seedance 1.1 Lite 🌸⚡', icon:'⚡', color:'#f472b6',
+    sub:'Pollinations · ByteDance · veloce · freemium · login req.',
+    free:true, needsKey:false, falEndpoint:null,
+    body: p => ({ prompt:p }), resultPath: r => r?.video_url || r?.url },
+  { id:'poll_veo',         name:'Veo 2 Alpha 🔬',          icon:'🔬', color:'#4285f4',
+    sub:'Google via Pollinations · Alpha · freemium · login req.',
+    free:true, needsKey:false, falEndpoint:null,
+    body: p => ({ prompt:p }), resultPath: r => r?.video_url || r?.url },
 
   /* ── Solo sito — no API disponibile ── */
   { id:'noapi_fal_signup',  name:'fal.ai — $20 gratis',   icon:'💰', color:'#30d158',
@@ -9834,9 +10513,21 @@ const _VIDEO_MODELS_DEF = [
   { id:'noapi_luma_site',   name:'Luma Dream Machine',    icon:'🌙', color:'#818cf8',
     sub:'30 generazioni gratis al mese · solo sito',
     noApi:true, siteUrl:'https://lumalabs.ai/dream-machine' },
-  { id:'noapi_zsky',        name:'ZSky AI — illimitato',  icon:'♾️', color:'#4ade80',
+  { id:'noapi_zsky',        name:'ZSky AI — illimitato',   icon:'♾️', color:'#4ade80',
     sub:'Illimitato con ads · 1080p · audio incluso · solo sito',
     noApi:true, siteUrl:'https://zsky.ai' },
+  { id:'noapi_vidu',         name:'Vidu 2.0',                icon:'🎁', color:'#22d3ee',
+    sub:'Crediti giornalieri gratuiti · 2K · audio · solo sito',
+    noApi:true, siteUrl:'https://www.vidu.com' },
+  { id:'noapi_seaweed',      name:'Seaweed APT',             icon:'🌿', color:'#4ade80',
+    sub:'Piano gratis · ByteDance · audio sync · solo sito',
+    noApi:true, siteUrl:'https://seaweed.video' },
+  { id:'noapi_haiper',       name:'Haiper 2.5',              icon:'🎁', color:'#f59e0b',
+    sub:'Crediti gratuiti giornalieri · 1080p · solo sito',
+    noApi:true, siteUrl:'https://haiper.ai' },
+  { id:'noapi_genmo',        name:'Genmo Mochi 1',           icon:'🎁', color:'#a855f7',
+    sub:'Open-source · 480p · piano gratis · solo sito',
+    noApi:true, siteUrl:'https://www.genmo.ai' },
 ];
 /* alias per AI Studio (usa lo stesso array) */
 const _KS_VIDEO_MODELS_DEF = _VIDEO_MODELS_DEF;
@@ -10782,6 +11473,9 @@ document.head.appendChild(_ksStyleEl);
           <button id="apiKeyGetKeyBtn" onclick="(function(){const u=PROVIDER_KEY_URLS[_selectedApiProvider];if(u)window.open(u,'_blank');})()" style="flex:1;padding:14px;border-radius:16px;border:1.5px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:var(--text2);font-family:var(--font-sans);font-size:14px;font-weight:600;cursor:pointer">🔗 Get Key</button>
           <button onclick="saveApiKey()" style="flex:2;padding:14px;border-radius:16px;border:none;background:var(--accent);color:white;font-family:var(--font-sans);font-size:14px;font-weight:600;cursor:pointer">Save &amp; Use</button>
         </div>
+        <button id="apiKeyTestAllBtn" onclick="testAllModels()" style="width:100%;padding:12px;border-radius:16px;border:1.5px solid rgba(var(--accentRgb),0.35);background:rgba(var(--accentRgb),0.05);color:var(--text2);font-family:var(--font-sans);font-size:13px;font-weight:600;cursor:pointer;transition:border-color 0.15s,background 0.15s">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.12em;margin-right:5px"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Test All Models
+        </button>
         <div id="apiKeyTestStatus" style="display:none;font-family:var(--font-sans);font-size:12px;padding:8px 12px;border-radius:10px;background:var(--surface);border:1px solid var(--border);line-height:1.5"></div>
         <div style="font-family:var(--font-sans);font-size:11px;color:var(--text3);text-align:center;line-height:1.6">Keys stored only on your device · Never sent to Helix servers</div>
       </div>
@@ -11012,7 +11706,7 @@ document.head.appendChild(_ksStyleEl);
           <div id="imgModel_nano_banana_2" onclick="setImageModel('nano_banana_2')" style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:13px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer">
             <div style="flex:1">
               <div style="font-family:var(--font-sans);font-size:14px;font-weight:600;color:#34d399">Nano Banana 2 🍌✨</div>
-              <div style="font-family:var(--font-sans);font-size:11px;color:var(--text3);margin-top:1px">Google · gemini-3.1-flash-image · chiave Gemini richiesta</div>
+              <div style="font-family:var(--font-sans);font-size:11px;color:var(--text3);margin-top:1px">Google · gemini-3.1-flash-image · Gemini key required</div>
             </div>
             <div class="api-model-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
           </div>
@@ -11749,10 +12443,11 @@ function _renderLibInstall(body) {
 }
 
 function _libInstallConfirm(modelId, modelName) {
-  if (confirm('Download ' + modelName + '?\n\nIt will be cached in the browser and usable offline.')) {
-    _libBrowseInstall(modelId, modelName, null);
-    closeLocalAiLibrary();
-  }
+  _showHelixModal({ title: 'Download Model', body: `Download ${modelName}?\n\nIt will be cached in the browser and usable offline.`, confirmLabel: 'Download', cancelLabel: 'Cancel' })
+    .then(() => {
+      _libBrowseInstall(modelId, modelName, null);
+      closeLocalAiLibrary();
+    }).catch(() => {});
 }
 
 function _libSelectText(modelId) {
@@ -11769,18 +12464,25 @@ function _libSelectText(modelId) {
 function _renderLibAudio(body) {
   const activeProv = ls('customTtsProvider', 'none');
   const TTS_AUDIO_LIST = [
-    { id:'none',             name:'Kokoro TTS',          sub:'Offline · On-device · 82M · Alta qualità',             color:'#a78bfa', icon:'🧠', note:'offline' },
-    { id:'webspeech',        name:'Web Speech',           sub:'Browser integrato · Gratuito · Sempre disponibile',    color:'#6366f1', icon:'🔊', note:'offline' },
-    { id:'streamelements',   name:'StreamElements TTS',   sub:'Gratuito · Nessuna chiave · Voci EN/ES/FR/IT online',  color:'#4ade80', icon:'🎙', note:'free' },
-    { id:'pollinations_tts', name:'Pollinations TTS',     sub:'Gratuito · Nessuna chiave · Powered by OpenAI TTS',   color:'#10a37f', icon:'✨', note:'free' },
-    { id:'elevenlabs',       name:'ElevenLabs',           sub:'Alta qualità · 10k chars/mese gratis',                 color:'#f59e0b', icon:'⭐', note:'key' },
+    { id:'none',             name:'Kokoro TTS',          sub:'Offline · On-device · 82M · High quality',             color:'#a78bfa', icon:'🧠', note:'offline' },
+    { id:'webspeech',        name:'Web Speech',           sub:'Built-in browser · Free · Always available',           color:'#6366f1', icon:'🔊', note:'offline' },
+    { id:'streamelements',   name:'StreamElements TTS',   sub:'Free · No key required · Online EN/ES/FR/IT voices',   color:'#4ade80', icon:'🎙', note:'free' },
+    { id:'pollinations_tts',          name:'Pollinations TTS (OpenAI)',          sub:'Gratuito · OpenAI tts-1',                   color:'#06b6d4', icon:'✨', note:'free' },
+    { id:'poll_qwen_tts',             name:'Pollinations · Qwen3-TTS Flash',     sub:'Gratuito · Multilingua',                    color:'#a78bfa', icon:'🗣', note:'free' },
+    { id:'poll_universal2',           name:'Pollinations · Universal-2',         sub:'Gratuito · AssemblyAI STT',                 color:'#22d3ee', icon:'🎙', note:'free' },
+    { id:'poll_whisper',              name:'Pollinations · Whisper V3',          sub:'Alpha · STT/trascrizione',                  color:'#f59e0b', icon:'🎙', note:'free' },
+    { id:'poll_qwen_tts_instruct',    name:'Pollinations · Qwen3-TTS Instruct',  sub:'💎 Pollen · istruzioni stile',             color:'#ec4899', icon:'✨', note:'paid' },
+    { id:'poll_universal3',           name:'Pollinations · Universal-3 Pro',     sub:'💎 Pollen · STT Premium',                  color:'#4285f4', icon:'🎙', note:'paid' },
+    { id:'poll_scribe2',              name:'Pollinations · Scribe v2',           sub:'💎 Pollen · Scribe STT',                   color:'#818cf8', icon:'🎙', note:'paid' },
+    { id:'poll_elevenlabs',           name:'Pollinations · ElevenLabs v3',       sub:'💎 Alpha · Pollen · premium',              color:'#f97316', icon:'✨', note:'paid' },
+    { id:'elevenlabs',       name:'ElevenLabs',           sub:'High quality · 10k chars/month free',                  color:'#f59e0b', icon:'⭐', note:'key' },
     { id:'openai',           name:'OpenAI TTS',           sub:'tts-1 / tts-1-hd · ~$0.015/1k chars',                 color:'#10a37f', icon:'🤖', note:'key' },
-    { id:'deepgram',         name:'Deepgram Aura',        sub:'Voci naturali · $200 free credits',                   color:'#4299e1', icon:'🌊', note:'key' },
-    { id:'fishaudio',        name:'Fish Audio',           sub:'Espressivo · 10k chars gratis',                       color:'#f97316', icon:'🐟', note:'key' },
+    { id:'deepgram',         name:'Deepgram Aura',        sub:'Natural voices · $200 free credits',                   color:'#4299e1', icon:'🌊', note:'key' },
+    { id:'fishaudio',        name:'Fish Audio',           sub:'Expressive · 10k chars free',                          color:'#f97316', icon:'🐟', note:'key' },
   ];
   const sttList = [
-    { id:'webspeech-stt', name:'Web Speech STT', sub:'Browser integrato · Gratuito · Funziona offline', color:'#6366f1', icon:'👂', note:'offline' },
-    { id:'whisper',       name:'Whisper Tiny',   sub:'OpenAI · Offline STT · Prossimamente',             color:'#f97316', icon:'👂', note:'soon' },
+    { id:'webspeech-stt', name:'Web Speech STT', sub:'Built-in browser · Free · Works offline', color:'#6366f1', icon:'👂', note:'offline' },
+    { id:'whisper',       name:'Whisper Tiny',   sub:'OpenAI · Offline STT · Coming soon',       color:'#f97316', icon:'👂', note:'soon' },
   ];
 
   body.innerHTML = `
@@ -11791,12 +12493,12 @@ function _renderLibAudio(body) {
     TTS_AUDIO_LIST.map(m => {
       const isActive = activeProv === m.id;
       const badge = isActive
-        ? `<span class="lib-model-badge" style="background:rgba(16,163,127,0.18);border:1px solid rgba(16,163,127,0.3);color:#10a37f">✓ Attivo</span>`
+        ? `<span class="lib-model-badge" style="background:rgba(16,163,127,0.18);border:1px solid rgba(16,163,127,0.3);color:#10a37f">✓ Active</span>`
         : m.note === 'soon'
           ? `<span class="lib-model-badge" style="background:var(--surface);border:1px solid var(--border);color:var(--text3)">Soon</span>`
           : m.note === 'key'
             ? `<span class="lib-model-badge" style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25);color:#818cf8">Key</span>`
-            : `<span class="lib-model-badge" style="background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.25);color:#4ade80">Gratis</span>`;
+            : `<span class="lib-model-badge" style="background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.25);color:#4ade80">Free</span>`;
       return `<div class="lib-model-card" onclick="_libAudioAction('${m.id}')" style="${isActive ? 'border-color:var(--accent);background:rgba(var(--accentRgb),0.06)' : ''}">
         <div class="lib-model-icon" style="background:${m.color}1a;color:${m.color}">${m.icon}</div>
         <div class="lib-model-info">
@@ -11826,12 +12528,54 @@ function _renderLibAudio(body) {
 function _libAudioAction(id) {
   if (id === 'none')             { setTtsProvider('none'); _renderLibTab('audio'); return; }
   if (id === 'webspeech' || id === 'webspeech-stt') { setTtsProvider('none'); _renderLibTab('audio'); return; }
-  if (id === 'whisper')          { alert('Whisper STT in arrivo in un futuro aggiornamento di Helix.'); return; }
+  if (id === 'whisper')          { alert('Whisper STT coming soon in a future Helix update.'); return; }
   if (id === 'streamelements')   { setTtsProvider('streamelements'); _renderLibTab('audio'); return; }
   if (id === 'pollinations_tts') { setTtsProvider('pollinations_tts'); _renderLibTab('audio'); return; }
   // Keyed providers: set and re-render so user sees active state
   setTtsProvider(id);
   _renderLibTab('audio');
+}
+</script>
+
+<!-- ══ Custom Modal Overlay System ══════════════════════════════════════════ -->
+<div id="helixModalBackdrop" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px;box-sizing:border-box">
+  <div id="helixModalBox" style="background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px 26px 22px;max-width:360px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,0.5);font-family:var(--font-sans)">
+    <div id="helixModalTitle" style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px"></div>
+    <div id="helixModalBody" style="font-size:14px;color:var(--text2);line-height:1.55;margin-bottom:18px"></div>
+    <input id="helixModalInput" type="text" style="display:none;width:100%;padding:10px 13px;border-radius:11px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-family:var(--font-sans);font-size:14px;box-sizing:border-box;margin-bottom:16px;outline:none" autocomplete="off">
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button id="helixModalCancel" onclick="_helixModalReject()" style="padding:9px 18px;border-radius:11px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);font-family:var(--font-sans);font-size:14px;font-weight:500;cursor:pointer">Cancel</button>
+      <button id="helixModalConfirm" onclick="_helixModalResolve()" style="padding:9px 18px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-family:var(--font-sans);font-size:14px;font-weight:600;cursor:pointer">OK</button>
+    </div>
+  </div>
+</div>
+<script>
+let _helixModalResolveFn = null, _helixModalRejectFn = null;
+function _showHelixModal({ title='', body='', input=false, inputDefault='', confirmLabel='OK', cancelLabel='Cancel', danger=false }) {
+  return new Promise((res, rej) => {
+    _helixModalResolveFn = res; _helixModalRejectFn = rej;
+    const bd = document.getElementById('helixModalBackdrop');
+    document.getElementById('helixModalTitle').textContent = title;
+    document.getElementById('helixModalBody').textContent = body;
+    const inp = document.getElementById('helixModalInput');
+    if (input) { inp.style.display = 'block'; inp.value = inputDefault; setTimeout(() => inp.focus(), 80); }
+    else { inp.style.display = 'none'; }
+    document.getElementById('helixModalConfirm').textContent = confirmLabel;
+    document.getElementById('helixModalConfirm').style.background = danger ? 'var(--red, #ff453a)' : 'var(--accent)';
+    document.getElementById('helixModalCancel').textContent = cancelLabel;
+    bd.style.display = 'flex';
+    inp.onkeydown = e => { if (e.key === 'Enter') _helixModalResolve(); if (e.key === 'Escape') _helixModalReject(); };
+    bd.onclick = e => { if (e.target === bd) _helixModalReject(); };
+  });
+}
+function _helixModalResolve() {
+  const val = document.getElementById('helixModalInput').value;
+  document.getElementById('helixModalBackdrop').style.display = 'none';
+  _helixModalResolveFn && _helixModalResolveFn(val);
+}
+function _helixModalReject() {
+  document.getElementById('helixModalBackdrop').style.display = 'none';
+  _helixModalRejectFn && _helixModalRejectFn(null);
 }
 </script>
 </body>
