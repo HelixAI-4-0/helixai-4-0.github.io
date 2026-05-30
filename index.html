@@ -3368,11 +3368,6 @@ function renderCloudModelSheet() {
       : hfVidToken
         ? `<span style="font-size:10px;font-weight:700;background:rgba(255,184,0,0.12);color:#fbbf24;border:1px solid rgba(255,184,0,0.25);padding:2px 7px;border-radius:6px;flex-shrink:0">🔑 HF ✓</span>`
         : `<span style="font-size:10px;font-weight:600;background:rgba(48,209,88,0.12);color:#30d158;border:1px solid rgba(48,209,88,0.25);padding:2px 7px;border-radius:6px;flex-shrink:0">Free</span>`;
-    const pollKeyBadge = isPoll
-      ? (_pollVidTok
-          ? `<span style="font-size:10px;font-weight:700;background:rgba(212,113,74,0.12);color:#d4714a;border:1px solid rgba(212,113,74,0.3);padding:2px 7px;border-radius:6px;flex-shrink:0">🔑 Pollen ✓</span>`
-          : `<span style="font-size:10px;font-weight:600;background:rgba(99,102,241,0.1);color:#818cf8;border:1px solid rgba(99,102,241,0.2);padding:2px 7px;border-radius:6px;flex-shrink:0;cursor:pointer" onclick="event.stopPropagation();openApiKeySheet()">+ Pollen key</span>`)
-      : '';
     const subText = isPoll ? m.sub : `HuggingFace · ${m.sub}${hfVidToken ? ' · HF key ✓' : ''}`;
     return `<div class="sheet-option" onclick="_switchToCloudVideo('${m.id}')" style="${isSel ? 'border-left:3px solid '+m.color : ''}">
       <div class="sheet-option-left">
@@ -3384,7 +3379,6 @@ function renderCloudModelSheet() {
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
         ${mainBadge}
-        ${pollKeyBadge}
         ${_check(isSel)}
       </div>
     </div>`;
