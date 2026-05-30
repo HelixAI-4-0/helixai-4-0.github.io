@@ -4017,50 +4017,39 @@ const PROVIDER_MODELS = {
     name:'Pollinations', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><circle cx="12" cy="12" r="2"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4m-3.17-7.07-2.83 2.83M7 17l-2.83 2.83M4.93 4.93 7.76 7.76M17 17l2.83 2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>', color:'#d4714a',
     endpoint:'https://gen.pollinations.ai/v1/chat/completions',
     models:[
-      { id:'qwen-coder',    name:'Qwen3 Coder 30B',       free:true, sub:'Alibaba · FREE · Code expert' },
-      { id:'mistral',       name:'Mistral Small 3.2',     free:true, sub:'Mistral · FREE · Efficient' },
-      { id:'grok',          name:'Grok 4.20',             free:true, sub:'xAI · FREE · Multimodal' },
-      { id:'llama',         name:'Llama 3.3 70B',         free:true, sub:'Meta · FREE · Reliable' },
-      { id:'llama-4-scout', name:'Llama 4 Scout',         free:true, sub:'Meta · FREE · Vision' },
-      { id:'sonar',         name:'Perplexity Sonar',      free:true, sub:'Perplexity · FREE · Web search' },
-      { id:'mistral-large', name:'Mistral Large 3',       free:true, sub:'Mistral · FREE · Reasoning' },
-      { id:'claude-haiku',  name:'Claude Haiku 4.5',      free:true, sub:'Anthropic · FREE · Fast' },
-      { id:'minimax',       name:'MiniMax M2.7',          free:true, sub:'MiniMax · FREE · Reasoning' },
-      { id:'nova',          name:'Nova Micro',            free:true,  sub:'Amazon · FREE · Tiny & fast' },
-      { id:'glm-5.1',                      name:'Z.ai GLM-5.1',                      free:false, sub:'Z.ai · Pollen · GLM-5.1' },
-      { id:'qwen-guard',                   name:'Qwen3Guard 8B',                     free:true,  sub:'Alibaba · FREE · Safety · 200K ctx' },
-      { id:'qwen-plus',                    name:'Qwen3.6 Plus',                      free:true,  sub:'Alibaba · FREE · Vision · Reasoning' },
-      { id:'qwen-vl',                      name:'Qwen3 VL 30B A3B',                  free:true,  sub:'Alibaba · FREE · Vision' },
-      { id:'qwen-vl-large',                name:'Qwen3 VL 235B Thinking',            free:false, sub:'Alibaba · Pollen · Vision · Reasoning' },
-      { id:'qwen-coder-next',              name:'Qwen3 Coder Next',                  free:true,  sub:'Alibaba · FREE · Code · Latest' },
-      { id:'polly',                        name:'Polly',                             free:true,  sub:'@Itachi-1824 · ALPHA · Vision · Search · Code' },
-      { id:'sonar-reasoning',              name:'Perplexity Sonar Reasoning',        free:false, sub:'Perplexity · Pollen · Vision · Reasoning · Search' },
-      { id:'nova-lite',                    name:'Nova 2 Lite',                       free:true,  sub:'Amazon · FREE · Vision · Reasoning' },
-      { id:'kimi-k2.6',                    name:'Moonshot Kimi K2.6',                free:true,  sub:'Moonshot · FREE · Vision · Reasoning' },
-      { id:'kimi',                         name:'Moonshot Kimi K2.5',                free:true,  sub:'Moonshot · FREE · Vision · Reasoning' },
-      { id:'mistral-small-4',              name:'Mistral Small 4',                   free:true,  sub:'Mistral · FREE · Vision · Latest' },
-      { id:'midijourney-large',            name:'MIDIjourney Large',                 free:true,  sub:'Pollinations · FREE · Music · Creative' },
-      { id:'llama-4-maverick',             name:'Meta Llama 4 Maverick',             free:false, sub:'Meta · PAID · Vision · Multimodal' },
-      { id:'grok-4.3',                     name:'Grok 4.3',                          free:true,  sub:'xAI · FREE · Vision · Reasoning · NEW' },
-      { id:'grok-reasoning',               name:'Grok 4.20 Reasoning',               free:true,  sub:'xAI · FREE · Vision · Thinking mode' },
-      { id:'openai-5.5',                   name:'GPT-5.5',                           free:true,  sub:'OpenAI · FREE · Vision · Reasoning' },
-      { id:'openai-large',                 name:'GPT-5.4',                           free:true,  sub:'OpenAI · FREE · Vision · Reasoning' },
-      { id:'openai',                       name:'GPT-5.4 Nano',                      free:true,  sub:'OpenAI · FREE · Vision · Balanced' },
-      { id:'openai-fast',                  name:'GPT-5 Nano',                        free:true,  sub:'OpenAI · FREE · Vision · Ultra fast' },
-      { id:'openai-5.4-mini',              name:'GPT-5.4 Mini',                      free:true,  sub:'OpenAI · FREE · Vision · Efficient' },
-      { id:'openai-audio',                 name:'GPT Audio Mini',                    free:true,  sub:'OpenAI · FREE · Audio generation' },
-      { id:'openai-audio-large',           name:'GPT Audio 1.5',                     free:true,  sub:'OpenAI · FREE · TTS · Premium' },
-      { id:'gemma',                        name:'Gemma 4 26B A4B',                   free:true,  sub:'Google · FREE · Vision · Reasoning · Open' },
-      { id:'gemini-3.5-flash',             name:'Gemini 3.5 Flash',                  free:false, sub:'Google · PAID · NEW · Vision · Reasoning · Search' },
-      { id:'gemini-3.5-flash-search',      name:'Gemini 3.5 Flash Search',           free:false, sub:'Google · PAID · NEW · Vision · Search · Code' },
-      { id:'gemini-pro',                   name:'Gemini 3.1 Pro',                    free:false, sub:'Google · PAID · Vision · Reasoning · Search' },
-      { id:'gemini-flash-lite-3.1',        name:'Gemini 3.1 Flash Lite',             free:false, sub:'Google · PAID · Vision · Search · Code' },
-      { id:'gemini-flash-lite-3.1-search', name:'Gemini 3.1 Flash Lite Search',      free:false, sub:'Google · PAID · Vision · Search · Code' },
-      { id:'gemini',                       name:'Gemini 3 Flash',                    free:false, sub:'Google · PAID · Vision · Search · Code' },
-      { id:'deepseek-pro',                 name:'DeepSeek V4 Pro',                   free:true,  sub:'DeepSeek · FREE · Reasoning · Latest' },
-      { id:'deepseek',                     name:'DeepSeek V4 Flash',                 free:true,  sub:'DeepSeek · FREE · Reasoning · Fast' },
-      { id:'claude-sonnet',                name:'Claude Sonnet 4.6',                 free:false, sub:'Anthropic · PAID · Vision · Balanced' },
-      { id:'claude-opus',                  name:'Claude Opus 4.7',                   free:false, sub:'Anthropic · PAID · Vision · Latest' },
+      { id:'qwen-coder',         name:'Qwen3 Coder 30B',              free:true,  sub:'Alibaba · FREE · Code expert' },
+      { id:'mistral',            name:'Mistral Small 3.2',            free:true,  sub:'Mistral · FREE · Efficient' },
+      { id:'grok',               name:'Grok 4.20',                    free:true,  sub:'xAI · FREE · Multimodal' },
+      { id:'llama',              name:'Llama 3.3 70B',                free:true,  sub:'Meta · FREE · Reliable' },
+      { id:'llama-4-scout',      name:'Llama 4 Scout',                free:true,  sub:'Meta · FREE · Vision' },
+      { id:'sonar',              name:'Perplexity Sonar',             free:true,  sub:'Perplexity · FREE · Web search' },
+      { id:'mistral-large',      name:'Mistral Large 3',              free:true,  sub:'Mistral · FREE · Reasoning' },
+      { id:'claude-fast',        name:'Claude Haiku 4.5',             free:true,  sub:'Anthropic · FREE · Fast' },
+      { id:'minimax',            name:'MiniMax M2.7',                 free:true,  sub:'MiniMax · FREE · Reasoning' },
+      { id:'nova',               name:'Nova Micro',                   free:true,  sub:'Amazon · FREE · Tiny & fast' },
+      { id:'glm',                name:'Z.ai GLM-5.1',                 free:true,  sub:'Z.ai · FREE · Reasoning' },
+      { id:'qwen-safety',        name:'Qwen3Guard 8B',                free:true,  sub:'Alibaba · FREE · Safety · 200K ctx' },
+      { id:'qwen-large',         name:'Qwen3.6 Plus',                 free:true,  sub:'Alibaba · FREE · Vision · Reasoning' },
+      { id:'qwen-vision',        name:'Qwen3 VL 30B A3B',             free:true,  sub:'Alibaba · FREE · Vision' },
+      { id:'qwen-coder-large',   name:'Qwen3 Coder Next',             free:true,  sub:'Alibaba · FREE · Code · Latest' },
+      { id:'polly',              name:'Polly',                        free:true,  sub:'@Itachi-1824 · ALPHA · Vision · Search · Code' },
+      { id:'perplexity-reasoning', name:'Perplexity Sonar Reasoning', free:false, sub:'Perplexity · Pollen · Reasoning · Search' },
+      { id:'nova-fast',          name:'Nova 2 Lite',                  free:true,  sub:'Amazon · FREE · Fast · Efficient' },
+      { id:'kimi-k2.6',          name:'Moonshot Kimi K2.6',           free:true,  sub:'Moonshot · FREE · Vision · Reasoning' },
+      { id:'kimi',               name:'Moonshot Kimi K2.5',           free:true,  sub:'Moonshot · FREE · Vision · Reasoning' },
+      { id:'gemini-fast',        name:'Gemma 4 26B A4B',              free:true,  sub:'Google · FREE · Vision · Reasoning · Open' },
+      { id:'midijourney-large',  name:'MIDIjourney Large',            free:true,  sub:'Pollinations · FREE · Music · Creative' },
+      { id:'grok-large',         name:'Grok 4.3',                     free:true,  sub:'xAI · FREE · Vision · Reasoning · NEW' },
+      { id:'openai-large',       name:'GPT-5.4',                      free:true,  sub:'OpenAI · FREE · Vision · Reasoning' },
+      { id:'openai',             name:'GPT-5.4 Nano',                 free:true,  sub:'OpenAI · FREE · Vision · Balanced' },
+      { id:'openai-fast',        name:'GPT-5 Nano',                   free:true,  sub:'OpenAI · FREE · Vision · Ultra fast' },
+      { id:'gemini',             name:'Gemini 3 Flash',               free:false, sub:'Google · PAID · Vision · Search · Code' },
+      { id:'gemini-flash-lite-3.1', name:'Gemini 3.1 Flash Lite',     free:false, sub:'Google · PAID · Vision · Search · Code' },
+      { id:'gemini-large',       name:'Gemini 3.1 Pro',               free:false, sub:'Google · PAID · Vision · Reasoning · Search' },
+      { id:'deepseek-pro',       name:'DeepSeek V4 Pro',              free:true,  sub:'DeepSeek · FREE · Reasoning · Latest' },
+      { id:'deepseek',           name:'DeepSeek V4 Flash',            free:true,  sub:'DeepSeek · FREE · Reasoning · Fast' },
+      { id:'claude',             name:'Claude Sonnet 4.6',            free:false, sub:'Anthropic · PAID · Vision · Balanced' },
+      { id:'claude-opus-4.7',    name:'Claude Opus 4.7',              free:false, sub:'Anthropic · PAID · Vision · Latest' },
     ]
   },
   venice: {
@@ -6914,6 +6903,22 @@ window.addEventListener('load', async function _handleGitHubCallback() {
 
 function _ghCancelDevice() {} // kept for compatibility
 
+async function saveGithubPAT() {
+  const inp = document.getElementById('githubPATInput');
+  const pat = inp?.value.trim();
+  if (!pat || pat.length < 10) { showToast('Enter a valid GitHub PAT'); return; }
+  try {
+    const res = await fetch('https://api.github.com/user', {
+      headers: { Authorization: 'token ' + pat, Accept: 'application/vnd.github+json' }
+    });
+    if (!res.ok) throw new Error('GitHub API ' + res.status + ' — check PAT scope (needs: gist)');
+    await _finalizeGitHubLogin(pat);
+    if (inp) inp.value = '';
+  } catch(e) {
+    showToast('❌ ' + e.message);
+  }
+}
+
 async function _finalizeGitHubLogin(accessToken) {
   const section = document.getElementById('githubInputSection');
   if (section) section.innerHTML = `<div style="font-family:var(--font-sans);font-size:13px;color:var(--text2);text-align:center;padding:12px 0">⏳ Loading profile…</div>`;
@@ -7155,13 +7160,14 @@ function openApiKeySheet() {
   if (customApiKey) {
     _selectedApiProvider = customApiKey.provider || _selectedApiProvider;
     _selectedApiModel    = customApiKey.model    || _selectedApiModel;
-    const inp = document.getElementById('apiKeyInput');
-    if (inp) inp.value = customApiKey.key || '';
   }
   // Always ensure a model is selected for the current provider
   if (!_selectedApiModel || !PROVIDER_MODELS[_selectedApiProvider]?.models.find(m => m.id === _selectedApiModel)) {
     _selectedApiModel = PROVIDER_MODELS[_selectedApiProvider]?.models[0]?.id || '';
   }
+  // Populate input with the saved key for this provider
+  const inp = document.getElementById('apiKeyInput');
+  if (inp) inp.value = apiKeys[_selectedApiProvider] || (customApiKey?.provider === _selectedApiProvider ? customApiKey.key || '' : '');
   _renderApiProviderGrid();
   _renderApiModelGrid();
   _updateApiKeyStatus();
@@ -7832,6 +7838,9 @@ function _renderApiProviderGrid() {
 function _selectApiProvider(id) {
   _selectedApiProvider = id;
   _selectedApiModel = PROVIDER_MODELS[id].models[0]?.id || '';
+  // Auto-fill input with the saved key for this provider (if any)
+  const inp = document.getElementById('apiKeyInput');
+  if (inp) inp.value = apiKeys[id] || '';
   _renderApiProviderGrid();
   _renderApiModelGrid();
 }
@@ -8154,7 +8163,11 @@ function testAllModels() {
 async function _callCustomProvider(messages, stream, onChunk, sig) {
   const prov  = PROVIDER_MODELS[customApiKey.provider];
   const model = customApiKey.model;
-  const key   = customApiKey.key;
+  // Always read fresh key from apiKeys store (in case it was updated after customApiKey was set)
+  const key   = (prov?.noKey ? '' : (apiKeys[customApiKey.provider] || customApiKey.key || ''));
+  if (!prov?.noKey && (!key || !key.trim())) {
+    throw new Error('No API key saved for ' + (prov?.name || customApiKey.provider) + ' — add it in Settings → API Keys');
+  }
   if (customApiKey.provider === 'anthropic') {
     return _callAnthropicAPI(messages, stream, onChunk, sig, key, model);
   } else if (customApiKey.provider === 'gemini') {
@@ -8224,15 +8237,22 @@ async function _callGeminiAPI(messages, stream, onChunk, sig, key, model) {
 }
 
 async function _callOpenAICompatible(endpoint, messages, stream, onChunk, sig, key, model) {
-  // Allow custom endpoint override ONLY for the free cloud (no-key) path — not for named providers
-  const isFreeCloud = !key || !key.trim();
+  // Allow custom endpoint override ONLY for the true free cloud (LLM7, no endpoint specified)
+  // NOT for named providers even if they use no key (noKey sentinel = ' ')
+  const effectiveKey = (key || '').trim();
+  const isFreeCloud = !effectiveKey && !endpoint;
   const customEp = isFreeCloud ? ls('customEndpoint', '') : '';
   let finalEndpoint = customEp || endpoint;
   const isNvidia = false;
   const body = { model, messages, stream, max_tokens: ls('aiMaxTokens',4096), temperature: ls('aiTemperature',0.7) };
   const headers = { 'Content-Type':'application/json' };
   // Only add Authorization header if key is non-empty
-  if (key && key.trim()) headers['Authorization'] = 'Bearer ' + key;
+  if (effectiveKey) headers['Authorization'] = 'Bearer ' + effectiveKey;
+  // For Pollinations endpoint without explicit key, use pollinationsToken if available
+  else if (finalEndpoint.includes('pollinations.ai')) {
+    const pollToken = ls('pollinationsToken', '');
+    if (pollToken) headers['Authorization'] = 'Bearer ' + pollToken;
+  }
   // OpenRouter extra headers
   if (finalEndpoint.includes('openrouter')) {
     headers['HTTP-Referer'] = location.href;
@@ -11406,6 +11426,18 @@ document.head.appendChild(_ksStyleEl);
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.49.5.09.68-.22.68-.48 0-.24-.01-.87-.01-1.7-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.99 1.03-2.69-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02A9.56 9.56 0 0 1 12 6.8a9.56 9.56 0 0 1 2.5.34c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.6 1.03 2.69 0 3.85-2.34 4.7-4.57 4.94.36.31.68.92.68 1.85 0 1.34-.01 2.42-.01 2.74 0 .27.18.58.69.48C19.14 20.16 22 16.42 22 12c0-5.52-4.48-10-10-10z"/></svg>
         Sign in with GitHub
       </button>
+      <!-- PAT fallback (works from file://) -->
+      <div style="margin-top:10px;padding:12px 16px;border-radius:14px;background:var(--surface);border:1px solid var(--border)">
+        <div style="font-family:var(--font-sans);font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">GitHub Personal Access Token</div>
+        <div style="font-family:var(--font-sans);font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.5">Use a <a href="https://github.com/settings/tokens/new?scopes=gist&description=Helix+Sync" target="_blank" style="color:var(--accent)">PAT with <b>gist</b> scope</a> — works from file:// too</div>
+        <div style="display:flex;gap:8px">
+          <input id="githubPATInput" type="password" placeholder="ghp_…"
+            style="flex:1;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg3);color:var(--text);font-family:var(--font-sans);font-size:13px;outline:none;box-sizing:border-box"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+            onkeydown="if(event.key==='Enter')saveGithubPAT()">
+          <button onclick="saveGithubPAT()" style="padding:10px 16px;border-radius:10px;border:none;background:var(--accent);color:white;font-family:var(--font-sans);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">Save</button>
+        </div>
+      </div>
       <!-- Device flow UI injected here dynamically -->
       <div id="githubInputSection" style="display:none;margin-top:8px;flex-direction:column;gap:10px"></div>
       <div id="loginStatusMsg" style="font-family:var(--font-sans);font-size:12px;color:var(--text3);text-align:center;min-height:20px;margin-top:4px"></div>
