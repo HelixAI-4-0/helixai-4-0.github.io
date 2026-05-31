@@ -1,60 +1,61 @@
-#  Helix AI
+Ecco il README.md definitivo e completo, ottimizzato con l'inserimento dell'immagine in modalità **Premium** (centrata, con angoli arrotondati e ombreggiatura) subito sotto il titolo principale.
+# Helix AI
+<p align="center">
+<img src="image0.jpg" alt="Helix AI Interface" width="100%" style="max-width: 800px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.3); margin: 20px 0;">
+</p>
+> Your personal AI assistant — local & cloud, voice & text.
+> 
+**Helix AI** is an advanced web application and Progressive Web App (PWA) built with a meticulously crafted user interface. It seamlessly bridges the gap between privacy and performance, combining local on-device models (powered by WebLLM) with the raw intelligence of leading global cloud providers (OpenAI, Anthropic, Gemini, and more).
+The application natively integrates text-based chat, immersive voice interaction, AI image generation, real-time web search, and an interactive "Artifacts" panel for live code, markdown, or sandboxed previews.
+## 🚀 Key Features
+ * **🧬 Hybrid Architecture (Local + Cloud):** Supports on-device models with smart lazy loading (via @mlc-ai/web-llm) to keep initial load times instant, alongside robust API integrations for top-tier cloud models.
+ * **🎙️ Advanced Voice Mode:** An immersive, dedicated voice interface featuring a dynamic graphical orb that reacts in real time to listening, processing, and speaking states, complete with high-fidelity speech-to-text and text-to-speech.
+ * **🖼️ Image Generation & Web Search:** Generate visuals directly inline within your chat threads, or trigger "Pro Search" to enrich responses with live web results, comprehensive snippets, and source citations.
+ * **📦 Artifacts Management (Project Panel):** A split-screen or full-screen workspace to display source code, render Markdown documents, or view interactive live previews inside secure iframes, complete with version tracking.
+ * **📱 Single-File PWA Ready:** Built-in PWA capabilities utilizing an in-line manifest (via Blob URLs) and self-contained service workers, allowing instant installation on desktop and mobile devices while keeping the source portable.
+ * **🎨 Premium Design & Micro-interactions:** A sophisticated aesthetic utilizing *Plus Jakarta Sans* and *Lora* typography, buttery-smooth light/dark mode transitions, crisp toast notifications, and contextual bottom sheets for model and voice selection.
+## 🛠️ Tech Stack
+The entire application runs strictly on a lightweight, high-performance frontend stack:
+ * **Core:** HTML5, CSS3 (Advanced CSS variables for thematic consistency, GPU-accelerated animations), and Vanilla JavaScript.
+ * **Local AI Engine:** @mlc-ai/web-llm (dynamically imported only when a local model is initialized).
+ * **Markdown & Security:** marked.js for markdown parsing, strictly paired with DOMPurify to sanitize all AI-generated outputs before DOM injection.
+ * **Typography:** Google Fonts (*Plus Jakarta Sans*, *Lora*, and *SF Mono* / *Fira Code* for clean code blocks).
+## 📂 Interface Structure (CSS Scoping)
+The codebase is highly organized into semantic CSS sections to ensure easy maintenance and scalability:
+ 1. **Welcome Screen:** The initial onboarding view for model onboarding and first-time configuration.
+ 2. **Topbar & Sidebar:** Navigation layers managing recent chat histories, the project library (Artifacts), and user preferences.
+ 3. **Chat Body & Messages:** Asynchronous conversational UI supporting distinct user/AI message blocks, file attachment chips, and fluid typing indicators.
+ 4. **Input Bar:** An auto-expanding text input area complete with attachment actions and rapid-toggle hardware controls (Microphone, Stop, Send).
+ 5. **Voice Mode Overlay:** A minimalist, dark-mode overlay featuring a pulsating central orb and animated audio spectrum visualizers.
+ 6. **Sheets & Modals:** Bottom-sliding utility menus for swift model switching, API key configurations, and advanced "Pro" features.
+## ⚙️ Local Setup & Installation
+Since Helix AI is an entirely client-side application, no heavy build steps or compilation processes are required.
+ 1. **Clone the repository or save the file:**
+   ```bash
+   git clone https://github.com/Marco3113/helix-ai.git
+   cd helix-ai
+   
+   ```
+```
 
-![Helix AI](image0.jpg)
+2. **Run a local development server:**
+   To ensure Service Workers and dynamic modules load correctly without CORS restrictions, run the app using a local web server (e.g., VS Code's *Live Server* or via the terminal)[span_23](start_span)[span_23](end_span):
+   ```bash
+   # Using Python
+   python -m http.server 8000
+   
+   # Or using Node.js (npx)
+   npx serve .
 
-**Your personal AI assistant — local & cloud, voice & text.**
+```
+ 3. **Configure and Chat:**
+   Open http://localhost:8000 in your browser. Paste your preferred cloud API keys in the settings panel or choose a local model to begin interacting in 100% data privacy.
+## 🔒 Security & Data Cleaning
+The application includes dedicated utility pipelines to guarantee a pristine, secure UI:
+ * **safeParse(md)**: Combines marked.js with DOMPurify to systematically neutralize cross-site scripting (XSS) risks originating from unverified AI outputs.
+ * **stripPollinationsNotice(text)**: A custom regex cleaning engine that automatically strips out backend system watermarks, hidden HTML comments (<!-- ... -->), and generic generation logs to keep your outputs clean and presentation-ready.
+## 📄 License
+This project is open-source software licensed under the MIT License. See the LICENSE file for more details.
 
----
 
-##
-**Helix AI** is an advanced AI assistant you can use directly in your browser. It supports both text and voice input and is designed to work both offline (thanks to the Service Worker) and online.
-
-### ✨ Key Features
-- **Intuitive Interface**: Clean and modern design with custom fonts.
-- **PWA (Progressive Web App)**: Can be installed as an app on your device.
-- **Offline Functionality**: Thanks to the Service Worker, you can use Helix AI even without an internet connection.
-- **Dark Theme**: Interface optimized for a comfortable visual experience.
-- **Custom Icons**: SVG icons embedded directly in the manifest.
-
----
-
-## 🚀 How to Use
-
-### 1. **Local Setup**
-1. Download or clone this repository.
-2. Open the `index.html` file in a modern browser (Chrome, Firefox, Edge, etc.).
-3. (Optional) Install the app on your device via the browser prompt.
-
-### 2. **Install as PWA**
-- Open the `index.html` file in a browser.
-- The browser will prompt you to install **Helix AI** as an app. Click **"Install"**.
-- Now you can use Helix AI like a native app!
-
----
-## 🛠 Technologies Used
-- **HTML5**
-- **CSS3** (with custom fonts from Google Fonts)
-- **JavaScript** (for Service Worker and PWA Manifest)
-- **SVG** (for icons and logo)
-
----
-## 🎨 Customization
-- **Theme**: Modify colors in the PWA manifest (`background_color`, `theme_color`).
-- **Fonts**: Change fonts in `<head>` to match your style.
-- **Logo**: Replace the SVG icon in the manifest with your own logo.
-
----
-## 🤝 Contributing
-If you want to contribute to the project:
-1. Fork the repository.
-2. Create a branch for your feature (`git checkout -b feature/feature-name`).
-3. Commit your changes (`git commit -m "Added feature X"`).
-4. Push the branch (`git push origin feature/feature-name`).
-5. Open a **Pull Request**.
-
----
-## 📜 License
-This project is licensed under the **MIT License**.
-
-## Created by
-Made with ❤ by Marco3113 
+Made with ❤ by Marco3113
