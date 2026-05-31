@@ -1,7 +1,7 @@
 # Helix AI
 
 <p align="center">
-  <img src="https://helixai-4-0.github.io/image0.jpg" alt="Helix AI Interface" width="100%" style="max-width: 750px; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); margin: 20px 0;">
+  <img src="https://helixai-4-0.github.io/helix_logo.png" alt="Helix AI Interface" width="100%" style="max-width: 750px; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); margin: 20px 0;">
 </p>
 
 > Your personal AI assistant — local & cloud, voice & text.
