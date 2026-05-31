@@ -3,14 +3,6 @@
 
 ![Helix AI Interface](https://raw.githubusercontent.com/helixai-4-0/helixai-4-0.github.io/main/image0.jpg)
 
-```
-*(Nota: se quando hai creato la repository il branch predefinito è stato chiamato master anziché main, basta sostituire /main/ con /master/ nell'URL qui sopra).*
-### Ecco il codice sorgente completo e definitivo pronto da copiare:
-```markdown
-# Helix AI
-
-![Helix AI Interface](https://raw.githubusercontent.com/helixai-4-0/helixai-4-0.github.io/main/image0.jpg)
-
 > Your personal AI assistant — local & cloud, voice & text[span_0](start_span)[span_0](end_span).
 
 **Helix AI** is an advanced web application and Progressive Web App (PWA) built with a meticulously crafted user interface[span_1](start_span)[span_1](end_span). It seamlessly bridges the gap between privacy and performance, combining local on-device models (powered by WebLLM) with the raw intelligence of leading global cloud providers (OpenAI, Anthropic, Gemini, and more)[span_2](start_span)[span_2](end_span).
