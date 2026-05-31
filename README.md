@@ -1,7 +1,15 @@
 ```markdown
 # Helix AI
 
-![Helix AI Interface](image0.jpg)
+![Helix AI Interface](https://raw.githubusercontent.com/helixai-4-0/helixai-4-0.github.io/main/image0.jpg)
+
+```
+*(Nota: se quando hai creato la repository il branch predefinito è stato chiamato master anziché main, basta sostituire /main/ con /master/ nell'URL qui sopra).*
+### Ecco il codice sorgente completo e definitivo pronto da copiare:
+```markdown
+# Helix AI
+
+![Helix AI Interface](https://raw.githubusercontent.com/helixai-4-0/helixai-4-0.github.io/main/image0.jpg)
 
 > Your personal AI assistant — local & cloud, voice & text[span_0](start_span)[span_0](end_span).
 
@@ -52,8 +60,8 @@ Since Helix AI is an entirely client-side application, no heavy build steps or c
 
 1. **Clone the repository or save the file:**
 ```bash
-   git clone [https://github.com/Marco3113/helix-ai.git](https://github.com/Marco3113/helix-ai.git)
-   cd helix-ai
+   git clone [https://github.com/helixai-4-0/helixai-4-0.github.io.git](https://github.com/helixai-4-0/helixai-4-0.github.io.git)
+   cd helixai-4-0.github.io
 
 ```
  2. **Run a local development server:**
