@@ -13,12 +13,12 @@ The application natively integrates text-based chat, immersive voice interaction
 
 ## 🚀 Key Features
 
-* **🧬 Hybrid Architecture (Local + Cloud):** Supports on-device models with smart lazy loading (via `@mlc-ai/web-llm`) to keep initial load times instant, alongside robust API integrations for top-tier cloud models[span_4](start_span)[span_4](end_span).
-* **🎙️ Advanced Voice Mode:** An immersive, dedicated voice interface featuring a dynamic graphical orb that reacts in real time to listening, processing, and speaking states, complete with high-fidelity speech-to-text and text-to-speech[span_5](start_span)[span_5](end_span).
-* **🖼️ Image Generation & Web Search:** Generate visuals directly inline within your chat threads, or trigger "Pro Search" to enrich responses with live web results, comprehensive snippets, and source citations[span_6](start_span)[span_6](end_span).
-* **📦 Artifacts Management (Project Panel):** A split-screen or full-screen workspace to display source code, render Markdown documents, or view interactive live previews inside secure iframes, complete with version tracking[span_7](start_span)[span_7](end_span).
-* **📱 Single-File PWA Ready:** Built-in PWA capabilities utilizing an in-line manifest (via Blob URLs) and self-contained service workers, allowing instant installation on desktop and mobile devices while keeping the source portable[span_8](start_span)[span_8](end_span).
-* **🎨 Premium Design & Micro-interactions:** A sophisticated aesthetic utilizing *Plus Jakarta Sans* and *Lora* typography, buttery-smooth light/dark mode transitions, crisp toast notifications, and contextual bottom sheets for model and voice selection[span_9](start_span)[span_9](end_span).
+- **🧬 Hybrid Architecture (Local + Cloud):** Supports on-device models with smart lazy loading (via `@mlc-ai/web-llm`) to keep initial load times instant, alongside robust API integrations for top-tier cloud models[span_4](start_span)[span_4](end_span).
+- **🎙️ Advanced Voice Mode:** An immersive, dedicated voice interface featuring a dynamic graphical orb that reacts in real time to listening, processing, and speaking states, complete with high-fidelity speech-to-text and text-to-speech[span_5](start_span)[span_5](end_span).
+- **🖼️ Image Generation & Web Search:** Generate visuals directly inline within your chat threads, or trigger "Pro Search" to enrich responses with live web results, comprehensive snippets, and source citations[span_6](start_span)[span_6](end_span).
+- **📦 Artifacts Management (Project Panel):** A split-screen or full-screen workspace to display source code, render Markdown documents, or view interactive live previews inside secure iframes, complete with version tracking[span_7](start_span)[span_7](end_span).
+- **📱 Single-File PWA Ready:** Built-in PWA capabilities utilizing an in-line manifest (via Blob URLs) and self-contained service workers, allowing instant installation on desktop and mobile devices while keeping the source portable[span_8](start_span)[span_8](end_span).
+- **🎨 Premium Design & Micro-interactions:** A sophisticated aesthetic utilizing *Plus Jakarta Sans* and *Lora* typography, buttery-smooth light/dark mode transitions, crisp toast notifications, and contextual bottom sheets for model and voice selection[span_9](start_span)[span_9](end_span).
 
 ---
 
@@ -26,10 +26,10 @@ The application natively integrates text-based chat, immersive voice interaction
 
 The entire application runs strictly on a lightweight, high-performance frontend stack:
 
-* **Core:** HTML5, CSS3 (Advanced CSS variables for thematic consistency, GPU-accelerated animations), and Vanilla JavaScript[span_10](start_span)[span_10](end_span).
-* **Local AI Engine:** `@mlc-ai/web-llm` (dynamically imported only when a local model is initialized)[span_11](start_span)[span_11](end_span).
-* **Markdown & Security:** `marked.js` for markdown parsing, strictly paired with `DOMPurify` to sanitize all AI-generated outputs before DOM injection[span_12](start_span)[span_12](end_span).
-* **Typography:** Google Fonts (*Plus Jakarta Sans*, *Lora*, and *SF Mono* / *Fira Code* for clean code blocks)[span_13](start_span)[span_13](end_span).
+- **Core:** HTML5, CSS3 (Advanced CSS variables for thematic consistency, GPU-accelerated animations), and Vanilla JavaScript[span_10](start_span)[span_10](end_span).
+- **Local AI Engine:** `@mlc-ai/web-llm` (dynamically imported only when a local model is initialized)[span_11](start_span)[span_11](end_span).
+- **Markdown & Security:** `marked.js` for markdown parsing, strictly paired with `DOMPurify` to sanitize all AI-generated outputs before DOM injection[span_12](start_span)[span_12](end_span).
+- **Typography:** Google Fonts (*Plus Jakarta Sans*, *Lora*, and *SF Mono* / *Fira Code* for clean code blocks)[span_13](start_span)[span_13](end_span).
 
 ---
 
