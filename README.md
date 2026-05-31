@@ -5,7 +5,7 @@
   <img src="https://helixai-4-0.github.io/helix_logo.png" alt="Helix AI Interface" width="100%" style="max-width: 750px; border-radius: 14px; box-shadow: 0 10px 40px rgba(0,0,0,0.25); margin: 20px 0;">
 </p>
 
-> Your personal AI assistant — local & cloud, voice & text.
+> Your personal AI assistant — local & cloud, voice, video & text.
 
 **Helix AI** is an advanced web application and Progressive Web App (PWA) built with a meticulously crafted user interface. It seamlessly bridges the gap between privacy and performance, combining local on-device models (powered by WebLLM) with the raw intelligence of leading global cloud providers (OpenAI, Anthropic, Gemini, and more).
 
@@ -79,6 +79,5 @@ This project is open-source software licensed under the MIT License. See the LIC
 <p align="center">
 Made with ❤ by <a href="https://github.com/Marco3113" target="_blank">Marco3113</a>
 </p>
-```
 
 ```
