@@ -1,4 +1,3 @@
-Ecco il README.md definitivo e completo, ottimizzato con l'inserimento dell'immagine in modalità **Premium** (centrata, con angoli arrotondati e ombreggiatura) subito sotto il titolo principale.
 # Helix AI
 <p align="center">
 <img src="image0.jpg" alt="Helix AI Interface" width="100%" style="max-width: 800px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.3); margin: 20px 0;">
