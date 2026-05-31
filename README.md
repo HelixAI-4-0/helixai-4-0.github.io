@@ -2,9 +2,7 @@
 ```markdown
 # Helix AI
 
-<p align="center">
-  <img src="image0.jpg" alt="Helix AI Interface" width="100%" style="max-width: 800px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);">
-</p>
+![Helix AI Interface](image0.jpg)
 
 > Your personal AI assistant — local & cloud, voice & text[span_0](start_span)[span_0](end_span).
 
