@@ -1,4 +1,3 @@
-```markdown
 # Helix AI
 
 <p align="center">
