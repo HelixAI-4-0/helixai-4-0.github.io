@@ -1,3 +1,4 @@
+
 # Helix AI
 
 <p align="center">
@@ -75,12 +76,9 @@ The application includes dedicated utility pipelines to guarantee a pristine, se
  * **stripPollinationsNotice(text)**: A custom regex cleaning engine that automatically strips out backend system watermarks, hidden HTML comments (``), and generic generation logs to keep your outputs clean and presentation-ready.
 ## 📄 License
 This project is open-source software licensed under the MIT License. See the LICENSE file for more details.
-
-
-
 <p align="center">
 Made with ❤ by <a href="https://github.com/Marco3113" target="_blank">Marco3113</a>
 </p>
-
+```
 
 ```
