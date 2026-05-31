@@ -1,6 +1,6 @@
 # Helix AI
 <p align="center">
-<img src="image0.jpg" alt="Helix AI Interface" width="100%" style="max-width: 800px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.3); margin: 20px 0;">
+<img src="image0.jpg" alt="Helix AI Interface" width="100%" style="max-width: 800px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);">
 </p>
 > Your personal AI assistant — local & cloud, voice & text.
 > 
@@ -36,9 +36,8 @@ Since Helix AI is an entirely client-side application, no heavy build steps or c
    
    ```
 ```
-
 2. **Run a local development server:**
-   To ensure Service Workers and dynamic modules load correctly without CORS restrictions, run the app using a local web server (e.g., VS Code's *Live Server* or via the terminal)[span_23](start_span)[span_23](end_span):
+   To ensure Service Workers and dynamic modules load correctly without CORS restrictions, run the app using a local web server (e.g., VS Code's *Live Server* or via the terminal)[span_22](start_span)[span_22](end_span):
    ```bash
    # Using Python
    python -m http.server 8000
@@ -55,6 +54,6 @@ The application includes dedicated utility pipelines to guarantee a pristine, se
  * **stripPollinationsNotice(text)**: A custom regex cleaning engine that automatically strips out backend system watermarks, hidden HTML comments (<!-- ... -->), and generic generation logs to keep your outputs clean and presentation-ready.
 ## 📄 License
 This project is open-source software licensed under the MIT License. See the LICENSE file for more details.
-
-
-Made with ❤ by Marco3113
+<p align="center">
+Made with ❤ by <a href="[https://github.com/Marco3113](https://github.com/Marco3113)">Marco3113</a>
+</p>
