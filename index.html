@@ -977,6 +977,32 @@ button { touch-action: manipulation; }
   padding:10px 20px 6px; flex-shrink:0;
 }
 .vsheet-list { overflow-y:auto; flex:1; padding-bottom:40px; }
+.vprov-tabs { display:flex; gap:6px; overflow-x:auto; padding:10px 14px 6px; flex-shrink:0; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+.vprov-tabs::-webkit-scrollbar { display:none; }
+.vprov-tab { flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:3px; padding:7px 11px 6px; border-radius:14px; border:1.5px solid var(--border); background:var(--surface); cursor:pointer; transition:all 0.15s; min-width:58px; touch-action:manipulation; position:relative; }
+.vprov-tab.active { border-color:var(--accent); background:rgba(var(--accentRgb),0.13); }
+.vprov-tab-icon { font-size:17px; line-height:1; }
+.vprov-tab-name { font-family:var(--font-sans); font-size:9px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:0.04em; white-space:nowrap; }
+.vprov-tab.active .vprov-tab-name { color:var(--accent); }
+.vprov-tab-badge { position:absolute; top:-5px; right:-4px; font-family:var(--font-sans); font-size:8px; font-weight:800; padding:1px 4px; border-radius:5px; background:#30d158; color:#000; line-height:1.5; }
+.vprov-tab-badge.key { background:var(--surface2); color:var(--text3); border:1px solid var(--border); }
+.vprov-tab.has-key .vprov-tab-badge.key { background:#30d158; color:#000; border:none; }
+.vprov-dl-panel { margin:14px 16px; padding:22px 18px; border-radius:20px; background:var(--surface); border:1.5px dashed var(--border); display:flex; flex-direction:column; align-items:center; gap:12px; }
+.vprov-dl-panel .vprov-dl-icon { width:52px; height:52px; position:relative; display:flex; align-items:center; justify-content:center; }
+.vprov-dl-ring { position:absolute; border-radius:50%; border:2px solid rgba(212,113,74,0.3); animation:kkdlRing 2s ease-out infinite; }
+.vprov-dl-ring:nth-child(1){width:52px;height:52px;animation-delay:0s}
+.vprov-dl-ring:nth-child(2){width:36px;height:36px;animation-delay:0.4s}
+.vprov-dl-core { width:18px; height:18px; border-radius:50%; background:radial-gradient(circle,var(--accent),rgba(212,113,74,0.5)); box-shadow:0 0 12px var(--accent); animation:kkdlCorePulse 1.2s ease-in-out infinite alternate; }
+.vprov-dl-title { font-family:var(--font-sans); font-size:14px; font-weight:700; color:var(--text); }
+.vprov-dl-sub { font-family:var(--font-sans); font-size:11px; color:var(--text3); text-align:center; line-height:1.5; margin-top:-4px; }
+.vprov-dl-btn { padding:9px 22px; border-radius:12px; background:var(--accent); color:#fff; border:none; font-family:var(--font-sans); font-size:13px; font-weight:700; cursor:pointer; transition:opacity 0.15s; }
+.vprov-dl-btn:active { opacity:0.7; }
+.vprov-dl-bar-wrap { width:100%; }
+.vprov-dl-bar-track { width:100%; height:4px; background:var(--surface2); border-radius:2px; overflow:hidden; margin-bottom:5px; }
+.vprov-dl-bar-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2,#7fb05e)); border-radius:2px; width:0%; transition:width 0.3s ease; }
+.vprov-dl-status { font-family:var(--font-sans); font-size:11px; color:var(--text3); text-align:center; }
+.vprov-nokey { margin:14px 16px; padding:16px; border-radius:16px; background:var(--surface); border:1px solid var(--border); font-family:var(--font-sans); font-size:12px; color:var(--text3); text-align:center; line-height:1.6; }
+.vprov-nokey a { color:var(--accent); }
 .vsheet-list::-webkit-scrollbar { display:none; }
 .vsheet-row {
   display:flex; align-items:center; gap:12px;
@@ -1599,13 +1625,13 @@ button { touch-action: manipulation; }
     <span class="vsheet-title">Choose Voice</span>
     <button class="vsheet-done" onclick="closeVoiceSheet()">Done</button>
   </div>
-  <!-- TTS Language selector row -->
-  <div style="padding:8px 20px 0;flex-shrink:0">
+  <!-- TTS Language selector row — hidden for non-WebSpeech providers -->
+  <div id="vsheetLangRow" style="padding:8px 20px 0;flex-shrink:0">
     <div style="font-family:var(--font-sans);font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px" id="ttsLangLabel">TTS Language</div>
     <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;-webkit-overflow-scrolling:touch;scrollbar-width:none" id="ttsLangChips"><!-- populated by JS --></div>
   </div>
-  <div style="height:1px;background:var(--border);flex-shrink:0;margin:0 0 0 0"></div>
-  <div class="vsheet-list" id="vsheetList"><!-- populated by JS --></div>
+  <!-- Provider tabs + voice list rendered by _renderVoiceSheet -->
+  <div class="vsheet-list" id="vsheetList" style="display:flex;flex-direction:column;overflow:hidden"><!-- populated by JS --></div>
 </div>
 
 <!-- ══════════════════════ SIDEBAR ══════════════════════ -->
@@ -2966,6 +2992,105 @@ function setGreeting() {
   if (el) el.textContent = greeting;
 }
 
+// ── VOICE PROVIDER DEFINITIONS ──
+const _VS_PROVIDERS = [
+  { id:'ws',               name:'WebSpeech',    icon:'🌐', badge:'free',  desc:'Instant · Built-in browser TTS',     needsKey:false },
+  { id:'ko',               name:'Kokoro',       icon:'⚡', badge:'free',  desc:'Best quality · Local · ~80MB dl',   needsKey:false, isLocal:true },
+  { id:'streamelements',   name:'SE',           icon:'🎙️', badge:'free',  desc:'StreamElements · No key needed',     needsKey:false },
+  { id:'pollinations_tts', name:'Pollinations', icon:'🌸', badge:'free',  desc:'Free cloud · OpenAI voices',         needsKey:false },
+  { id:'openai',           name:'OpenAI',       icon:'🤖', badge:'key',   desc:'OpenAI TTS · Key required',          needsKey:true  },
+  { id:'elevenlabs',       name:'11Labs',       icon:'🎤', badge:'key',   desc:'ElevenLabs · Key required',          needsKey:true  },
+  { id:'deepgram',         name:'Deepgram',     icon:'🎯', badge:'key',   desc:'Deepgram Aura · Key required',       needsKey:true  },
+  { id:'grok_voice',       name:'Grok',         icon:'🔮', badge:'key',   desc:'xAI Grok Voice · Key required',      needsKey:true  },
+  { id:'fishaudio',        name:'Fish',         icon:'🐟', badge:'key',   desc:'Fish Audio · Key required',          needsKey:true  },
+  { id:'speecht5',         name:'SpeechT5',     icon:'🔬', badge:'free',  desc:'Microsoft · Local · ~300MB',         needsKey:false, isLocal:true },
+  { id:'parler',           name:'Parler',       icon:'🎭', badge:'free',  desc:'High quality · Local · ~700MB',      needsKey:false, isLocal:true },
+  { id:'mms',              name:'MMS',          icon:'🌍', badge:'free',  desc:'Meta · 1100+ langs · Local · ~500MB',needsKey:false, isLocal:true },
+];
+const _VS_CLOUD_VOICES = {
+  streamelements: [
+    {id:'Brian',   name:'Brian',    desc:'UK Male',          emoji:'🇬🇧', color:'#5b8def'},
+    {id:'Amy',     name:'Amy',      desc:'UK Female',        emoji:'🇬🇧', color:'#cf6ea0'},
+    {id:'Emma',    name:'Emma',     desc:'UK Female · Warm', emoji:'🇬🇧', color:'#9b6ecf'},
+    {id:'Geraint', name:'Geraint',  desc:'Welsh Male',       emoji:'🏴', color:'#4db3b3'},
+    {id:'Joanna',  name:'Joanna',   desc:'US Female',        emoji:'🇺🇸', color:'#d4714a'},
+    {id:'Joey',    name:'Joey',     desc:'US Male',          emoji:'🇺🇸', color:'#5b8def'},
+    {id:'Justin',  name:'Justin',   desc:'US Male · Young',  emoji:'🇺🇸', color:'#7fb05e'},
+    {id:'Kendra',  name:'Kendra',   desc:'US Female',        emoji:'🇺🇸', color:'#cf6ea0'},
+    {id:'Kimberly',name:'Kimberly', desc:'US Female',        emoji:'🇺🇸', color:'#e07a8f'},
+    {id:'Matthew', name:'Matthew',  desc:'US Male',          emoji:'🇺🇸', color:'#4db37e'},
+    {id:'Nicole',  name:'Nicole',   desc:'AU Female',        emoji:'🇦🇺', color:'#4db3b3'},
+    {id:'Raveena', name:'Raveena',  desc:'Indian Female',    emoji:'🇮🇳', color:'#d4a74a'},
+    {id:'Russell', name:'Russell',  desc:'AU Male',          emoji:'🇦🇺', color:'#5b8def'},
+    {id:'Salli',   name:'Salli',    desc:'US Female',        emoji:'🇺🇸', color:'#9b6ecf'},
+  ],
+  pollinations_tts: [
+    {id:'alloy',   name:'Alloy',   desc:'Neutral · Balanced',   emoji:'⚡', color:'#5b8def'},
+    {id:'ash',     name:'Ash',     desc:'Male · Warm',          emoji:'🔥', color:'#d4714a'},
+    {id:'ballad',  name:'Ballad',  desc:'Expressive',           emoji:'🎵', color:'#9b6ecf'},
+    {id:'coral',   name:'Coral',   desc:'Female · Soft',        emoji:'🪸', color:'#e07a8f'},
+    {id:'echo',    name:'Echo',    desc:'Male · Clear',         emoji:'🔊', color:'#4db3b3'},
+    {id:'fable',   name:'Fable',   desc:'Storyteller',          emoji:'📖', color:'#cf6ea0'},
+    {id:'nova',    name:'Nova',    desc:'Female · Vivid',       emoji:'✨', color:'#d4a74a'},
+    {id:'onyx',    name:'Onyx',    desc:'Male · Deep',          emoji:'🖤', color:'#7fb05e'},
+    {id:'sage',    name:'Sage',    desc:'Female · Calm',        emoji:'🌿', color:'#4db37e'},
+    {id:'shimmer', name:'Shimmer', desc:'Female · Bright',      emoji:'🌟', color:'#e07a52'},
+    {id:'verse',   name:'Verse',   desc:'Expressive',           emoji:'🎭', color:'#a78bfa'},
+  ],
+  openai: [
+    {id:'alloy',   name:'Alloy',   desc:'Neutral · Balanced',   emoji:'⚡', color:'#5b8def'},
+    {id:'ash',     name:'Ash',     desc:'Male · Warm',          emoji:'🔥', color:'#d4714a'},
+    {id:'ballad',  name:'Ballad',  desc:'Expressive',           emoji:'🎵', color:'#9b6ecf'},
+    {id:'coral',   name:'Coral',   desc:'Female · Soft',        emoji:'🪸', color:'#e07a8f'},
+    {id:'echo',    name:'Echo',    desc:'Male · Clear',         emoji:'🔊', color:'#4db3b3'},
+    {id:'fable',   name:'Fable',   desc:'Storyteller',          emoji:'📖', color:'#cf6ea0'},
+    {id:'nova',    name:'Nova',    desc:'Female · Vivid',       emoji:'✨', color:'#d4a74a'},
+    {id:'onyx',    name:'Onyx',    desc:'Male · Deep',          emoji:'🖤', color:'#7fb05e'},
+    {id:'sage',    name:'Sage',    desc:'Female · Calm',        emoji:'🌿', color:'#4db37e'},
+    {id:'shimmer', name:'Shimmer', desc:'Female · Bright',      emoji:'🌟', color:'#e07a52'},
+    {id:'verse',   name:'Verse',   desc:'Expressive',           emoji:'🎭', color:'#a78bfa'},
+  ],
+  elevenlabs: [
+    {id:'21m00Tcm4TlvDq8ikWAM', name:'Rachel',   desc:'US Female · Calm',        emoji:'🎤', color:'#d4714a'},
+    {id:'pNInz6obpgDQGcFmaJgB', name:'Adam',     desc:'US Male · Deep',          emoji:'🎤', color:'#5b8def'},
+    {id:'AZnzlk1XvdvUeBnXmlld', name:'Domi',     desc:'US Female · Strong',      emoji:'🎤', color:'#9b6ecf'},
+    {id:'EXAVITQu4vr4xnSDxMaL', name:'Bella',    desc:'US Female · Soft',        emoji:'🎤', color:'#cf6ea0'},
+    {id:'ErXwobaYiN019PkySvjV',  name:'Antoni',   desc:'US Male · Gentle',        emoji:'🎤', color:'#7fb05e'},
+    {id:'MF3mGyEYCl7XYWbV9V6O', name:'Elli',     desc:'US Female · Young',       emoji:'🎤', color:'#e07a8f'},
+    {id:'TxGEqnHWrfWFTfGW9XjX', name:'Josh',     desc:'US Male · Young',         emoji:'🎤', color:'#4db3b3'},
+    {id:'VR6AewLTigWG4xSOukaG', name:'Arnold',   desc:'US Male · Crisp',         emoji:'🎤', color:'#d4a74a'},
+    {id:'pqHfZKP75CvOlQylNhV4', name:'Bill',     desc:'US Male · Authoritative', emoji:'🎤', color:'#4db37e'},
+    {id:'yoZ06aMxZJJ28mfd3POQ', name:'Sam',      desc:'US Male · Raspy',         emoji:'🎤', color:'#a78bfa'},
+    {id:'cgSgspJ2msm6clMCkdW9', name:'Jessica',  desc:'US Female · Expressive',  emoji:'🎤', color:'#e07a52'},
+    {id:'iP95p4xoKVk53GoZ742B', name:'Chris',    desc:'US Male · Casual',        emoji:'🎤', color:'#5b8def'},
+  ],
+  deepgram: [
+    {id:'aura-asteria-en',  name:'Asteria', desc:'US Female · Confident', emoji:'⭐', color:'#d4714a'},
+    {id:'aura-luna-en',     name:'Luna',    desc:'US Female · Soft',      emoji:'🌙', color:'#9b6ecf'},
+    {id:'aura-stella-en',   name:'Stella',  desc:'US Female · Bubbly',    emoji:'✨', color:'#cf6ea0'},
+    {id:'aura-athena-en',   name:'Athena',  desc:'UK Female · Gentle',    emoji:'🏛️', color:'#4db3b3'},
+    {id:'aura-hera-en',     name:'Hera',    desc:'US Female · Strong',    emoji:'👑', color:'#d4a74a'},
+    {id:'aura-orion-en',    name:'Orion',   desc:'US Male · Warm',        emoji:'🌌', color:'#5b8def'},
+    {id:'aura-arcas-en',    name:'Arcas',   desc:'US Male · Calm',        emoji:'🐻', color:'#7fb05e'},
+    {id:'aura-perseus-en',  name:'Perseus', desc:'US Male · Neutral',     emoji:'⚔️', color:'#4db37e'},
+    {id:'aura-angus-en',    name:'Angus',   desc:'Irish Male · Friendly', emoji:'🍀', color:'#a78bfa'},
+    {id:'aura-orpheus-en',  name:'Orpheus', desc:'US Male · Confident',   emoji:'🎸', color:'#e07a52'},
+    {id:'aura-helios-en',   name:'Helios',  desc:'UK Male · Neutral',     emoji:'☀️', color:'#d4714a'},
+    {id:'aura-zeus-en',     name:'Zeus',    desc:'US Male · Strong',      emoji:'⚡', color:'#5b8def'},
+  ],
+  grok_voice: [
+    {id:'Aria',    name:'Aria',    desc:'Female · Expressive', emoji:'🎤', color:'#d4714a'},
+    {id:'Roger',   name:'Roger',   desc:'Male · Neutral',      emoji:'🎤', color:'#5b8def'},
+    {id:'Sarah',   name:'Sarah',   desc:'Female · Warm',       emoji:'🎤', color:'#cf6ea0'},
+    {id:'Laura',   name:'Laura',   desc:'Female · Soft',       emoji:'🎤', color:'#9b6ecf'},
+    {id:'Charlie', name:'Charlie', desc:'Male · Natural',      emoji:'🎤', color:'#7fb05e'},
+    {id:'George',  name:'George',  desc:'Male · Calm',         emoji:'🎤', color:'#4db37e'},
+    {id:'Callum',  name:'Callum',  desc:'Male · Intense',      emoji:'🎤', color:'#a78bfa'},
+    {id:'River',   name:'River',   desc:'Neutral · Calm',      emoji:'🎤', color:'#4db3b3'},
+  ],
+  fishaudio: [],
+};
+
 // ── VOICES (WebSpeech native — works on all browsers, no downloads needed)
 // Kokoro premium voices are also listed; they fall back to WebSpeech automatically
 const VOICES = [
@@ -3282,7 +3407,18 @@ function renderCloudModelSheet() {
     _imgRow('wan_27',         'Wan 2.7 Image 🌊',         'Free · Pollinations · Open-source detail',       '#22d3ee', false) +
     _imgRow('qwen_img',       'Qwen Image Plus 📸',       'Free · Pollinations · Alibaba · Photorealistic', '#6366f1', false) +
     _imgRow('seedream',       'Seedream 4.0 🌸',          'Freemium · Pollinations login · Artistic',       '#ec4899', false) +
+    _imgRow('poll_seedream5', 'Seedream 5.0 Lite 🌸',     'Freemium · Pollinations · ByteDance · Reasoning','#f472b6', false) +
+    _imgRow('poll_gpt_mini',  'GPT Image 1 Mini 🤖',      'Free · Pollinations · OpenAI · Fast',            '#10a37f', false) +
+    _imgRow('poll_gpt15',     'GPT Image 1.5 🤖',         'Free · Pollinations · OpenAI · High quality',    '#34d399', false) +
+    _imgRow('poll_zimage',    'Z-Image Turbo ⚡',          'Free · Pollinations · 6B Flux · 2x upscale',    '#22d3ee', false) +
+    _imgRow('poll_klein',     'FLUX.2 Klein 4B ⚡',        'Free · Pollinations · Fast edit & generation',  '#f59e0b', false) +
+    _imgRow('poll_wan27pro',  'Wan 2.7 Image Pro 🌊',     'Freemium · Pollinations · 4K · Thinking mode',  '#06b6d4', false) +
     _imgRow('grok_img',       'Grok Imagine 🤖',          'Freemium · Pollinations login · xAI Realism',   '#ffffff', false) +
+    _imgRow('poll_grok_pro',  'Grok Imagine Pro 🤖',      'Freemium · Pollinations · xAI Aurora · High Q', '#d1d5db', false) +
+    _imgRow('nano_banana_pro','NanoBanana Pro 🍌',        'Freemium · Pollinations · Gemini 3 Pro · 4K',   '#fbbf24', false) +
+    _imgRow('poll_pruna',     'Pruna p-image ⚡',          'Freemium · Pollinations · Fast generation',     '#a78bfa', false) +
+    _imgRow('poll_pruna_edit','Pruna p-image-edit ✏️',    'Freemium · Pollinations · Image editing',       '#818cf8', false) +
+    _imgRow('poll_nova_canvas','Nova Canvas 🎨',          'Freemium · Pollinations · Amazon Bedrock',      '#60a5fa', false) +
     // ── OpenRouter advanced ──
     _imgRow('or_recraft',     'Recraft v3 🎨',            'Vector/graphic design · OpenRouter key',        '#f97316', !orK) +
     _imgRow('or_imagen4',     'Imagen 4.0 🖼',            'Google · Best quality · OpenRouter key',         '#4285f4', !orK) +
@@ -3550,7 +3686,7 @@ function renderCloudModelSheet() {
         {id:'poll_pruna',         name:'Pruna p-video',          sub:'Pollinations · Pruna AI · ultra-fast',                c:'#a78bfa', badge:'Pollen'},
         {id:'poll_seedance_fast', name:'Seedance Pro-Fast 🌸',   sub:'Pollinations · ByteDance · fast',                   c:'#f472b6', badge:'Pollen'},
         {id:'poll_grok_video',    name:'Grok Video Pro',         sub:'Pollinations · xAI · high quality',                   c:'#eab308', badge:'Pollen'},
-        {id:'poll_nova_reel',     name:'Nova Reel',              sub:'Pollinations · Amazon · cinematic',                   c:'#60a5fa', badge:'Pollen'},
+        {id:'poll_nova_reel',     name:'Nova Reel',              sub:'Pollinations · Amazon · cinematic · seed support · free',            c:'#60a5fa', badge:'Free'},
         {id:'poll_veo3_fast',     name:'Veo 3.1 Fast 🔬',        sub:'Pollinations · Google · audio+video',                 c:'#4285f4', badge:'Pollen'},
         {id:'poll_seedance2',     name:'Seedance 2.0 🌸',        sub:'Pollinations · ByteDance · high quality',             c:'#d4714a', badge:'Pollen'},
         {id:'poll_wan26',         name:'Wan 2.6',                sub:'Pollinations · Wan-AI · open-source',                 c:'#06b6d4', badge:'Pollen'},
@@ -3661,7 +3797,7 @@ function _selectLocalSttFromSheet(id) {
 function _switchToCloudImg(id) {
   lsSet('imageModelPref', id);
   _refreshImageTab && _refreshImageTab();
-  const names = { flux_schnell:'FLUX.1-schnell (free)', poll_turbo:'Pollinations Turbo (free)', poll_realism:'Flux Realism (free)', nano_banana:'Nano Banana (free)', nano_banana_2:'Nano Banana 2 (Gemini)', flux_dev:'FLUX.1-dev (HF token)', sd35:'SD 3.5 (Stability)', fal_flux_pro:'FLUX.1-pro (fal.ai)', together_flux:'Together FLUX', ideogram:'Ideogram v2', dalle3:'DALL-E 3 (OpenAI)', poll_kontext:'FLUX.1 Kontext (free)', wan_27:'Wan 2.7 Image (free)', qwen_img:'Qwen Image Plus (free)', seedream:'Seedream 4.0 (Pollinations)', grok_img:'Grok Imagine (Pollinations)', or_recraft:'Recraft v3 (OpenRouter)', or_imagen4:'Imagen 4.0 (OpenRouter)', or_midjourney:'Midjourney v7 (OpenRouter)' };
+  const names = { flux_schnell:'FLUX.1-schnell (free)', poll_turbo:'Pollinations Turbo (free)', poll_realism:'Flux Realism (free)', nano_banana:'Nano Banana (free)', nano_banana_2:'Nano Banana 2 (Gemini)', flux_dev:'FLUX.1-dev (HF token)', sd35:'SD 3.5 (Stability)', fal_flux_pro:'FLUX.1-pro (fal.ai)', together_flux:'Together FLUX', ideogram:'Ideogram v2', dalle3:'DALL-E 3 (OpenAI)', poll_kontext:'FLUX.1 Kontext (free)', wan_27:'Wan 2.7 Image (free)', qwen_img:'Qwen Image Plus (free)', seedream:'Seedream 4.0 (Pollinations)', grok_img:'Grok Imagine (Pollinations)', or_recraft:'Recraft v3 (OpenRouter)', or_imagen4:'Imagen 4.0 (OpenRouter)', or_midjourney:'Midjourney v7 (OpenRouter)', poll_gpt_mini:'GPT Image 1 Mini (free)', poll_gpt15:'GPT Image 1.5 (free)', poll_zimage:'Z-Image Turbo (free)', poll_klein:'FLUX.2 Klein 4B (free)', poll_seedream5:'Seedream 5.0 Lite (Pollinations)', poll_wan27pro:'Wan 2.7 Image Pro (Pollinations)', poll_grok_pro:'Grok Imagine Pro (Pollinations)', nano_banana_pro:'NanoBanana Pro (Pollinations)', poll_pruna:'Pruna p-image (Pollinations)', poll_pruna_edit:'Pruna p-image-edit (Pollinations)', poll_nova_canvas:'Nova Canvas (Pollinations)' };
   showToast('🖼 Image: ' + (names[id] || id));
   haptic && haptic();
   closeCloudModelSheet();
@@ -3960,10 +4096,10 @@ const PROVIDER_MODELS = {
     name:'Cerebras', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-0.15em;flex-shrink:0"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="3" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="21" y2="12"/><line x1="12" y1="3" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="21"/></svg>', color:'#f43f5e',
     endpoint:'https://api.cerebras.ai/v1/chat/completions',
     models:[
-      { id:'llama-4-scout-17b-16e-instruct', name:'Llama 4 Scout', free:true, sub:'~2000 t/s · FREE w/ limits' },
-      { id:'llama-3.3-70b',                  name:'Llama 3.3 70B', free:true, sub:'~1000 t/s · FREE w/ limits' },
-      { id:'llama3.1-8b',                    name:'Llama 3.1 8B',  free:true, sub:'Fastest · Tiny · FREE w/ limits' },
-      { id:'qwen-3-32b',                     name:'Qwen 3 32B',    free:true, sub:'Smart · 32B · FREE w/ limits' },
+      { id:'llama-4-scout-17b-16e-instruct', name:'Llama 4 Scout',  free:true, sub:'~2000 t/s · FREE w/ limits' },
+      { id:'gpt-oss-120b',                   name:'GPT-OSS 120B',   free:true, sub:'OpenAI open · Reasoning · FREE w/ limits' },
+      { id:'zai-glm-4.7',                    name:'ZAI GLM-4.7',    free:true, sub:'Preview · Smart · FREE w/ limits' },
+      { id:'llama3.1-8b',                    name:'Llama 3.1 8B',   free:true, sub:'Fastest · Tiny · FREE w/ limits' },
     ]
   },
   perplexity: {
@@ -4023,14 +4159,13 @@ const PROVIDER_MODELS = {
     name:'SambaNova', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-0.15em;flex-shrink:0"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>', color:'#ef4444',
     endpoint:'https://api.sambanova.ai/v1/chat/completions',
     models:[
-      { id:'Meta-Llama-4-Maverick-17B-128E-Instruct', name:'Llama 4 Maverick', free:true, sub:'Meta · FREE w/ limits' },
-      { id:'Meta-Llama-4-Scout-17B-16E-Instruct',     name:'Llama 4 Scout',    free:true, sub:'Meta · Efficient · FREE w/ limits' },
-      { id:'Meta-Llama-3.3-70B-Instruct',             name:'Llama 3.3 70B',    free:true, sub:'Meta · Reliable · FREE w/ limits' },
-      { id:'DeepSeek-R1',                             name:'DeepSeek R1',      free:true, sub:'671B reasoning · FREE w/ limits' },
-      { id:'DeepSeek-V3-0324',                        name:'DeepSeek V3',      free:true, sub:'Flagship · FREE w/ limits' },
-      { id:'Qwen3-32B',                               name:'Qwen 3 32B',       free:true, sub:'Alibaba · Smart · FREE w/ limits' },
-      { id:'Qwen2.5-72B-Instruct',                    name:'Qwen 2.5 72B',     free:true, sub:'Alibaba · Solid · FREE w/ limits' },
-      { id:'QwQ-32B',                                 name:'QwQ 32B',          free:true, sub:'Reasoning · Alibaba · FREE w/ limits' },
+      { id:'gpt-oss-120b',                     name:'GPT-OSS 120B',      free:true, sub:'OpenAI open · Fast Lane · FREE w/ limits' },
+      { id:'DeepSeek-V3.1',                    name:'DeepSeek V3.1',     free:true, sub:'DeepSeek · Fast Lane · 128k · FREE w/ limits' },
+      { id:'Meta-Llama-3.3-70B-Instruct',      name:'Llama 3.3 70B',     free:true, sub:'Meta · Fast Lane · FREE w/ limits' },
+      { id:'MiniMax-M2.7',                     name:'MiniMax M2.7',      free:true, sub:'MiniMax · 192k ctx · FREE w/ limits' },
+      { id:'Llama-4-Maverick-17B-128E-Instruct',name:'Llama 4 Maverick', free:true, sub:'Meta · Vision · Preview · FREE w/ limits' },
+      { id:'DeepSeek-V3.2',                    name:'DeepSeek V3.2',     free:true, sub:'DeepSeek · Preview · 32k · FREE w/ limits' },
+      { id:'gemma-3-12b-it',                   name:'Gemma 3 12B',       free:true, sub:'Google · Vision · Preview · FREE w/ limits' },
     ]
   },
   huggingface: {
@@ -4726,10 +4861,34 @@ async function generateVideo(prompt) {
       let res;
       try {
         const _vidSeed = Math.floor(Math.random()*2147483646) + 1;
-        // Pollinations caches by prompt text — append a random style hint to bust cache
-        // Append invisible nonce to bust Pollinations prompt cache without affecting style
-        const _vidPrompt = prompt + ' ' + Math.floor(Math.random()*9999999);
-        res = await fetch('https://gen.pollinations.ai/video/' + encodeURIComponent(_vidPrompt) + '?model=' + modelParam + '&nologo=true&seed=' + _vidSeed, {
+        // Pollinations caches server-side on the decoded prompt text — only way to bust is
+        // to vary the prompt itself. Append a random cinematic detail: changes the cache key
+        // AND gives the model useful variation info, so every generation is actually different.
+        const _camVariants = [
+          'steady cam shot','handheld camera','drone aerial shot','tracking shot',
+          'dolly zoom','slow motion','rack focus','wide angle lens',
+          'shallow depth of field','deep focus','anamorphic lens flare',
+          'slow push in','crane shot','low angle','high angle',
+          'whip pan','tilt up','orbit shot','oner','snap zoom'
+        ];
+        const _lightVariants = [
+          'golden hour light','overcast daylight','soft natural light','blue hour',
+          'harsh noon sun','backlit silhouette','interior warm light',
+          'foggy atmosphere','night scene city lights','rainy reflections',
+          'magic hour sunset','moonlight'
+        ];
+        // Two independent random picks → 20×12 = 240 combinations, collisions negligible
+        const _ri1 = Math.floor(Math.random() * _camVariants.length);
+        const _ri2 = Math.floor(Math.random() * _lightVariants.length);
+        const _camDetail = _camVariants[_ri1] + ', ' + _lightVariants[_ri2];
+        // Check if user explicitly asked for a stylized/non-realistic look
+        const _styleKws = ['cartoon','anime','animated','animation','illustrat','drawing','sketch','pixar','disney','2d','3d render','cgi','painted','watercolor','oil paint','stylized','comic'];
+        const _wantsStyle = _styleKws.some(kw => prompt.toLowerCase().includes(kw));
+        const _nonce = Math.floor(Math.random()*999999999) + 1;
+        const _finalPrompt = _wantsStyle
+          ? (_nonce + ' ' + prompt + ', ' + _camDetail)
+          : (_nonce + ' Cinematic photorealistic footage. ' + prompt + ', ' + _camDetail);
+        res = await fetch('https://gen.pollinations.ai/video/' + encodeURIComponent(_finalPrompt) + '?model=' + modelParam + '&nologo=true&seed=-1', {
           method: 'GET', headers, signal: sig
         });
       } finally {
@@ -4803,10 +4962,19 @@ async function generateVideo(prompt) {
       throw new Error(`${m.name} requires a fal.ai key.\n\nGo to Settings → API Keys → Image tab → fal.ai to add it.\n(Your current text provider is ${provName} — video generation uses fal.ai separately.)`);
     }
     try {
+      const _falBaseBody = m.body(prompt);
+      // Only inject negative_prompt if user didn't explicitly request a stylized look
+      const _falStyleKws = ['cartoon','anime','animated','animation','illustrat','drawing','sketch','pixar','disney','2d','3d render','cgi','painted','watercolor','oil paint','stylized','comic'];
+      const _falWantsStyle = _falStyleKws.some(kw => prompt.toLowerCase().includes(kw));
+      const _falBody = _falWantsStyle ? _falBaseBody : {
+        ..._falBaseBody,
+        negative_prompt: (_falBaseBody.negative_prompt ? _falBaseBody.negative_prompt + ', ' : '') +
+          'cartoon, anime, illustration, animation, 2D, 3D render, CGI, Pixar, Disney, sketch, drawing, watercolor, oil painting, low quality, blurry, unrealistic, artificial'
+      };
       const sub = await fetch(`https://queue.fal.run/${m.falEndpoint}`, {
         method: 'POST',
         headers: { 'Authorization': 'Key ' + falKey, 'Content-Type': 'application/json' },
-        body: JSON.stringify(m.body(prompt)),
+        body: JSON.stringify(_falBody),
         signal: sig
       });
       if (sub.ok) {
@@ -4919,7 +5087,7 @@ function addVideoMsg(videoUrl, prompt) {
     <div class="ai-content">
       <div class="ai-text">
         <div class="gen-img-wrap">
-          <video src="${escAttr(videoUrl)}" controls autoplay loop muted playsinline
+          <video src="${escAttr(videoUrl)}" controls loop playsinline
             style="width:100%;max-width:340px;border-radius:14px;display:block;background:#000"
             onerror="this.parentElement.innerHTML='<p style=color:var(--red)>Video playback failed</p>'"></video>
           <div class="gen-img-caption">Generated video</div>
@@ -5184,10 +5352,36 @@ async function generateImage(prompt) {
   // ── Grok Imagine (Pollinations freemium) ──
   if (imgPref === 'grok_img') {
     try {
-      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=grok-imagine&seed=' + Math.floor(Math.random()*2147483647);
+      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=grok-imagine&seed=-1';
       const polRes = await fetch(polUrl, { signal: sig });
       if (polRes.ok) { const blob = await polRes.blob(); if (blob.size > 1000) return URL.createObjectURL(blob); }
     } catch(e) { if (e.name === 'AbortError') throw e; }
+  }
+
+  // ── Pollinations: simple model map (all use image.pollinations.ai, seed=-1 where supported) ──
+  const _pollImgMap = {
+    poll_gpt_mini:   'gptimage',
+    poll_gpt15:      'gptimage-large',
+    poll_zimage:     'zimage',
+    poll_klein:      'klein',
+    poll_seedream5:  'seedream5',
+    poll_wan27pro:   'wan-image-pro',
+    poll_grok_pro:   'grok-imagine-pro',
+    nano_banana_pro: 'nanobanana-pro',
+    poll_pruna:      'p-image',
+    poll_pruna_edit: 'p-image-edit',
+    poll_nova_canvas:'nova-canvas',
+  };
+  if (_pollImgMap[imgPref]) {
+    try {
+      const polToken = ls('pollinationsToken', '') || (apiKeys && apiKeys['pollinations']) || '';
+      const polHeaders = polToken ? { 'Authorization': 'Bearer ' + polToken } : {};
+      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=' + _pollImgMap[imgPref] + '&seed=-1';
+      const polRes = await fetch(polUrl, { headers: polHeaders, signal: sig });
+      if (polRes.ok) { const blob = await polRes.blob(); if (blob.size > 1000) return URL.createObjectURL(blob); }
+      const errTxt = await polRes.text().catch(() => polRes.statusText);
+      throw new Error(_pollImgMap[imgPref] + ' ' + polRes.status + ': ' + errTxt.slice(0, 100));
+    } catch(e) { if (e.name === 'AbortError') throw e; throw new Error(_pollImgMap[imgPref] + ' failed: ' + e.message); }
   }
 
   // ── OpenRouter image generation (Recraft, Imagen 4, Midjourney, SD 3.5, GPT Image 2) ──
@@ -7798,6 +7992,24 @@ async function _tryCustomTts(text, btn) {
     let audioUrl = null;
     const key = ls('ttsKey_' + provId, '');
 
+    // ── Local offline TTS (SpeechT5 · Parler · MMS) ──
+    if (provId === 'speecht5' || provId === 'parler' || provId === 'mms') {
+      const url = await _vsRunLocalTts(provId, text);
+      const _blob = await fetch(url).then(r => r.blob());
+      URL.revokeObjectURL(url);
+      const ctxSrc = await window._playBlobViaCtx?.(_blob, _done);
+      if (ctxSrc) { currentAudio = { pause: () => window._stopCtxSrc?.() }; return true; }
+      const fallUrl = URL.createObjectURL(_blob);
+      const audio = new Audio(fallUrl);
+      currentAudio = audio;
+      audio.onended = () => { try { URL.revokeObjectURL(fallUrl); } catch(e){} _done(); };
+      audio.onerror = () => { try { URL.revokeObjectURL(fallUrl); } catch(e){} _done(); };
+      await window._ensureAudioUnlocked?.();
+      const ok = await audio.play().then(() => true).catch(() => false);
+      if (!ok) { currentAudio = null; _done(); return false; }
+      return true;
+    }
+
     // ── Free providers (no key needed) ──
     if (provId === 'streamelements') {
       const seVoice = ls('seVoice', 'Brian');
@@ -7972,11 +8184,36 @@ async function _tryCustomTts(text, btn) {
 
     if (!audioUrl) return false;
     if (currentAudio) { try { currentAudio.pause(); } catch(e){} currentAudio = null; }
+
+    // Primary: AudioContext playback — immune to browser autoplay policy blocks
+    try {
+      const _blob = await fetch(audioUrl).then(r => r.blob());
+      URL.revokeObjectURL(audioUrl);
+      const ctxSrc = await window._playBlobViaCtx?.(_blob, _done);
+      if (ctxSrc) {
+        currentAudio = { pause: () => window._stopCtxSrc?.() };
+        return true;
+      }
+      // AudioContext failed — reuse blob for HTMLAudio fallback
+      const _fallUrl = URL.createObjectURL(_blob);
+      const audio = new Audio(_fallUrl);
+      currentAudio = audio;
+      audio.onended = () => { try { URL.revokeObjectURL(_fallUrl); } catch(e){} _done(); };
+      audio.onerror = () => { try { URL.revokeObjectURL(_fallUrl); } catch(e){} _done(); };
+      await window._ensureAudioUnlocked?.();
+      const _played = await audio.play().then(() => true).catch(() => false);
+      if (!_played) { currentAudio = null; _done(); return false; }
+      return true;
+    } catch(_e) {}
+
+    // fetch of blob URL failed — try direct HTMLAudioElement on original URL
     const audio = new Audio(audioUrl);
     currentAudio = audio;
     audio.onended = () => { try { URL.revokeObjectURL(audioUrl); } catch(e){} _done(); };
-    audio.onerror = () => { try { URL.revokeObjectURL(audioUrl); } catch(e){} _done(); showToast('⚠️ TTS playback error'); };
-    audio.play().catch(err => { _done(); showToast('⚠️ TTS play failed: ' + (err?.message || err)); });
+    audio.onerror = () => { try { URL.revokeObjectURL(audioUrl); } catch(e){} _done(); };
+    await window._ensureAudioUnlocked?.();
+    const _played = await audio.play().then(() => true).catch(() => false);
+    if (!_played) { currentAudio = null; _done(); return false; }
     return true;
 
   } catch(e) {
@@ -8340,7 +8577,13 @@ async function _callCustomProvider(messages, stream, onChunk, sig) {
   } else if (customApiKey.provider === 'gemini') {
     return _callGeminiAPI(messages, stream, onChunk, sig, key, model);
   } else {
-    return _callOpenAICompatible(prov.endpoint, messages, stream, onChunk, sig, key, model);
+    // HuggingFace: also try hfToken (image token) as fallback since users typically
+    // set their HF token in image settings, not the separate provider key UI
+    let finalKey = key;
+    if (customApiKey.provider === 'huggingface' && !finalKey) {
+      finalKey = ls('hfToken', '') || '';
+    }
+    return _callOpenAICompatible(prov.endpoint, messages, stream, onChunk, sig, finalKey, model);
   }
 }
 
@@ -8426,8 +8669,9 @@ async function _callOpenAICompatible(endpoint, messages, stream, onChunk, sig, k
   }
   // OpenRouter extra headers
   if (finalEndpoint.includes('openrouter')) {
-    headers['HTTP-Referer'] = location.href;
+    headers['HTTP-Referer'] = 'https://helixai-4-0.github.io';
     headers['X-Title'] = 'Helix AI';
+    headers['X-Requested-With'] = 'XMLHttpRequest';
   }
   const res = await fetch(finalEndpoint, { method:'POST', headers, body:JSON.stringify(body), signal:sig });
   if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.error?.message || 'API error ' + res.status); }
@@ -8471,6 +8715,125 @@ async function preloadWebLLM() {
 ══════════════════════════════════════════ */
 function _getVoice(id) { return VOICES.find(v => v.id === id) || VOICES[0]; }
 
+// ── Voice sheet provider state ──
+let _vsActiveProvider = null;
+
+function _vsInitProvider() {
+  const cProv = ls('customTtsProvider', 'none');
+  if (cProv !== 'none') { _vsActiveProvider = cProv; return; }
+  const v = _getVoice(selectedVoiceId);
+  _vsActiveProvider = v.provider || 'ws';
+}
+
+function _vsGetSelected(provId) {
+  if (provId === 'ws' || provId === 'ko') return selectedVoiceId;
+  if (provId === 'streamelements')   return ls('seVoice', 'Brian');
+  if (provId === 'pollinations_tts') return ls('pollinationsTtsVoice', 'alloy');
+  if (provId === 'openai')           return ls('ttsOpenAiVoice', 'alloy');
+  if (provId === 'elevenlabs')       return ls('ttsVoiceId_elevenlabs', '21m00Tcm4TlvDq8ikWAM');
+  if (provId === 'deepgram')         return ls('ttsDeepgramVoice', 'aura-asteria-en');
+  if (provId === 'grok_voice')       return ls('ttsGrokVoice', 'Aria');
+  if (provId === 'fishaudio')        return ls('ttsVoiceId_fishaudio', '');
+  return '';
+}
+
+function _vsSelectVoice(provId, voiceId) {
+  haptic && haptic();
+  if (provId === 'ws' || provId === 'ko') {
+    lsSet('customTtsProvider', 'none');
+    selectedVoiceId = voiceId;
+    lsSet('selectedVoiceId', voiceId);
+    _updateVoiceLabels();
+    _renderVoiceSheet();
+    return;
+  }
+  if (provId === 'speecht5' || provId === 'parler' || provId === 'mms') {
+    lsSet('customTtsProvider', provId);
+    const pData = _VS_PROVIDERS.find(p => p.id === provId);
+    showToast('TTS: ' + (pData?.name || provId));
+    _renderVoiceSheet();
+    return;
+  }
+  // Cloud provider: set the voice + activate this provider
+  if (provId === 'streamelements')   lsSet('seVoice', voiceId);
+  if (provId === 'pollinations_tts') lsSet('pollinationsTtsVoice', voiceId);
+  if (provId === 'openai')           lsSet('ttsOpenAiVoice', voiceId);
+  if (provId === 'elevenlabs')       lsSet('ttsVoiceId_elevenlabs', voiceId);
+  if (provId === 'deepgram')         lsSet('ttsDeepgramVoice', voiceId);
+  if (provId === 'grok_voice')       lsSet('ttsGrokVoice', voiceId);
+  if (provId === 'fishaudio')        lsSet('ttsVoiceId_fishaudio', voiceId);
+  lsSet('customTtsProvider', provId);
+  const vData = (_VS_CLOUD_VOICES[provId] || []).find(v => v.id === voiceId);
+  const vName = vData ? vData.name : voiceId;
+  const pData = _VS_PROVIDERS.find(p => p.id === provId);
+  showToast('Voice: ' + vName + ' · ' + (pData?.name || provId));
+  _renderVoiceSheet();
+}
+
+function _vsSelectProvider(provId) {
+  _vsActiveProvider = provId;
+  // Show/hide lang chips — only relevant for WebSpeech
+  const langRow = document.getElementById('vsheetLangRow');
+  if (langRow) langRow.style.display = (provId === 'ws') ? '' : 'none';
+  _renderVoiceSheet();
+  haptic && haptic();
+}
+
+async function _vsTestCloudVoice(provId, voiceId, btn) {
+  if (btn.classList.contains('testing')) { _stopTestAudio(); return; }
+  _stopTestAudio();
+  testingVoiceId = voiceId;
+  btn.classList.add('testing');
+  const vData = (_VS_CLOUD_VOICES[provId] || []).find(v => v.id === voiceId);
+  const sample = 'Hi, I am ' + (vData?.name || voiceId) + '.';
+  function _done() { testingVoiceId = null; testAudio = null; btn.classList.remove('testing'); }
+  // Temporarily set provider to test
+  const prevProv = ls('customTtsProvider', 'none');
+  const prevVoice = _vsGetSelected(provId);
+  lsSet('customTtsProvider', provId);
+  if (provId === 'streamelements')   lsSet('seVoice', voiceId);
+  if (provId === 'pollinations_tts') lsSet('pollinationsTtsVoice', voiceId);
+  if (provId === 'openai')           lsSet('ttsOpenAiVoice', voiceId);
+  if (provId === 'elevenlabs')       lsSet('ttsVoiceId_elevenlabs', voiceId);
+  if (provId === 'deepgram')         lsSet('ttsDeepgramVoice', voiceId);
+  if (provId === 'grok_voice')       lsSet('ttsGrokVoice', voiceId);
+  try {
+    const ok = await _tryCustomTts(sample, null);
+    if (!ok) showToast('⚠️ Test failed');
+  } catch(e) { showToast('TTS error: ' + e.message); }
+  _done();
+  // Restore previous unless user selected this voice
+  if (ls('customTtsProvider', 'none') === provId) {
+    // user may have auto-selected, keep as is
+  }
+}
+
+async function _vsDownloadKokoro() {
+  // Show inline progress in sheet
+  _vsRenderKokoroDl(true, 0, 'Starting download…');
+  _showKokoroDownloadOverlay();
+  try {
+    await _loadKokoroJS();
+    _vsRenderKokoroDl(false, 100, '✅ Ready!');
+    setTimeout(() => _renderVoiceSheet(), 400);
+  } catch(e) {
+    _vsRenderKokoroDl(false, 0, '❌ Failed: ' + e.message);
+  }
+}
+
+function _vsRenderKokoroDl(active, pct, status) {
+  const fill = document.getElementById('vsDlBarFill');
+  const stat = document.getElementById('vsDlStatus');
+  const btn  = document.getElementById('vsDlBtn');
+  const bars = document.getElementById('vsDlBars');
+  if (fill) fill.style.width = pct + '%';
+  if (stat) stat.textContent = status;
+  if (btn)  btn.style.display = active ? 'none' : (pct === 100 ? 'none' : '');
+  if (bars) bars.style.display = active ? 'flex' : 'none';
+  // Mirror to kkdl overlay
+  _kkdlSetPct(pct); _kkdlSetStatus(status);
+}
+
 function _updateVoiceLabels() {
   const v = _getVoice(selectedVoiceId);
   const el = document.getElementById('settingsVoiceName');
@@ -8478,7 +8841,10 @@ function _updateVoiceLabels() {
 }
 
 function openVoiceSheet() {
+  _vsInitProvider();
   _renderTtsLangChips();
+  const langRow = document.getElementById('vsheetLangRow');
+  if (langRow) langRow.style.display = (_vsActiveProvider === 'ws') ? '' : 'none';
   _renderVoiceSheet();
   document.getElementById('vsheetOverlay').classList.add('open');
   document.getElementById('vsheet').classList.add('open');
@@ -8595,46 +8961,173 @@ async function _runTestVoice(v, sample, id, _done) {
 }
 
 function _renderVoiceSheet() {
+  if (!_vsActiveProvider) _vsInitProvider();
   const list = document.getElementById('vsheetList');
   if (!list) return;
-  // Determine locale hint for labeling
-  const effectiveLang = ttsLang || sttLang;
-  const langEntry = LANG_LIST.find(l => l.stt === effectiveLang || l.code === (effectiveLang||'').slice(0,2)) || LANG_LIST.find(l => l.code === uiLang) || LANG_LIST[0];
-  const localeLang = langEntry.label;
 
-  // Split voices by relevance: locale-matching first, then other ws, then Kokoro premium
-  const matchLang = (effectiveLang || 'en').slice(0, 2);
-  const matchVoices = VOICES.filter(v => v.wsLang && v.wsLang.toLowerCase().startsWith(matchLang.toLowerCase()));
-  const wsOther     = VOICES.filter(v => v.provider==='ws' && !matchVoices.includes(v));
-  const koVoices    = VOICES.filter(v => v.provider==='ko' && !matchVoices.includes(v));
-  const seVoices    = []; // StreamElements removed
+  const cProv = ls('customTtsProvider', 'none');
 
-  function voiceRow(v) {
-    const sel = v.id === selectedVoiceId;
-    return `<div class="vsheet-row${sel?' selected':''}" onclick="selectVoice('${v.id}')">
+  // ── Provider tabs ──
+  const tabsHtml = '<div class="vprov-tabs">' + _VS_PROVIDERS.map(p => {
+    const isActive = p.id === _vsActiveProvider;
+    const hasKey   = p.needsKey && !!ls('ttsKey_' + p.id, '');
+    const badgeCls = p.badge === 'free' ? '' : 'key';
+    const hasKeyCls = hasKey ? ' has-key' : '';
+    const badgeLabel = p.badge === 'free' ? 'FREE' : (hasKey ? '✓' : 'KEY');
+    return `<div class="vprov-tab${isActive?' active':''}${hasKeyCls}" onclick="_vsSelectProvider('${p.id}')">
+      <div class="vprov-tab-icon">${p.icon}</div>
+      <div class="vprov-tab-name">${p.name}</div>
+      <span class="vprov-tab-badge ${badgeCls}">${badgeLabel}</span>
+    </div>`;
+  }).join('') + '</div><div style="height:1px;background:var(--border);flex-shrink:0"></div>';
+
+  const prov = _vsActiveProvider;
+
+  // ── Content per provider ──
+  let bodyHtml = '';
+
+  function _voiceRow(v, selId, clickFn, testFn) {
+    const sel = v.id === selId;
+    return `<div class="vsheet-row${sel?' selected':''}" onclick="${clickFn}('${prov}','${v.id}')">
       <div class="vsheet-row-icon" style="background:${v.color}22">${v.emoji}</div>
       <div class="vsheet-row-body"><div class="vsheet-row-name">${v.name}</div><div class="vsheet-row-desc">${v.desc}</div></div>
       <div class="vsheet-row-right">
-        <button class="vsheet-test-btn" id="vtest_${v.id}" onclick="event.stopPropagation();testVoice('${v.id}')">▶ Test</button>
+        <button class="vsheet-test-btn" id="vtest_${v.id}" onclick="event.stopPropagation();${testFn}">${testingVoiceId===v.id?'■ Stop':'▶ Test'}</button>
         <div class="vsheet-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
       </div>
     </div>`;
   }
 
-  let html = '';
-  if (matchVoices.length) {
-    html += `<div class="vsheet-section-label">${localeLang} · Recommended</div>`;
-    html += matchVoices.map(voiceRow).join('');
+  if (prov === 'ws') {
+    const effectiveLang = ttsLang || sttLang;
+    const matchLang = (effectiveLang || 'en').slice(0, 2);
+    const langEntry = LANG_LIST.find(l => l.stt === effectiveLang || l.code === (effectiveLang||'').slice(0,2)) || LANG_LIST[0];
+    const matchVoices = VOICES.filter(v => v.provider==='ws' && v.wsLang && v.wsLang.toLowerCase().startsWith(matchLang.toLowerCase()));
+    const wsOther     = VOICES.filter(v => v.provider==='ws' && !matchVoices.includes(v));
+    if (matchVoices.length) {
+      bodyHtml += `<div class="vsheet-section-label">${langEntry.label} · Recommended</div>`;
+      bodyHtml += matchVoices.map(v => _voiceRow(v, selectedVoiceId, '_vsSelectVoice', `testVoice('${v.id}')`)).join('');
+    }
+    if (wsOther.length) {
+      bodyHtml += `<div class="vsheet-section-label" style="margin-top:6px">Other Languages</div>`;
+      bodyHtml += wsOther.map(v => _voiceRow(v, selectedVoiceId, '_vsSelectVoice', `testVoice('${v.id}')`)).join('');
+    }
+
+  } else if (prov === 'ko') {
+    if (_kokoroTTS) {
+      // Downloaded — show voices
+      const koVoices = VOICES.filter(v => v.provider === 'ko');
+      bodyHtml += `<div class="vsheet-section-label">✅ Kokoro Downloaded · ${koVoices.length} voices</div>`;
+      bodyHtml += koVoices.map(v => _voiceRow(v, selectedVoiceId, '_vsSelectVoice', `testVoice('${v.id}')`)).join('');
+    } else {
+      // Not downloaded yet
+      const isDownloading = !!_kokoroLoadPromise;
+      bodyHtml += `<div class="vprov-dl-panel">
+        <div class="vprov-dl-icon">
+          <div class="vprov-dl-ring"></div><div class="vprov-dl-ring"></div>
+          <div class="vprov-dl-core"></div>
+        </div>
+        <div class="vprov-dl-title">Kokoro AI Voice</div>
+        <div class="vprov-dl-sub">Fully local · ~80MB one-time download<br>Best quality available · Works offline forever</div>
+        ${isDownloading ? `
+        <div class="vprov-dl-bar-wrap" id="vsDlBars" style="display:flex;flex-direction:column;gap:6px;width:100%">
+          <div class="vprov-dl-bar-track"><div class="vprov-dl-bar-fill" id="vsDlBarFill"></div></div>
+          <div class="vprov-dl-status" id="vsDlStatus">Downloading…</div>
+        </div>` : `
+        <button class="vprov-dl-btn" id="vsDlBtn" onclick="_vsDownloadKokoro()">⬇ Download Kokoro</button>
+        <div class="vprov-dl-sub" style="margin-top:-4px">10 high-quality English voices</div>`}
+      </div>`;
+      // Preview the voices greyed out
+      const koVoices = VOICES.filter(v => v.provider === 'ko');
+      bodyHtml += `<div class="vsheet-section-label" style="margin-top:2px;opacity:0.5">Preview (requires download)</div>`;
+      bodyHtml += koVoices.map(v => `<div class="vsheet-row" style="opacity:0.4;pointer-events:none">
+        <div class="vsheet-row-icon" style="background:${v.color}22">${v.emoji}</div>
+        <div class="vsheet-row-body"><div class="vsheet-row-name">${v.name}</div><div class="vsheet-row-desc">${v.desc}</div></div>
+        <div class="vsheet-row-right"><div style="font-family:var(--font-sans);font-size:10px;color:var(--text3)">🔒 dl</div></div>
+      </div>`).join('');
+    }
+
+  } else if (prov === 'speecht5' || prov === 'parler' || prov === 'mms') {
+    const isLoaded = !!_vsLocalEngines[prov];
+    const isLoading = !!_vsLocalLoadPromises[prov];
+    const meta = {
+      speecht5: { name:'SpeechT5', desc:'Microsoft · Single neutral voice · Good quality', size:'~300MB', emoji:'🔬', color:'#0078d4' },
+      parler:   { name:'Parler Mini', desc:'Highest quality · Single expressive voice · Instruction-based', size:'~700MB', emoji:'🎭', color:'#10a37f' },
+      mms:      { name:'Meta MMS', desc:'1100+ language support · Best for non-English', size:'~500MB', emoji:'🌍', color:'#0668e1' },
+    }[prov];
+    const isActiveProv = cProv === prov;
+
+    if (isLoaded) {
+      // Ready — show activate button
+      bodyHtml += `<div style="padding:14px 16px">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;background:var(--surface);border:1.5px solid ${isActiveProv?'var(--accent)':'var(--border)'}">
+          <div style="font-size:28px">${meta.emoji}</div>
+          <div style="flex:1">
+            <div style="font-family:var(--font-sans);font-size:14px;font-weight:700;color:var(--text)">${meta.name} <span style="font-size:11px;color:#30d158;font-weight:800">✅ Loaded</span></div>
+            <div style="font-family:var(--font-sans);font-size:11px;color:var(--text3);margin-top:2px">${meta.desc}</div>
+          </div>
+          <button onclick="_vsSelectVoice('${prov}','${prov}')"
+            style="padding:8px 14px;border-radius:11px;border:none;background:${isActiveProv?'var(--accent)':'var(--surface2)'};color:${isActiveProv?'#fff':'var(--text2)'};font-family:var(--font-sans);font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">
+            ${isActiveProv?'✓ Active':'Use'}
+          </button>
+        </div>
+      </div>`;
+    } else {
+      // Not loaded — show download panel
+      bodyHtml += `<div class="vprov-dl-panel">
+        <div class="vprov-dl-icon">
+          <div class="vprov-dl-ring"></div><div class="vprov-dl-ring"></div>
+          <div class="vprov-dl-core" style="background:radial-gradient(circle,${meta.color},rgba(0,0,0,0.3))"></div>
+        </div>
+        <div class="vprov-dl-title">${meta.name}</div>
+        <div class="vprov-dl-sub">${meta.desc}<br>${meta.size} one-time download · cached forever · fully offline</div>
+        ${isLoading ? `
+        <div id="vsDlBars_${prov}" style="display:flex;flex-direction:column;gap:6px;width:100%">
+          <div class="vprov-dl-bar-track"><div class="vprov-dl-bar-fill" id="vsDlBarFill_${prov}"></div></div>
+          <div class="vprov-dl-status" id="vsDlStatus_${prov}">Downloading…</div>
+        </div>` : `
+        <button class="vprov-dl-btn" id="vsDlBtn_${prov}" onclick="_vsDownloadLocalTts('${prov}')">⬇ Download ${meta.name}</button>`}
+      </div>`;
+    }
+
+  } else if (prov === 'fishaudio') {
+    const hasKey = !!ls('ttsKey_fishaudio', '');
+    if (!hasKey) {
+      bodyHtml += `<div class="vprov-nokey">🔑 Fish Audio requires an API key<br>Set it in Settings → TTS → Fish Audio<br><a href="https://fish.audio" target="_blank">fish.audio</a> · $10 free credits</div>`;
+    } else {
+      const savedId = ls('ttsVoiceId_fishaudio', '');
+      bodyHtml += `<div class="vsheet-section-label">Fish Audio · Custom Voice ID</div>
+      <div style="padding:12px 16px">
+        <div style="font-family:var(--font-sans);font-size:12px;color:var(--text3);margin-bottom:8px">Paste a Voice Model ID from the Fish Audio catalogue:</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="vsHFishId" type="text" value="${savedId}" placeholder="e.g. 7f92f8efb8ec43bf81429cc1c9199cb1"
+            style="flex:1;padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:var(--font-sans);font-size:13px;outline:none;min-width:0"
+            onchange="lsSet('ttsVoiceId_fishaudio',this.value);lsSet('customTtsProvider','fishaudio')"/>
+          <button onclick="lsSet('customTtsProvider','fishaudio');lsSet('ttsVoiceId_fishaudio',document.getElementById('vsHFishId').value);showToast('Fish Audio voice saved');_renderVoiceSheet()"
+            style="padding:9px 14px;border-radius:10px;background:var(--accent);color:#fff;border:none;font-family:var(--font-sans);font-size:13px;font-weight:700;cursor:pointer">Save</button>
+        </div>
+      </div>`;
+    }
+
+  } else {
+    // Cloud providers with voice lists
+    const voices = _VS_CLOUD_VOICES[prov] || [];
+    const pData  = _VS_PROVIDERS.find(p2 => p2.id === prov);
+    const hasKey = pData?.needsKey ? !!ls('ttsKey_' + prov, '') : true;
+    if (pData?.needsKey && !hasKey) {
+      const urls = {elevenlabs:'elevenlabs.io',openai:'platform.openai.com',deepgram:'console.deepgram.com',grok_voice:'console.x.ai'};
+      const url = urls[prov] || '#';
+      bodyHtml += `<div class="vprov-nokey">🔑 ${pData.name} requires an API key<br>Set it in Settings → TTS → ${pData.name}<br><a href="https://${url}" target="_blank">${url}</a></div>`;
+    }
+    const selId = _vsGetSelected(prov);
+    const isActive = cProv === prov;
+    if (voices.length) {
+      bodyHtml += `<div class="vsheet-section-label">${pData?.name || prov} · ${voices.length} voices${isActive ? ' · ✅ Active' : ''}</div>`;
+      bodyHtml += voices.map(v => _voiceRow(v, selId, '_vsSelectVoice', `_vsTestCloudVoice('${prov}','${v.id}',this)`)).join('');
+    }
   }
-  if (wsOther.length) {
-    html += `<div class="vsheet-section-label" style="margin-top:6px">Other Languages · WebSpeech</div>`;
-    html += wsOther.map(voiceRow).join('');
-  }
-  if (koVoices.length) {
-    html += `<div class="vsheet-section-label" style="margin-top:6px">✨ Kokoro Premium · Highest Quality (requires ~150MB download)</div>`;
-    html += koVoices.map(voiceRow).join('');
-  }
-  list.innerHTML = html;
+
+  list.innerHTML = tabsHtml + '<div style="overflow-y:auto;flex:1;padding-bottom:40px">' + bodyHtml + '</div>';
 }
 
 let currentAudio  = null;
@@ -8658,6 +9151,97 @@ function cleanForTTS(text) {
           → Kokoro.js (premium, 150MB download, optional)
    Completely reimagined: no more broken StreamElements chain.
 ══════════════════════════════════════════ */
+
+// ── Local TTS engine state ────────────────
+const _vsLocalEngines = {}; // { speecht5: pipeline, parler: pipeline, mms: pipeline }
+const _vsLocalLoadPromises = {};
+
+async function _vsLoadLocalTts(id, onProgress) {
+  if (_vsLocalEngines[id]) return _vsLocalEngines[id];
+  if (_vsLocalLoadPromises[id]) return _vsLocalLoadPromises[id];
+  const cfg = {
+    speecht5: { model:'Xenova/speecht5_tts',         label:'SpeechT5',    size:'~300MB' },
+    parler:   { model:'parler-tts/parler-tts-mini-v1', label:'Parler Mini', size:'~700MB' },
+    mms:      { model:'facebook/mms-tts-eng',         label:'Meta MMS',    size:'~500MB' },
+  }[id];
+  if (!cfg) throw new Error('Unknown local TTS: ' + id);
+
+  _vsLocalLoadPromises[id] = (async () => {
+    const { pipeline, env } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3/dist/transformers.min.js');
+    env.allowLocalModels = false;
+    onProgress?.(0, 'Loading ' + cfg.label + '…');
+    const synth = await pipeline('text-to-speech', cfg.model, {
+      device: 'wasm',
+      progress_callback: (p) => {
+        if (p.status === 'downloading' && p.total > 0) {
+          onProgress?.(Math.round(p.loaded / p.total * 100), 'Downloading ' + cfg.label + '…');
+        } else if (p.status === 'loading') {
+          onProgress?.(100, 'Loading model into memory…');
+        }
+      }
+    });
+    _vsLocalEngines[id] = synth;
+    delete _vsLocalLoadPromises[id];
+    return synth;
+  })();
+  return _vsLocalLoadPromises[id];
+}
+
+async function _vsRunLocalTts(id, text) {
+  const synth = _vsLocalEngines[id] || await _vsLoadLocalTts(id, (pct, msg) => {
+    _kkdlSetPct(pct); _kkdlSetStatus(msg);
+    const fill = document.getElementById('vsDlBarFill');
+    const stat = document.getElementById('vsDlStatus');
+    if (fill) fill.style.width = pct + '%';
+    if (stat) stat.textContent = msg;
+  });
+  let out;
+  if (id === 'speecht5') {
+    out = await synth(text.slice(0, 500), {
+      speaker_embeddings: 'https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/speaker_embeddings.bin'
+    });
+  } else {
+    out = await synth(text.slice(0, 500));
+  }
+  return URL.createObjectURL(_float32ToWav(out.audio, out.sampling_rate));
+}
+
+async function _vsDownloadLocalTts(id) {
+  _vsRenderLocalDl(id, true, 0, 'Connecting…');
+  _kkdlSetTitle('Loading ' + ({speecht5:'SpeechT5',parler:'Parler Mini',mms:'Meta MMS'}[id] || id));
+  _kkdlSetSub(({speecht5:'~300MB · Microsoft',parler:'~700MB · High quality',mms:'~500MB · 1100+ languages'}[id] || ''));
+  _showKokoroDownloadOverlay();
+  try {
+    await _vsLoadLocalTts(id, (pct, msg) => {
+      _vsRenderLocalDl(id, true, pct, msg);
+      _kkdlSetPct(pct); _kkdlSetStatus(msg);
+    });
+    _vsRenderLocalDl(id, false, 100, '✅ Ready!');
+    _kkdlSetStatus('✅ Ready!');
+    setTimeout(() => {
+      _hideKokoroDownloadOverlay();
+      if (document.getElementById('vsheet')?.classList.contains('open')) _renderVoiceSheet();
+    }, 500);
+  } catch(e) {
+    delete _vsLocalLoadPromises[id];
+    _vsRenderLocalDl(id, false, 0, '❌ ' + (e.message || 'Failed'));
+    _hideKokoroDownloadOverlay();
+  }
+}
+
+function _vsRenderLocalDl(id, active, pct, status) {
+  const fill = document.getElementById('vsDlBarFill_' + id);
+  const stat = document.getElementById('vsDlStatus_' + id);
+  const btn  = document.getElementById('vsDlBtn_' + id);
+  const bars = document.getElementById('vsDlBars_' + id);
+  if (fill) fill.style.width = pct + '%';
+  if (stat) stat.textContent = status;
+  if (btn)  btn.style.display = active ? 'none' : (pct >= 100 ? 'none' : '');
+  if (bars) bars.style.display = active ? 'flex' : 'none';
+}
+
+// ── Local TTS provider routing in _tryCustomTts ─────────────────────
+// (injected into speakText / voice test flow)
 
 // ── Kokoro.js state ──────────────────────
 let _kokoroTTS        = null;   // loaded KokoroTTS instance
@@ -8708,7 +9292,11 @@ async function _loadKokoroJS() {
       const barWrap2 = document.getElementById('ksDownloadBarWrap');
       if (barWrap2) barWrap2.style.display = 'none';
       _kkdlSetStatus('✅ Ready!');
-      setTimeout(() => _hideKokoroDownloadOverlay(), 600);
+      setTimeout(() => {
+        _hideKokoroDownloadOverlay();
+        // Re-render voice sheet to show voices now that Kokoro is ready
+        if (document.getElementById('vsheet')?.classList.contains('open')) _renderVoiceSheet();
+      }, 600);
       return _kokoroTTS;
     } catch(e) {
       _kokoroLoadPromise = null;
@@ -8875,6 +9463,7 @@ async function speakText(text, btn) {
   if (btn && activeSpeakBtn === btn) { activeSpeakBtn = null; return; } // toggle off
   activeSpeakBtn = null;
 
+  window._ensureAudioUnlocked?.();
   const clean = cleanForTTS(text).slice(0, 600);
   if (!clean) return;
 
@@ -8916,11 +9505,27 @@ async function speakText(text, btn) {
         _showKokoroDownloadOverlay();
         const audioUrl = await _ttsKokoroJS(clean, v.koV);
         _hideKokoroDownloadOverlay();
-        const audio = new Audio(audioUrl);
-        currentAudio = audio;
-        audio.onended = () => { try { URL.revokeObjectURL(audioUrl); } catch(e){} currentAudio = null; _done(); };
-        audio.onerror = () => { try { URL.revokeObjectURL(audioUrl); } catch(e){} currentAudio = null; _done(); showToast('⚠️ Kokoro playback error'); };
-        audio.play().catch(() => { currentAudio = null; _done(); showToast('⚠️ Kokoro play failed'); });
+        // Try AudioContext first (bypasses autoplay policy), fallback to HTMLAudioElement
+        try {
+          const _kBlob = await fetch(audioUrl).then(r => r.blob());
+          URL.revokeObjectURL(audioUrl);
+          const _kSrc = await window._playBlobViaCtx?.(_kBlob, () => { currentAudio = null; _done(); });
+          if (_kSrc) { currentAudio = { pause: () => window._stopCtxSrc?.() }; return; }
+          // AudioContext failed — fallback to HTMLAudio using the same blob
+          const _kFallUrl = URL.createObjectURL(_kBlob);
+          const audio = new Audio(_kFallUrl);
+          currentAudio = audio;
+          audio.onended = () => { try { URL.revokeObjectURL(_kFallUrl); } catch(e){} currentAudio = null; _done(); };
+          audio.onerror = () => { try { URL.revokeObjectURL(_kFallUrl); } catch(e){} currentAudio = null; _done(); showToast('⚠️ Kokoro playback error'); };
+          audio.play().catch(() => { currentAudio = null; _done(); showToast('⚠️ Kokoro play failed'); });
+        } catch(_ke) {
+          // fetch of blob URL failed — last resort direct HTMLAudio on original URL
+          const audio = new Audio(audioUrl);
+          currentAudio = audio;
+          audio.onended = () => { try { URL.revokeObjectURL(audioUrl); } catch(e){} currentAudio = null; _done(); };
+          audio.onerror = () => { currentAudio = null; _done(); showToast('⚠️ Kokoro playback error'); };
+          audio.play().catch(() => { currentAudio = null; _done(); });
+        }
       } catch(e) {
         _hideKokoroDownloadOverlay();
         currentAudio = null; _done();
@@ -9166,6 +9771,8 @@ function toggleVmodeMic() {
       document.getElementById('vmodeBars').classList.remove('listening');
       document.getElementById('vmodeMicMain').classList.remove('listening');
       if (!vmBusy) _vmSetStatus(vmTranscript ? t('tapContinue') : t('tapToSpeak'), false);
+      // Auto-send as soon as speech is transcribed
+      if (vmTranscript && !vmBusy) setTimeout(() => vmodeConfirm(), 600);
     },
     (err) => {
       vmListening = false;
@@ -9272,6 +9879,7 @@ function vmodeSendToChat() {
 async function _vmSpeak(text) {
   return new Promise(async (resolve) => {
     const _done = () => { window._vmCurrentAudio = null; resolve(); };
+    window._ensureAudioUnlocked?.();
 
     // ── Custom cloud TTS (ElevenLabs, OpenAI, Deepgram, Fish Audio) ──
     const customProvId = ls('customTtsProvider', 'none');
@@ -9306,7 +9914,12 @@ async function _vmSpeak(text) {
           resolve();
         };
         audio.onended = onEnd; audio.onerror = onEnd;
-        audio.play().catch(() => { onEnd(); });
+        // Use AudioContext for reliable playback
+        try {
+          const _vkBlob = await fetch(url).then(r => r.blob());
+          const _vkSrc = await window._playBlobViaCtx?.(_vkBlob, onEnd);
+          if (!_vkSrc) onEnd();
+        } catch(_vke) { onEnd(); }
         return;
       } catch(e) {
         /* Kokoro error — just resolve, no WebSpeech fallback */
@@ -10696,8 +11309,8 @@ const _VIDEO_MODELS_DEF = [
     free:false, needsKey:false, falEndpoint:null, pollModel:'grok-video-pro',
     body: p => ({ prompt:p }), resultPath: r => r?.video_url || r?.url },
   { id:'poll_nova_reel',     name:'Nova Reel',             icon:'🎬', color:'#60a5fa',
-    sub:'Pollinations · Amazon · cinematic · 💎 Pollen',
-    free:false, needsKey:false, falEndpoint:null, pollModel:'nova-reel',
+    sub:'Pollinations · Amazon · cinematic · seed support · free',
+    free:true, needsKey:false, falEndpoint:null, pollModel:'nova-reel',
     body: p => ({ prompt:p }), resultPath: r => r?.video_url || r?.url },
   { id:'poll_veo3_fast',     name:'Veo 3.1 Fast 🔬',       icon:'🔬', color:'#4285f4',
     sub:'Pollinations · Google · audio+video · 💎 Pollen',
@@ -10920,7 +11533,7 @@ async function ksVidGenerate() {
         const videoUrl = modelDef.resultPath(res);
         if (!videoUrl) throw new Error('Video URL missing in response');
         _ksVidUrl = videoUrl;
-        preview.innerHTML = `<video src="${videoUrl}" controls autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;border-radius:14px;background:#000"></video>`;
+        preview.innerHTML = `<video src="${videoUrl}" controls loop playsinline style="width:100%;height:100%;object-fit:cover;border-radius:14px;background:#000"></video>`;
         if (status) status.textContent = `✅ Done in ${elapsed}s · tap ↓ to download`;
         dlBtn.disabled = false;
         haptic && haptic([10, 60, 10]);
@@ -12441,11 +13054,17 @@ function _kkdlSetPct(pct) {
   const pctEl = document.getElementById('kkdlPct');
   if (fill) fill.style.width = pct + '%';
   if (pctEl) pctEl.textContent = pct + '%';
+  // Also update inline voice sheet bar
+  const vsFill = document.getElementById('vsDlBarFill');
+  if (vsFill) vsFill.style.width = pct + '%';
 }
 
 function _kkdlSetStatus(msg) {
   const el = document.getElementById('kkdlStatus');
   if (el) el.textContent = msg;
+  // Also update inline voice sheet status
+  const vsEl = document.getElementById('vsDlStatus');
+  if (vsEl) vsEl.textContent = msg;
 }
 
 function _kkdlCancel() {
@@ -12835,6 +13454,77 @@ function _helixModalReject() {
   document.getElementById('helixModalBackdrop').style.display = 'none';
   _helixModalRejectFn && _helixModalRejectFn(null);
 }
+</script>
+
+<script>
+/* ── Audio unlock for Opera Mobile / browsers that block autoplay ── */
+(function() {
+  let _audioCtx = null;
+  let _unlocked = false;
+
+  function _getAudioCtx() {
+    if (!_audioCtx) {
+      try { _audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+    }
+    return _audioCtx;
+  }
+
+  function _unlock() {
+    if (_unlocked) return;
+    const ctx = _getAudioCtx();
+    if (ctx && ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+    // Play a silent buffer to unlock audio on Opera/iOS
+    if (ctx) {
+      try {
+        const buf = ctx.createBuffer(1, 1, 22050);
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        src.connect(ctx.destination);
+        src.start(0);
+      } catch(e) {}
+    }
+    _unlocked = true;
+    window._audioUnlocked = true;
+  }
+
+  // Unlock on any user interaction
+  ['touchstart', 'touchend', 'mousedown', 'keydown', 'click', 'pointerdown'].forEach(evt => {
+    document.addEventListener(evt, _unlock, { once: false, passive: true, capture: true });
+  });
+
+  // Expose so speakText can resume before play()
+  window._ensureAudioUnlocked = function() {
+    _unlock();
+    const ctx = _getAudioCtx();
+    if (ctx && ctx.state === 'suspended') return ctx.resume();
+    return Promise.resolve();
+  };
+
+  // Play a Blob through AudioContext — bypasses HTMLAudioElement autoplay restrictions entirely
+  window._playBlobViaCtx = async function(blob, onEnd) {
+    const ctx = _getAudioCtx();
+    if (!ctx) return null;
+    try {
+      if (ctx.state === 'suspended') await ctx.resume();
+      const arrayBuf = await blob.arrayBuffer();
+      const decoded = await ctx.decodeAudioData(arrayBuf);
+      if (window._helixCtxSrc) { try { window._helixCtxSrc.stop(); } catch(e){} window._helixCtxSrc = null; }
+      const src = ctx.createBufferSource();
+      src.buffer = decoded;
+      src.connect(ctx.destination);
+      src.onended = () => { window._helixCtxSrc = null; onEnd?.(); };
+      src.start(0);
+      window._helixCtxSrc = src;
+      return src;
+    } catch(e) { return null; }
+  };
+
+  window._stopCtxSrc = function() {
+    if (window._helixCtxSrc) { try { window._helixCtxSrc.stop(); } catch(e){} window._helixCtxSrc = null; }
+  };
+})();
 </script>
 </body>
 </html>
