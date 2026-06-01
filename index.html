@@ -3419,6 +3419,8 @@ function renderCloudModelSheet() {
     _imgRow('poll_pruna',     'Pruna p-image ⚡',          'Freemium · Pollinations · Fast generation',     '#a78bfa', false) +
     _imgRow('poll_pruna_edit','Pruna p-image-edit ✏️',    'Freemium · Pollinations · Image editing',       '#818cf8', false) +
     _imgRow('poll_nova_canvas','Nova Canvas 🎨',          'Freemium · Pollinations · Amazon Bedrock',      '#60a5fa', false) +
+    _imgRow('poll_gpt_img2',  'GPT Image 2 🤖',           'Freemium · Pollinations · OpenAI · Best quality','#10a37f', false) +
+    _imgRow('poll_seedream45','Seedream 4.5 Pro 🌸',      'Freemium · Pollinations · ByteDance · Pro',     '#f472b6', false) +
     // ── OpenRouter advanced ──
     _imgRow('or_recraft',     'Recraft v3 🎨',            'Vector/graphic design · OpenRouter key',        '#f97316', !orK) +
     _imgRow('or_imagen4',     'Imagen 4.0 🖼',            'Google · Best quality · OpenRouter key',         '#4285f4', !orK) +
@@ -3571,7 +3573,10 @@ function renderCloudModelSheet() {
     _ttsFreeNoKeyRow('poll_qwen_tts_instruct', 'Pollinations · Qwen3-TTS Instruct 💎', 'Freemium · pollen · style instructions',        '#ec4899', '✨') +
     _ttsFreeNoKeyRow('poll_universal3',    'Pollinations · Universal-3 Pro 💎',      'Freemium · pollen · STT Premium',               '#4285f4', '🎙') +
     _ttsFreeNoKeyRow('poll_scribe2',       'Pollinations · Scribe v2 💎',            'Freemium · pollen · Scribe STT',                '#818cf8', '🎙') +
-    _ttsFreeNoKeyRow('poll_elevenlabs',    'Pollinations · ElevenLabs v3 💎 (Alpha)','Alpha · pollen · premium quality',               '#f97316', '✨');
+    _ttsFreeNoKeyRow('poll_elevenlabs',    'Pollinations · ElevenLabs v3 💎 (Alpha)','Alpha · pollen · premium quality',               '#f97316', '✨') +
+    _ttsFreeNoKeyRow('poll_elevenlabs_flash', 'Pollinations · ElevenLabs Flash v2.5 💎','Alpha · pollen · ultra-fast ElevenLabs',        '#fb923c', '⚡') +
+    _ttsFreeNoKeyRow('poll_elevenlabs_music', 'Pollinations · ElevenLabs Music 💎 (Alpha)','Alpha · pollen · AI music generation',       '#a78bfa', '🎵') +
+    _ttsFreeNoKeyRow('poll_ace_step',     'Pollinations · ACE-Step 1.5 Turbo (Alpha)','Alpha · No Key · music generation',              '#22d3ee', '🎵');
 
   const _ttsRow = (id, label, sub, color) => {
     const k = ls('ttsKey_' + id, '');
@@ -3691,6 +3696,9 @@ function renderCloudModelSheet() {
         {id:'poll_seedance2',     name:'Seedance 2.0 🌸',        sub:'Pollinations · ByteDance · high quality',             c:'#d4714a', badge:'Pollen'},
         {id:'poll_wan26',         name:'Wan 2.6',                sub:'Pollinations · Wan-AI · open-source',                 c:'#06b6d4', badge:'Pollen'},
         {id:'poll_wan27',         name:'Wan 2.7',                sub:'Pollinations · Wan-AI · 720p · NEW',                  c:'#22d3ee', badge:'Pollen'},
+        {id:'poll_wan27mid',      name:'Wan 2.7 MID 🌊',         sub:'Pollinations · Wan-AI · mid quality',                 c:'#06b6d4', badge:'Pollen'},
+        {id:'poll_amia',          name:'Amia 🎭',                sub:'Pollinations · Amia',                                 c:'#f472b6', badge:'Pollen'},
+        {id:'poll_fan',           name:'FAN 🌀',                 sub:'Pollinations · FAN',                                  c:'#a78bfa', badge:'Pollen'},
       ].map(m => {
         const isSel = vp === m.id;
         const badgeHtml = m.badge === 'Free'
@@ -3797,7 +3805,7 @@ function _selectLocalSttFromSheet(id) {
 function _switchToCloudImg(id) {
   lsSet('imageModelPref', id);
   _refreshImageTab && _refreshImageTab();
-  const names = { flux_schnell:'FLUX.1-schnell (free)', poll_turbo:'Pollinations Turbo (free)', poll_realism:'Flux Realism (free)', nano_banana:'Nano Banana (free)', nano_banana_2:'Nano Banana 2 (Gemini)', flux_dev:'FLUX.1-dev (HF token)', sd35:'SD 3.5 (Stability)', fal_flux_pro:'FLUX.1-pro (fal.ai)', together_flux:'Together FLUX', ideogram:'Ideogram v2', dalle3:'DALL-E 3 (OpenAI)', poll_kontext:'FLUX.1 Kontext (free)', wan_27:'Wan 2.7 Image (free)', qwen_img:'Qwen Image Plus (free)', seedream:'Seedream 4.0 (Pollinations)', grok_img:'Grok Imagine (Pollinations)', or_recraft:'Recraft v3 (OpenRouter)', or_imagen4:'Imagen 4.0 (OpenRouter)', or_midjourney:'Midjourney v7 (OpenRouter)', poll_gpt_mini:'GPT Image 1 Mini (free)', poll_gpt15:'GPT Image 1.5 (free)', poll_zimage:'Z-Image Turbo (free)', poll_klein:'FLUX.2 Klein 4B (free)', poll_seedream5:'Seedream 5.0 Lite (Pollinations)', poll_wan27pro:'Wan 2.7 Image Pro (Pollinations)', poll_grok_pro:'Grok Imagine Pro (Pollinations)', nano_banana_pro:'NanoBanana Pro (Pollinations)', poll_pruna:'Pruna p-image (Pollinations)', poll_pruna_edit:'Pruna p-image-edit (Pollinations)', poll_nova_canvas:'Nova Canvas (Pollinations)' };
+  const names = { flux_schnell:'FLUX.1-schnell (free)', poll_turbo:'Pollinations Turbo (free)', poll_realism:'Flux Realism (free)', nano_banana:'Nano Banana (free)', nano_banana_2:'Nano Banana 2 (Gemini)', flux_dev:'FLUX.1-dev (HF token)', sd35:'SD 3.5 (Stability)', fal_flux_pro:'FLUX.1-pro (fal.ai)', together_flux:'Together FLUX', ideogram:'Ideogram v2', dalle3:'DALL-E 3 (OpenAI)', poll_kontext:'FLUX.1 Kontext (free)', wan_27:'Wan 2.7 Image (free)', qwen_img:'Qwen Image Plus (free)', seedream:'Seedream 4.0 (Pollinations)', grok_img:'Grok Imagine (Pollinations)', or_recraft:'Recraft v3 (OpenRouter)', or_imagen4:'Imagen 4.0 (OpenRouter)', or_midjourney:'Midjourney v7 (OpenRouter)', poll_gpt_mini:'GPT Image 1 Mini (free)', poll_gpt15:'GPT Image 1.5 (free)', poll_zimage:'Z-Image Turbo (free)', poll_klein:'FLUX.2 Klein 4B (free)', poll_seedream5:'Seedream 5.0 Lite (Pollinations)', poll_wan27pro:'Wan 2.7 Image Pro (Pollinations)', poll_grok_pro:'Grok Imagine Pro (Pollinations)', nano_banana_pro:'NanoBanana Pro (Pollinations)', poll_pruna:'Pruna p-image (Pollinations)', poll_pruna_edit:'Pruna p-image-edit (Pollinations)', poll_nova_canvas:'Nova Canvas (Pollinations)', poll_gpt_img2:'GPT Image 2 (Pollinations)', poll_seedream45:'Seedream 4.5 Pro (Pollinations)' };
   showToast('🖼 Image: ' + (names[id] || id));
   haptic && haptic();
   closeCloudModelSheet();
@@ -3951,6 +3959,7 @@ const PROVIDER_MODELS = {
     endpoint:'https://api.anthropic.com/v1/messages',
     models:[
       { id:'claude-opus-4-7',            name:'Claude Opus 4.7',   free:false, sub:'Most capable · 1M ctx · $5/1M in · Apr 2026' },
+      { id:'claude-opus-4-8',            name:'Claude Opus 4.8',   free:false, sub:'Frontier · 1M ctx · Latest · Jun 2026' },
       { id:'claude-sonnet-4-6',          name:'Claude Sonnet 4.6', free:false, sub:'Speed + intelligence · 1M ctx · $3/1M in' },
       { id:'claude-haiku-4-5-20251001',  name:'Claude Haiku 4.5',  free:false, sub:'Fastest · 200k ctx · $1/1M in' },
       { id:'claude-opus-4-6',            name:'Claude Opus 4.6',   free:false, sub:'Legacy · superseded by 4.7 · $5/1M in' },
@@ -4200,10 +4209,15 @@ const PROVIDER_MODELS = {
     models:[
       { id:'qwen-coder',         name:'Qwen3 Coder 30B',              free:true,  sub:'Alibaba · FREE · Code expert' },
       { id:'mistral',            name:'Mistral Small 3.2',            free:true,  sub:'Mistral · FREE · Efficient' },
+      { id:'mistral-small',      name:'Mistral Small 4',              free:true,  sub:'Mistral · FREE · Efficient · Latest' },
       { id:'grok',               name:'Grok 4.20',                    free:true,  sub:'xAI · FREE · Multimodal' },
+      { id:'grok-non-reasoning', name:'Grok 4.20 Non-Reasoning',      free:true,  sub:'xAI · FREE · Fast · No thinking' },
+      { id:'grok-reasoning',     name:'Grok 4.20 Reasoning',          free:true,  sub:'xAI · FREE · Extended thinking' },
       { id:'llama',              name:'Llama 3.3 70B',                free:true,  sub:'Meta · FREE · Reliable' },
       { id:'llama-4-scout',      name:'Llama 4 Scout',                free:true,  sub:'Meta · FREE · Vision' },
+      { id:'llama-4-maverick',   name:'Llama 4 Maverick',             free:false, sub:'Meta · PAID · Vision · 128 experts' },
       { id:'sonar',              name:'Perplexity Sonar',             free:true,  sub:'Perplexity · FREE · Web search' },
+      { id:'sonar-pro',          name:'Perplexity Sonar Pro',         free:true,  sub:'Perplexity · FREE · Web search · Advanced' },
       { id:'mistral-large',      name:'Mistral Large 3',              free:true,  sub:'Mistral · FREE · Reasoning' },
       { id:'claude-fast',        name:'Claude Haiku 4.5',             free:true,  sub:'Anthropic · FREE · Fast' },
       { id:'minimax',            name:'MiniMax M2.7',                 free:true,  sub:'MiniMax · FREE · Reasoning' },
@@ -4212,26 +4226,35 @@ const PROVIDER_MODELS = {
       { id:'qwen-safety',        name:'Qwen3Guard 8B',                free:true,  sub:'Alibaba · FREE · Safety · 200K ctx' },
       { id:'qwen-large',         name:'Qwen3.6 Plus',                 free:true,  sub:'Alibaba · FREE · Vision · Reasoning' },
       { id:'qwen-vision',        name:'Qwen3 VL 30B A3B',             free:true,  sub:'Alibaba · FREE · Vision' },
+      { id:'qwen-vision-thinking', name:'Qwen3 VL 235B Thinking',     free:true,  sub:'Alibaba · FREE · Vision · Extended thinking' },
       { id:'qwen-coder-large',   name:'Qwen3 Coder Next',             free:true,  sub:'Alibaba · FREE · Code · Latest' },
+      { id:'midijourney',        name:'MIDIjourney',                  free:true,  sub:'Pollinations · FREE · Music · Creative' },
+      { id:'midijourney-large',  name:'MIDIjourney Large',            free:true,  sub:'Pollinations · FREE · Music · Creative · Extended' },
       { id:'polly',              name:'Polly',                        free:true,  sub:'@Itachi-1824 · ALPHA · Vision · Search · Code' },
       { id:'perplexity-reasoning', name:'Perplexity Sonar Reasoning', free:true,  sub:'Perplexity · FREE · Reasoning · Search' },
       { id:'nova-fast',          name:'Nova 2 Lite',                  free:true,  sub:'Amazon · FREE · Fast · Efficient' },
       { id:'kimi-k2.6',          name:'Moonshot Kimi K2.6',           free:true,  sub:'Moonshot · FREE · Vision · Reasoning' },
       { id:'kimi',               name:'Moonshot Kimi K2.5',           free:true,  sub:'Moonshot · FREE · Vision · Reasoning' },
-      { id:'gemma',              name:'Gemma 3 27B',                   free:true,  sub:'Google · FREE · Open · Vision · Reasoning' },
+      { id:'gemma',              name:'Gemma 3 27B',                  free:true,  sub:'Google · FREE · Open · Vision · Reasoning' },
       { id:'gemini-fast',        name:'Gemma 4 26B A4B',              free:false, sub:'Google · PAID · Vision · Reasoning · Open' },
-      { id:'midijourney-large',  name:'MIDIjourney Large',            free:true,  sub:'Pollinations · FREE · Music · Creative' },
       { id:'grok-large',         name:'Grok 4.3',                     free:true,  sub:'xAI · FREE · Vision · Reasoning · NEW' },
       { id:'openai-large',       name:'GPT-5.4',                      free:true,  sub:'OpenAI · FREE · Vision · Reasoning' },
       { id:'openai',             name:'GPT-5.4 Nano',                 free:true,  sub:'OpenAI · FREE · Vision · Balanced' },
       { id:'openai-fast',        name:'GPT-5 Nano',                   free:true,  sub:'OpenAI · FREE · Vision · Ultra fast' },
+      { id:'openai-mini',        name:'GPT-5.4 Mini',                 free:true,  sub:'OpenAI · FREE · Vision · Fast' },
+      { id:'openai-large-latest', name:'GPT-5.5',                     free:true,  sub:'OpenAI · FREE · Flagship · Latest' },
+      { id:'stepfun-fast',       name:'StepFun Step 3.5 Flash',       free:true,  sub:'StepFun · FREE · Fast' },
+      { id:'stepfun',            name:'StepFun Step 3.7 Flash',       free:true,  sub:'StepFun · FREE · Reasoning · Fast' },
       { id:'gemini',             name:'Gemini 3 Flash',               free:false, sub:'Google · PAID · Vision · Search · Code' },
       { id:'gemini-flash-lite-3.1', name:'Gemini 3.1 Flash Lite',     free:false, sub:'Google · PAID · Vision · Search · Code' },
       { id:'gemini-large',       name:'Gemini 3.1 Pro',               free:false, sub:'Google · PAID · Vision · Reasoning · Search' },
+      { id:'gemini-35-flash',    name:'Gemini 3.5 Flash',             free:false, sub:'Google · PAID · Vision · Search · Latest' },
       { id:'deepseek-pro',       name:'DeepSeek V4 Pro',              free:true,  sub:'DeepSeek · FREE · Reasoning · Latest' },
       { id:'deepseek',           name:'DeepSeek V4 Flash',            free:true,  sub:'DeepSeek · FREE · Reasoning · Fast' },
       { id:'claude',             name:'Claude Sonnet 4.6',            free:false, sub:'Anthropic · PAID · Vision · Balanced' },
+      { id:'claude-opus-4.6',    name:'Claude Opus 4.6',              free:false, sub:'Anthropic · PAID · Vision · Powerful' },
       { id:'claude-opus-4.7',    name:'Claude Opus 4.7',              free:false, sub:'Anthropic · PAID · Vision · Latest' },
+      { id:'claude-opus-4.8',    name:'Claude Opus 4.8',              free:false, sub:'Anthropic · PAID · Vision · Frontier' },
     ]
   },
   venice: {
@@ -5371,6 +5394,8 @@ async function generateImage(prompt) {
     poll_pruna:      'p-image',
     poll_pruna_edit: 'p-image-edit',
     poll_nova_canvas:'nova-canvas',
+    poll_gpt_img2:   'gptimage-2',
+    poll_seedream45: 'seedream-45-pro',
   };
   if (_pollImgMap[imgPref]) {
     try {
@@ -7782,6 +7807,21 @@ const TTS_PROVIDERS = {
     info:'💎 Paid (pollen) · Alpha · ElevenLabs v3 via Pollinations.ai · Premium quality',
     needsKey:false, needsVoiceId:false, free:false, freemium:true,
   },
+  poll_elevenlabs_flash: {
+    name:'Pollinations · ElevenLabs Flash v2.5', keyPlaceholder:'pollinations-token',
+    info:'💎 Paid (pollen) · Alpha · ElevenLabs Flash v2.5 via Pollinations.ai · Ultra-fast',
+    needsKey:false, needsVoiceId:false, free:false, freemium:true,
+  },
+  poll_elevenlabs_music: {
+    name:'Pollinations · ElevenLabs Music', keyPlaceholder:'pollinations-token',
+    info:'💎 Paid (pollen) · Alpha · ElevenLabs Music via Pollinations.ai · AI music generation',
+    needsKey:false, needsVoiceId:false, free:false, freemium:true,
+  },
+  poll_ace_step: {
+    name:'Pollinations · ACE-Step 1.5 Turbo', keyPlaceholder:'',
+    info:'Alpha · No key needed · ACE-Step music generation via Pollinations.ai',
+    needsKey:false, needsVoiceId:false, free:true, freemium:false,
+  },
   elevenlabs: {
     name:'ElevenLabs', keyPlaceholder:'sk_…',
     info:'Get the key at <a href="https://elevenlabs.io" target="_blank" style="color:var(--accent)">elevenlabs.io</a> · 10k chars/month free',
@@ -8083,6 +8123,44 @@ async function _tryCustomTts(text, btn) {
         body: JSON.stringify({ model: 'elevenlabs', input: text.slice(0, 2000), voice: pollVoice })
       });
       if (!res.ok) throw new Error('Pollinations ElevenLabs: ' + res.status);
+      const blob = await res.blob();
+      audioUrl = URL.createObjectURL(blob);
+
+    } else if (provId === 'poll_elevenlabs_flash') {
+      // ElevenLabs Flash v2.5 via Pollinations
+      const pollToken = ls('pollinationsToken', '') || (apiKeys && apiKeys['pollinations']) || '';
+      const pollVoice = ls('pollinationsTtsVoice', 'alloy');
+      const headers = { 'Content-Type': 'application/json' };
+      if (pollToken) headers['Authorization'] = 'Bearer ' + pollToken;
+      const res = await fetch('https://text.pollinations.ai/openai/audio/speech', {
+        method: 'POST', headers,
+        body: JSON.stringify({ model: 'elevenlabs-flash', input: text.slice(0, 2000), voice: pollVoice })
+      });
+      if (!res.ok) throw new Error('Pollinations ElevenLabs Flash: ' + res.status);
+      const blob = await res.blob();
+      audioUrl = URL.createObjectURL(blob);
+
+    } else if (provId === 'poll_elevenlabs_music') {
+      // ElevenLabs Music via Pollinations
+      const pollToken = ls('pollinationsToken', '') || (apiKeys && apiKeys['pollinations']) || '';
+      const headers = { 'Content-Type': 'application/json' };
+      if (pollToken) headers['Authorization'] = 'Bearer ' + pollToken;
+      const res = await fetch('https://text.pollinations.ai/openai/audio/speech', {
+        method: 'POST', headers,
+        body: JSON.stringify({ model: 'elevenlabs-music', input: text.slice(0, 2000), voice: 'alloy' })
+      });
+      if (!res.ok) throw new Error('Pollinations ElevenLabs Music: ' + res.status);
+      const blob = await res.blob();
+      audioUrl = URL.createObjectURL(blob);
+
+    } else if (provId === 'poll_ace_step') {
+      // ACE-Step 1.5 Turbo via Pollinations — music generation
+      const headers = { 'Content-Type': 'application/json' };
+      const res = await fetch('https://text.pollinations.ai/openai/audio/speech', {
+        method: 'POST', headers,
+        body: JSON.stringify({ model: 'ace-step', input: text.slice(0, 2000), voice: 'alloy' })
+      });
+      if (!res.ok) throw new Error('Pollinations ACE-Step: ' + res.status);
       const blob = await res.blob();
       audioUrl = URL.createObjectURL(blob);
 
@@ -11328,6 +11406,18 @@ const _VIDEO_MODELS_DEF = [
     sub:'Pollinations · Wan-AI · 720p · NEW · 💎 Pollen',
     free:false, needsKey:false, falEndpoint:null, pollModel:'wan2.7',
     body: p => ({ prompt:p }), resultPath: r => r?.video_url || r?.url },
+  { id:'poll_wan27mid',      name:'Wan 2.7 MID',           icon:'🌊', color:'#06b6d4',
+    sub:'Pollinations · Wan-AI · Mid quality · 💎 Pollen',
+    free:false, needsKey:false, falEndpoint:null, pollModel:'wan2.7-mid',
+    body: p => ({ prompt:p }), resultPath: r => r?.video_url || r?.url },
+  { id:'poll_amia',          name:'Amia',                  icon:'🎭', color:'#f472b6',
+    sub:'Pollinations · Amia · 💎 Pollen',
+    free:false, needsKey:false, falEndpoint:null, pollModel:'amia',
+    body: p => ({ prompt:p }), resultPath: r => r?.video_url || r?.url },
+  { id:'poll_fan',           name:'FAN',                   icon:'🌀', color:'#a78bfa',
+    sub:'Pollinations · FAN · 💎 Pollen',
+    free:false, needsKey:false, falEndpoint:null, pollModel:'fan',
+    body: p => ({ prompt:p }), resultPath: r => r?.video_url || r?.url },
 
   /* ── Solo sito — no API disponibile ── */
   { id:'noapi_fal_signup',  name:'fal.ai — $20 free',   icon:'💰', color:'#30d158',
@@ -13352,6 +13442,9 @@ function _renderLibAudio(body) {
     { id:'poll_universal3',           name:'Pollinations · Universal-3 Pro',     sub:'💎 Pollen · STT Premium',                  color:'#4285f4', icon:'🎙', note:'paid' },
     { id:'poll_scribe2',              name:'Pollinations · Scribe v2',           sub:'💎 Pollen · Scribe STT',                   color:'#818cf8', icon:'🎙', note:'paid' },
     { id:'poll_elevenlabs',           name:'Pollinations · ElevenLabs v3',       sub:'💎 Alpha · Pollen · premium',              color:'#f97316', icon:'✨', note:'paid' },
+    { id:'poll_elevenlabs_flash',     name:'Pollinations · ElevenLabs Flash v2.5',sub:'💎 Alpha · Pollen · ultra-fast',           color:'#fb923c', icon:'⚡', note:'paid' },
+    { id:'poll_elevenlabs_music',     name:'Pollinations · ElevenLabs Music',    sub:'💎 Alpha · Pollen · music generation',     color:'#a78bfa', icon:'🎵', note:'paid' },
+    { id:'poll_ace_step',             name:'Pollinations · ACE-Step 1.5 Turbo',  sub:'Alpha · No key · music generation',       color:'#22d3ee', icon:'🎵', note:'free' },
     { id:'elevenlabs',       name:'ElevenLabs',           sub:'High quality · 10k chars/month free',                  color:'#f59e0b', icon:'⭐', note:'key' },
     { id:'openai',           name:'OpenAI TTS',           sub:'tts-1 / tts-1-hd · ~$0.015/1k chars',                 color:'#10a37f', icon:'🤖', note:'key' },
     { id:'deepgram',         name:'Deepgram Aura',        sub:'Natural voices · $200 free credits',                   color:'#4299e1', icon:'🌊', note:'key' },
