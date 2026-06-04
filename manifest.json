@@ -1,20 +1,28 @@
-const manifest = {
-  name: "Helix AI",
-  short_name: "Helix",
-  description: "Your personal AI assistant — local & cloud, voice & text.",
-  start_url: "./",
-  display: "standalone",
-  orientation: "portrait-primary",
-  background_color: "#131211",
-  theme_color: "#d4714a",
-  icons: [
+{
+  "name": "Helix AI",
+  "short_name": "Helix",
+  "description": "Your personal AI assistant — local & cloud, voice & text.",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#131211",
+  "theme_color": "#d4714a",
+  "icons": [
     {
-      src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E...",
-      sizes: "512x512",
-      type: "image/svg+xml",
-      purpose: "any maskable"
-    },
-    // ...
+      "src": "helix_logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ],
-  // ...
-};
+  "shortcuts": [
+    {
+      "name": "New Chat",
+      "short_name": "Chat",
+      "description": "Start a new conversation",
+      "url": "./"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "lang": "en"
+}

@@ -1,7 +1,7 @@
 // Helix AI — Service Worker
 // Host this file at the root of your domain alongside index.html
 
-const CACHE = 'helix-v10';
+const CACHE = 'helix-v11';
 const OFFLINE_ASSETS = [self.location.pathname.replace(/sw\.js$/, '') || '/'];
 
 self.addEventListener('install', e => e.waitUntil(
