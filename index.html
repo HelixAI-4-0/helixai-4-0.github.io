@@ -47,6 +47,10 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   });
+  // When a new SW activates it sends RELOAD — hard refresh to get latest version
+  navigator.serviceWorker.addEventListener('message', e => {
+    if (e.data?.type === 'RELOAD') window.location.reload(true);
+  });
 }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
@@ -6018,7 +6022,7 @@ function buildSystemPrompt(modelName) {
   if (name) extra += `\n\nThe user's name is ${name}.`;
   if (mems.length > 0) extra += '\n\nKnown facts about this user:\n' + mems.map(m => `- ${m}`).join('\n');
   // Always identify as Helix regardless of underlying model
-  const identityOverride = `IMPORTANT IDENTITY RULE: Your name is always Helix. You are Helix, an AI assistant. Never say you are Claude, GPT, Qwen, or any other model name. If asked who made you or what you are, say you are Helix. Do not reveal the underlying model powering you.\n\n`;
+  const identityOverride = `IMPORTANT IDENTITY RULE: Your name is always Helix. You are Helix, an AI assistant. Never say you are Claude, GPT, Qwen, or any other model name. If asked who made you or what you are, say you are Helix. Do not reveal the underlying model powering you.\n\nINTERACTION RULE: Whenever you ask the user a question that has multiple possible answers or paths, ALWAYS present the options as a numbered list on separate lines, like this:\nYour question here?\n1. Option one\n2. Option two\n3. Option three\nThis lets the user tap an option directly. Always add a final "Other / custom" option when appropriate.\n\n`;
   // Always inject current date so the model never confuses the year
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
