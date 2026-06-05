@@ -658,6 +658,9 @@ body.theme-shifting { animation:themeShift 0.4s ease; }
   .welcome-form { max-width: 380px; }
   .welcome-title { font-size: 40px; }
   .greeting { font-size: 34px; }
+.suggestion-chip { padding:9px 15px; border-radius:20px; border:1.5px solid var(--border); background:var(--surface); color:var(--text2); font-family:var(--font-sans); font-size:13px; font-weight:500; cursor:pointer; transition:background 0.15s,border-color 0.15s,color 0.15s; white-space:nowrap; }
+.suggestion-chip:hover { background:var(--surface2); border-color:var(--accent); color:var(--text); }
+.suggestion-chip:active { transform:scale(0.96); }
 }
 @media (min-width: 900px) {
   :root { --sidebar-width: 320px; }
@@ -1405,6 +1408,7 @@ button { touch-action: manipulation; }
         </div>
       </div>
       <div class="greeting" id="greetingText">How can I help you?</div>
+      <div id="suggestionChips" style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:480px;padding:0 16px"></div>
     </div>
     <div class="messages-wrap" id="messages" style="display:none"></div>
   </div>
@@ -3299,6 +3303,39 @@ function setGreeting() {
   const greeting = name ? `${greetWord}, ${name}.` : t('greeting');
   const el = document.getElementById('greetingText');
   if (el) el.textContent = greeting;
+  renderSuggestionChips();
+}
+
+function renderSuggestionChips() {
+  const el = document.getElementById('suggestionChips');
+  if (!el) return;
+  const lang = uiLang || 'en';
+  const suggestions = {
+    en: ['Write a poem', 'Explain quantum computing', 'Debug my code', 'Translate to Italian', 'Summarize this text', 'Give me a recipe', 'Plan my day', 'Write an email'],
+    it: ['Scrivi una poesia', 'Spiega il machine learning', 'Debug del codice', 'Traduci in inglese', 'Riassumi questo testo', 'Dammi una ricetta', 'Pianifica la mia giornata', 'Scrivi una email'],
+    es: ['Escribe un poema', 'Explica la IA', 'Depura mi código', 'Traduce al inglés', 'Resume este texto', 'Dame una receta', 'Planifica mi día', 'Escribe un email'],
+    fr: ['Écris un poème', 'Explique l\'IA', 'Débogue mon code', 'Traduis en anglais', 'Résume ce texte', 'Donne-moi une recette', 'Planifie ma journée', 'Écris un email'],
+    de: ['Schreib ein Gedicht', 'Erkläre KI', 'Code debuggen', 'Übersetze ins Englische', 'Fasse zusammen', 'Gib mir ein Rezept', 'Plane meinen Tag', 'E-Mail schreiben'],
+    pt: ['Escreva um poema', 'Explique IA', 'Depure meu código', 'Traduza para inglês', 'Resuma este texto', 'Me dê uma receita', 'Planeje meu dia', 'Escreva um email'],
+    zh: ['写一首诗', '解释人工智能', '调试代码', '翻译成中文', '总结这段文字', '给我一个食谱', '规划我的一天', '写一封邮件'],
+    ja: ['詩を書いて', 'AIを説明して', 'コードをデバッグ', '日本語に翻訳', 'テキストを要約', 'レシピをちょうだい', '一日を計画して', 'メールを書いて'],
+    ko: ['시 써줘', 'AI 설명해줘', '코드 디버그', '한국어로 번역', '텍스트 요약', '레시피 알려줘', '하루 계획 세워줘', '이메일 써줘'],
+  };
+  const list = suggestions[lang] || suggestions.en;
+  const shuffled = [...list].sort(() => 0.5 - Math.random()).slice(0, 4);
+  el.innerHTML = shuffled.map(s =>
+    `<button class="suggestion-chip" onclick="useSuggestion(this)">${s}</button>`
+  ).join('');
+}
+
+function useSuggestion(btn) {
+  const inp = document.getElementById('msgInput');
+  if (!inp) return;
+  inp.value = btn.textContent;
+  inp.focus();
+  handleInput(inp);
+  const chips = document.getElementById('suggestionChips');
+  if (chips) chips.style.display = 'none';
 }
 
 // ── VOICE PROVIDER DEFINITIONS ──
@@ -7016,6 +7053,9 @@ function showEmptyState() {
   if (empty) empty.style.display = 'flex';
   if (msgs)  msgs.style.display  = 'none';
   if (body)  body.classList.remove('has-messages');
+  // Re-show suggestion chips with fresh random picks
+  const chips = document.getElementById('suggestionChips');
+  if (chips) { chips.style.display = 'flex'; renderSuggestionChips(); }
 }
 // Generic show/hide helpers — use CSS display value stored in data-display, or 'block'
 function showEl(id, display) {
