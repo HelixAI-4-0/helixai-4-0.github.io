@@ -1,5 +1,5 @@
-// Helix AI — Service Worker v12
-const CACHE = 'helix-v12';
+// Helix AI — Service Worker v13
+const CACHE = 'helix-v13';
 const OFFLINE_ASSETS = [self.location.pathname.replace(/sw\.js$/, '') || '/'];
 
 // Install: cache assets, skip waiting immediately
@@ -9,13 +9,20 @@ self.addEventListener('install', e => e.waitUntil(
     .then(() => self.skipWaiting())
 ));
 
-// Activate: delete old caches, claim clients, then tell them to reload
+// Activate: delete old caches, claim clients
+// Only send RELOAD if there was a previous cache (= genuine update, not first install)
 self.addEventListener('activate', e => e.waitUntil(
-  caches.keys()
-    .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
-    .then(() => self.clients.claim())
-    .then(() => self.clients.matchAll({ type: 'window' }))
-    .then(clients => clients.forEach(client => client.postMessage({ type: 'RELOAD' })))
+  caches.keys().then(keys => {
+    const oldCaches = keys.filter(k => k !== CACHE);
+    const isUpdate  = oldCaches.length > 0;
+    return Promise.all(oldCaches.map(k => caches.delete(k)))
+      .then(() => self.clients.claim())
+      .then(() => {
+        if (!isUpdate) return;
+        return self.clients.matchAll({ type: 'window' })
+          .then(clients => clients.forEach(c => c.postMessage({ type: 'RELOAD' })));
+      });
+  })
 ));
 
 // Fetch: network-first for same-origin HTML, cache-first for everything else
@@ -27,7 +34,6 @@ self.addEventListener('fetch', e => {
   const isHTML = e.request.headers.get('accept')?.includes('text/html');
 
   if (isHTML) {
-    // Network-first: always try to get fresh HTML, fall back to cache
     e.respondWith(
       fetch(e.request)
         .then(res => {
@@ -40,7 +46,6 @@ self.addEventListener('fetch', e => {
         .catch(() => caches.match(e.request))
     );
   } else {
-    // Cache-first for assets
     e.respondWith(
       caches.match(e.request).then(cached => {
         if (cached) return cached;
