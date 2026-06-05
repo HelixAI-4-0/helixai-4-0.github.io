@@ -658,6 +658,27 @@ body.theme-shifting { animation:themeShift 0.4s ease; }
   .welcome-form { max-width: 380px; }
   .welcome-title { font-size: 40px; }
   .greeting { font-size: 34px; }
+/* ── Interactive Choice Sheet ── */
+.choice-sheet { margin-top:12px; background:var(--bg2); border:1.5px solid var(--border); border-radius:18px; overflow:hidden; }
+.choice-sheet-q { padding:14px 16px 10px; font-family:var(--font-sans); font-size:15px; font-weight:600; color:var(--text); border-bottom:1px solid var(--border); }
+.choice-sheet-opts { display:flex; flex-direction:column; }
+.choice-sheet-opt { display:flex; align-items:center; gap:12px; padding:13px 16px; background:none; border:none; border-bottom:1px solid var(--border); cursor:pointer; text-align:left; color:var(--text); transition:background 0.12s; touch-action:manipulation; }
+.choice-sheet-opt:active { background:var(--surface); }
+.choice-sheet-opt:last-child { border-bottom:1px solid var(--border); }
+.choice-sheet-num { width:26px; height:26px; border-radius:50%; background:var(--surface2); color:var(--text2); font-family:var(--font-sans); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.choice-sheet-label { font-family:var(--font-sans); font-size:14px; font-weight:500; color:var(--text); }
+.choice-sheet-input { width:100%; padding:13px 50px 13px 16px; background:none; border:none; border-top:0; font-family:var(--font-sans); font-size:14px; color:var(--text); outline:none; box-sizing:border-box; }
+.choice-sheet-input::placeholder { color:var(--text3); }
+.choice-sheet-send { position:absolute; right:10px; bottom:10px; width:34px; height:34px; border-radius:50%; background:var(--accent); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.choice-sheet-send svg { width:16px; height:16px; stroke:white; }
+.choice-sheet { position:relative; }
+.choice-sheet-input-wrap { display:flex; align-items:center; padding:6px 10px 10px; gap:8px; border-top:1px solid var(--border); }
+.choice-sheet-input { flex:1; padding:10px 14px; background:var(--surface); border:1.5px solid var(--border); border-radius:12px; font-family:var(--font-sans); font-size:14px; color:var(--text); outline:none; }
+.choice-sheet-send { width:36px; height:36px; border-radius:50%; background:var(--accent); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.choice-sheet.done .choice-sheet-opt { opacity:0.4; pointer-events:none; cursor:default; }
+.choice-sheet.done .choice-sheet-input-wrap { display:none; }
+.choice-sheet-opt.selected { background:var(--surface2); }
+.choice-sheet-opt.selected .choice-sheet-num { background:var(--accent); color:#fff; }
 .suggestion-chip { display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:14px; background:var(--surface); border:1.5px solid var(--border); cursor:pointer; transition:background 0.15s,transform 0.1s; touch-action:manipulation; width:100%; box-sizing:border-box; color:var(--text); }
 .suggestion-chip:active { transform:scale(0.98); background:var(--surface2); }
 .suggestion-chip-icon { width:32px; height:32px; border-radius:8px; background:var(--bg2); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:16px; line-height:1; }
@@ -6881,6 +6902,35 @@ function addMsg(role, text, silent, artifacts, searchHTML) {
     .replace(/\[Δ\]/g,'<span class="lm-delta">[Δ]</span>')
     .replace(/\[Ω\]/g,'<span class="lm-omega">[Ω]</span>');
 
+  // ── Interactive choice sheet detection ──
+  // Detect: a question line followed by 2+ numbered options (1. / 1) / 1 -)
+  let choiceSheetHTML = '';
+  const _choiceMatch = (text || '').match(/^([^\n]{5,120}\?)\s*\n((?:\s*\d+[\.\)]\s*.+\n?){2,})/m);
+  if (_choiceMatch) {
+    const _cQuestion = _choiceMatch[1].trim();
+    const _cOptions  = [..._choiceMatch[2].matchAll(/\d+[\.\)]\s*(.+)/g)].map(m => m[1].trim());
+    if (_cOptions.length >= 2) {
+      const _cId = 'cs_' + Date.now();
+      choiceSheetHTML = `
+        <div class="choice-sheet" id="${_cId}">
+          <div class="choice-sheet-q">${escHtml(_cQuestion)}</div>
+          <div class="choice-sheet-opts">
+            ${_cOptions.map((opt, i) => `
+              <button class="choice-sheet-opt" onclick="_choicePick(this,'${_cId}')">
+                <span class="choice-sheet-num">${i+1}</span>
+                <span class="choice-sheet-label">${escHtml(opt)}</span>
+              </button>`).join('')}
+          </div>
+          <div class="choice-sheet-input-wrap">
+            <input class="choice-sheet-input" placeholder="Type your own answer…" onkeydown="if(event.key==='Enter'&&this.value.trim()){_choiceCustom(this,'${_cId}')}" />
+            <button class="choice-sheet-send" onclick="_choiceCustom(this.previousElementSibling,'${_cId}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            </button>
+          </div>
+        </div>`;
+    }
+  }
+
   // Code actions for inline code blocks
   const codeBlocks = extractCodeBlocks(text || '');
   let codeActionsHTML = '';
@@ -6922,6 +6972,7 @@ function addMsg(role, text, silent, artifacts, searchHTML) {
     <div class="ai-dot">${logo}</div>
     <div class="ai-content">
       <div class="ai-text">${html || (artifacts?.length ? '' : '<p>(empty)</p>')}</div>
+      ${choiceSheetHTML}
       ${codeActionsHTML}
       ${artifactBadgesHTML}
       <div class="msg-actions">
@@ -9386,6 +9437,27 @@ async function testVoice(id) {
     if (b) b.classList.remove('testing');
   }
   await _runTestVoice(v, sample, id, _done);
+}
+
+function _choicePick(btn, sheetId) {
+  const label = btn.querySelector('.choice-sheet-label')?.textContent?.trim();
+  if (!label) return;
+  _choiceSubmit(label, sheetId, btn);
+}
+function _choiceCustom(input, sheetId) {
+  const val = input.value.trim();
+  if (!val) return;
+  _choiceSubmit(val, sheetId, null);
+}
+function _choiceSubmit(answer, sheetId, selectedBtn) {
+  const sheet = document.getElementById(sheetId);
+  if (sheet) {
+    sheet.classList.add('done');
+    if (selectedBtn) selectedBtn.classList.add('selected');
+  }
+  const inp = document.getElementById('msgInput');
+  if (inp) { inp.value = answer; handleInput(inp); }
+  sendMsg();
 }
 
 function _tamCopyResults() {
