@@ -658,9 +658,13 @@ body.theme-shifting { animation:themeShift 0.4s ease; }
   .welcome-form { max-width: 380px; }
   .welcome-title { font-size: 40px; }
   .greeting { font-size: 34px; }
-.suggestion-chip { padding:9px 15px; border-radius:20px; border:1.5px solid var(--border); background:var(--surface); color:var(--text2); font-family:var(--font-sans); font-size:13px; font-weight:500; cursor:pointer; transition:background 0.15s,border-color 0.15s,color 0.15s; white-space:nowrap; }
-.suggestion-chip:hover { background:var(--surface2); border-color:var(--accent); color:var(--text); }
+.suggestion-chip { display:flex; align-items:center; gap:9px; padding:11px 16px; border-radius:14px; border:1.5px solid var(--border); background:var(--surface); color:var(--text); font-family:var(--font-sans); font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s,border-color 0.15s,transform 0.12s; text-align:left; line-height:1.3; }
+.suggestion-chip:hover { background:var(--surface2); border-color:var(--accent); }
 .suggestion-chip:active { transform:scale(0.96); }
+.suggestion-chip-icon { font-size:18px; flex-shrink:0; line-height:1; }
+.suggestion-chip-text { display:flex; flex-direction:column; gap:1px; }
+.suggestion-chip-label { font-size:13px; font-weight:600; color:var(--text); }
+.suggestion-chip-sub { font-size:11px; font-weight:400; color:var(--text3); }
 }
 @media (min-width: 900px) {
   :root { --sidebar-width: 320px; }
@@ -1408,7 +1412,7 @@ button { touch-action: manipulation; }
         </div>
       </div>
       <div class="greeting" id="greetingText">How can I help you?</div>
-      <div id="suggestionChips" style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:480px;padding:0 16px"></div>
+      <div id="suggestionChips" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:440px;padding:0 16px"></div>
     </div>
     <div class="messages-wrap" id="messages" style="display:none"></div>
   </div>
@@ -3311,27 +3315,74 @@ function renderSuggestionChips() {
   if (!el) return;
   const lang = uiLang || 'en';
   const suggestions = {
-    en: ['Write a poem', 'Explain quantum computing', 'Debug my code', 'Translate to Italian', 'Summarize this text', 'Give me a recipe', 'Plan my day', 'Write an email'],
-    it: ['Scrivi una poesia', 'Spiega il machine learning', 'Debug del codice', 'Traduci in inglese', 'Riassumi questo testo', 'Dammi una ricetta', 'Pianifica la mia giornata', 'Scrivi una email'],
-    es: ['Escribe un poema', 'Explica la IA', 'Depura mi código', 'Traduce al inglés', 'Resume este texto', 'Dame una receta', 'Planifica mi día', 'Escribe un email'],
-    fr: ['Écris un poème', 'Explique l\'IA', 'Débogue mon code', 'Traduis en anglais', 'Résume ce texte', 'Donne-moi une recette', 'Planifie ma journée', 'Écris un email'],
-    de: ['Schreib ein Gedicht', 'Erkläre KI', 'Code debuggen', 'Übersetze ins Englische', 'Fasse zusammen', 'Gib mir ein Rezept', 'Plane meinen Tag', 'E-Mail schreiben'],
-    pt: ['Escreva um poema', 'Explique IA', 'Depure meu código', 'Traduza para inglês', 'Resuma este texto', 'Me dê uma receita', 'Planeje meu dia', 'Escreva um email'],
-    zh: ['写一首诗', '解释人工智能', '调试代码', '翻译成中文', '总结这段文字', '给我一个食谱', '规划我的一天', '写一封邮件'],
-    ja: ['詩を書いて', 'AIを説明して', 'コードをデバッグ', '日本語に翻訳', 'テキストを要約', 'レシピをちょうだい', '一日を計画して', 'メールを書いて'],
-    ko: ['시 써줘', 'AI 설명해줘', '코드 디버그', '한국어로 번역', '텍스트 요약', '레시피 알려줘', '하루 계획 세워줘', '이메일 써줘'],
+    en: [
+      { icon:'✍️', label:'Write a poem', sub:'Creative writing' },
+      { icon:'🧠', label:'Explain quantum computing', sub:'Science & tech' },
+      { icon:'🐛', label:'Debug my code', sub:'Programming' },
+      { icon:'🌍', label:'Translate to Italian', sub:'Languages' },
+      { icon:'📄', label:'Summarize this text', sub:'Productivity' },
+      { icon:'🍝', label:'Give me a recipe', sub:'Food & cooking' },
+      { icon:'📅', label:'Plan my day', sub:'Organization' },
+      { icon:'📧', label:'Write an email', sub:'Communication' },
+    ],
+    it: [
+      { icon:'✍️', label:'Scrivi una poesia', sub:'Scrittura creativa' },
+      { icon:'🧠', label:'Spiega il machine learning', sub:'Tecnologia' },
+      { icon:'🐛', label:'Debug del codice', sub:'Programmazione' },
+      { icon:'🌍', label:'Traduci in inglese', sub:'Lingue' },
+      { icon:'📄', label:'Riassumi questo testo', sub:'Produttività' },
+      { icon:'🍝', label:'Dammi una ricetta', sub:'Cucina' },
+      { icon:'📅', label:'Pianifica la mia giornata', sub:'Organizzazione' },
+      { icon:'📧', label:'Scrivi una email', sub:'Comunicazione' },
+    ],
+    es: [
+      { icon:'✍️', label:'Escribe un poema', sub:'Escritura creativa' },
+      { icon:'🧠', label:'Explica la IA', sub:'Tecnología' },
+      { icon:'🐛', label:'Depura mi código', sub:'Programación' },
+      { icon:'🌍', label:'Traduce al inglés', sub:'Idiomas' },
+      { icon:'📄', label:'Resume este texto', sub:'Productividad' },
+      { icon:'🍝', label:'Dame una receta', sub:'Cocina' },
+      { icon:'📅', label:'Planifica mi día', sub:'Organización' },
+      { icon:'📧', label:'Escribe un email', sub:'Comunicación' },
+    ],
+    fr: [
+      { icon:'✍️', label:'Écris un poème', sub:'Écriture créative' },
+      { icon:'🧠', label:"Explique l'IA", sub:'Technologie' },
+      { icon:'🐛', label:'Débogue mon code', sub:'Programmation' },
+      { icon:'🌍', label:'Traduis en anglais', sub:'Langues' },
+      { icon:'📄', label:'Résume ce texte', sub:'Productivité' },
+      { icon:'🍝', label:'Donne-moi une recette', sub:'Cuisine' },
+      { icon:'📅', label:'Planifie ma journée', sub:'Organisation' },
+      { icon:'📧', label:'Écris un email', sub:'Communication' },
+    ],
+    de: [
+      { icon:'✍️', label:'Schreib ein Gedicht', sub:'Kreatives Schreiben' },
+      { icon:'🧠', label:'Erkläre KI', sub:'Technologie' },
+      { icon:'🐛', label:'Code debuggen', sub:'Programmierung' },
+      { icon:'🌍', label:'Übersetze ins Englische', sub:'Sprachen' },
+      { icon:'📄', label:'Fasse diesen Text zusammen', sub:'Produktivität' },
+      { icon:'🍝', label:'Gib mir ein Rezept', sub:'Kochen' },
+      { icon:'📅', label:'Plane meinen Tag', sub:'Organisation' },
+      { icon:'📧', label:'E-Mail schreiben', sub:'Kommunikation' },
+    ],
   };
   const list = suggestions[lang] || suggestions.en;
   const shuffled = [...list].sort(() => 0.5 - Math.random()).slice(0, 4);
   el.innerHTML = shuffled.map(s =>
-    `<button class="suggestion-chip" onclick="useSuggestion(this)">${s}</button>`
+    `<button class="suggestion-chip" onclick="useSuggestion(this)" data-prompt="${s.label}">
+      <span class="suggestion-chip-icon">${s.icon}</span>
+      <span class="suggestion-chip-text">
+        <span class="suggestion-chip-label">${s.label}</span>
+        <span class="suggestion-chip-sub">${s.sub}</span>
+      </span>
+    </button>`
   ).join('');
 }
 
 function useSuggestion(btn) {
   const inp = document.getElementById('msgInput');
   if (!inp) return;
-  inp.value = btn.textContent;
+  inp.value = btn.dataset.prompt || btn.textContent.trim();
   inp.focus();
   handleInput(inp);
   const chips = document.getElementById('suggestionChips');
