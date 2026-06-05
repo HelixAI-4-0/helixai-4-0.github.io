@@ -6972,9 +6972,13 @@ function addMsg(role, text, silent, artifacts, searchHTML) {
     const _cOptions  = [..._choiceMatch[2].matchAll(/\d+[\.\)]\s*(.+)/g)].map(m => m[1].trim());
     if (_cOptions.length >= 2) {
       const _cId = 'cs_' + Date.now();
-      const _cDataQ = _cQuestion.replace(/'/g, "\\'");
-      const _cDataOpts = JSON.stringify(_cOptions).replace(/'/g, "\\'");
-      choiceSheetHTML = `<button class="choice-sheet-trigger-btn" onclick="_openChoiceSheet('${_cId}', '${_cDataQ}', '${_cDataOpts}')" style="margin-top:12px;display:flex;align-items:center;gap:8px;padding:11px 16px;border-radius:14px;background:var(--surface);border:1.5px solid var(--border);cursor:pointer;font-family:var(--font-sans);font-size:14px;font-weight:600;color:var(--text);width:100%;text-align:left;transition:background 0.12s;" onmouseenter="this.style.background='var(--surface2)'" onmouseleave="this.style.background='var(--surface)'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="8 12 12 16 16 12"/><line x1="12" y1="8" x2="12" y2="16"/></svg><span>${escHtml(_cQuestion)}</span><span style="margin-left:auto;font-size:12px;color:var(--text3);font-weight:500;">${_cOptions.length} options</span></button>`;
+      // Store in global registry to avoid HTML attribute escaping issues
+      window._choiceRegistry = window._choiceRegistry || {};
+      window._choiceRegistry[_cId] = { question: _cQuestion, options: _cOptions };
+      // Auto-open the sheet after render (like Claude)
+      setTimeout(() => _openChoiceSheet(_cId), 80);
+      // In-chat pill — tap to reopen
+      choiceSheetHTML = `<button class="choice-sheet-trigger-btn" onclick="_openChoiceSheet('${_cId}')" style="margin-top:10px;display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:14px;background:var(--surface);border:1.5px solid var(--border);cursor:pointer;font-family:var(--font-sans);font-size:14px;font-weight:500;color:var(--text2);width:100%;text-align:left;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;color:var(--accent)"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span style="color:var(--text)">${escHtml(_cQuestion)}</span><span style="margin-left:auto;background:var(--surface2);border-radius:20px;padding:2px 9px;font-size:12px;font-weight:600;color:var(--text3);">${_cOptions.length}</span></button>`;
     }
   }
 
@@ -9486,7 +9490,7 @@ async function testVoice(id) {
   await _runTestVoice(v, sample, id, _done);
 }
 
-function _openChoiceSheet(cId, question, optsJson) {
+function _openChoiceSheet(cId) {
   const overlay = document.getElementById('choiceOverlay');
   const sheet   = document.getElementById('choiceSheetGlobal');
   const qEl     = document.getElementById('choiceSheetQ');
@@ -9496,8 +9500,9 @@ function _openChoiceSheet(cId, question, optsJson) {
   const inputWrap = document.getElementById('choiceSheetInputWrap');
   if (!overlay || !sheet) return;
 
-  let opts = [];
-  try { opts = JSON.parse(optsJson); } catch(e) {}
+  const reg = (window._choiceRegistry || {})[cId];
+  if (!reg) return;
+  const { question, options: opts } = reg;
 
   qEl.textContent = question;
   optsEl.innerHTML = opts.map((opt, i) => `
