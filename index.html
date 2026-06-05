@@ -663,25 +663,83 @@ body.theme-shifting { animation:themeShift 0.4s ease; }
   .welcome-title { font-size: 40px; }
   .greeting { font-size: 34px; }
 /* ── Interactive Choice Sheet ── */
-.choice-sheet { margin-top:12px; background:var(--bg2); border:1.5px solid var(--border); border-radius:18px; overflow:hidden; }
-.choice-sheet-q { padding:14px 16px 10px; font-family:var(--font-sans); font-size:15px; font-weight:600; color:var(--text); border-bottom:1px solid var(--border); }
-.choice-sheet-opts { display:flex; flex-direction:column; }
-.choice-sheet-opt { display:flex; align-items:center; gap:12px; padding:13px 16px; background:none; border:none; border-bottom:1px solid var(--border); cursor:pointer; text-align:left; color:var(--text); transition:background 0.12s; touch-action:manipulation; }
-.choice-sheet-opt:active { background:var(--surface); }
-.choice-sheet-opt:last-child { border-bottom:1px solid var(--border); }
-.choice-sheet-num { width:26px; height:26px; border-radius:50%; background:var(--surface2); color:var(--text2); font-family:var(--font-sans); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.choice-sheet-label { font-family:var(--font-sans); font-size:14px; font-weight:500; color:var(--text); }
-.choice-sheet-input { width:100%; padding:13px 50px 13px 16px; background:none; border:none; border-top:0; font-family:var(--font-sans); font-size:14px; color:var(--text); outline:none; box-sizing:border-box; }
+/* ── Claude-style choice bottom sheet overlay ── */
+.choice-sheet-trigger { display:none; } /* hidden trigger, sheet is shown via overlay */
+/* Overlay backdrop */
+.choice-overlay { position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0); pointer-events:none; transition:background 0.28s ease; }
+.choice-overlay.open { background:rgba(0,0,0,0.55); pointer-events:all; }
+/* The bottom sheet panel */
+.choice-sheet {
+  position:fixed; bottom:0; left:0; right:0; z-index:9001;
+  background:color-mix(in srgb, var(--bg2) 96%, transparent);
+  backdrop-filter:blur(24px) saturate(1.3); -webkit-backdrop-filter:blur(24px) saturate(1.3);
+  border-radius:24px 24px 0 0;
+  border-top:1px solid rgba(255,255,255,0.07);
+  box-shadow:0 -8px 48px rgba(0,0,0,0.45);
+  padding:0 0 env(safe-area-inset-bottom,0);
+  transform:translateY(100%);
+  transition:transform 0.32s cubic-bezier(0.32,0.72,0,1);
+  max-height:85vh; display:flex; flex-direction:column;
+  overflow:hidden;
+}
+.choice-sheet.open { transform:translateY(0); }
+/* Header row */
+.choice-sheet-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 20px 14px;
+}
+.choice-sheet-q {
+  font-family:var(--font-sans); font-size:16px; font-weight:600;
+  color:var(--text); flex:1; line-height:1.3;
+}
+.choice-sheet-close {
+  width:30px; height:30px; border-radius:50%;
+  background:var(--surface2); border:none;
+  color:var(--text2); font-size:18px; line-height:1;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; flex-shrink:0; margin-left:12px;
+  transition:background 0.15s, color 0.15s;
+}
+.choice-sheet-close:active { background:var(--surface); color:var(--text); }
+/* Options list */
+.choice-sheet-opts { display:flex; flex-direction:column; overflow-y:auto; flex:1; }
+.choice-sheet-opt {
+  display:flex; align-items:center; gap:14px;
+  padding:15px 20px; background:none; border:none;
+  border-top:1px solid var(--border);
+  cursor:pointer; text-align:left; color:var(--text);
+  transition:background 0.12s; touch-action:manipulation; width:100%;
+}
+.choice-sheet-opt:first-child { border-top:1px solid var(--border); }
+.choice-sheet-opt:active { background:rgba(255,255,255,0.04); }
+.choice-sheet-num {
+  width:30px; height:30px; border-radius:50%;
+  background:var(--surface2); color:var(--text);
+  font-family:var(--font-sans); font-size:13px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.choice-sheet-label { font-family:var(--font-sans); font-size:15px; font-weight:500; color:var(--text); line-height:1.35; }
+/* Bottom input row */
+.choice-sheet-input-wrap {
+  display:flex; align-items:center; gap:0;
+  border-top:1px solid var(--border);
+  padding:10px 16px 14px;
+}
+.choice-sheet-input {
+  flex:1; padding:11px 16px; background:transparent; border:none;
+  font-family:var(--font-sans); font-size:15px; color:var(--text3); outline:none;
+}
 .choice-sheet-input::placeholder { color:var(--text3); }
-.choice-sheet-send { position:absolute; right:10px; bottom:10px; width:34px; height:34px; border-radius:50%; background:var(--accent); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.choice-sheet-send {
+  width:36px; height:36px; border-radius:50%;
+  background:var(--accent); border:none;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
 .choice-sheet-send svg { width:16px; height:16px; stroke:white; }
-.choice-sheet { position:relative; }
-.choice-sheet-input-wrap { display:flex; align-items:center; padding:6px 10px 10px; gap:8px; border-top:1px solid var(--border); }
-.choice-sheet-input { flex:1; padding:10px 14px; background:var(--surface); border:1.5px solid var(--border); border-radius:12px; font-family:var(--font-sans); font-size:14px; color:var(--text); outline:none; }
-.choice-sheet-send { width:36px; height:36px; border-radius:50%; background:var(--accent); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.choice-sheet.done .choice-sheet-opt { opacity:0.4; pointer-events:none; cursor:default; }
+/* Done state */
+.choice-sheet.done .choice-sheet-opt { opacity:0.45; pointer-events:none; cursor:default; }
 .choice-sheet.done .choice-sheet-input-wrap { display:none; }
-.choice-sheet-opt.selected { background:var(--surface2); }
+.choice-sheet-opt.selected { background:rgba(255,255,255,0.05); }
 .choice-sheet-opt.selected .choice-sheet-num { background:var(--accent); color:#fff; }
 .suggestion-chip { display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:14px; background:var(--surface); border:1.5px solid var(--border); cursor:pointer; transition:background 0.15s,transform 0.1s; touch-action:manipulation; width:100%; box-sizing:border-box; color:var(--text); }
 .suggestion-chip:active { transform:scale(0.98); background:var(--surface2); }
@@ -6914,23 +6972,9 @@ function addMsg(role, text, silent, artifacts, searchHTML) {
     const _cOptions  = [..._choiceMatch[2].matchAll(/\d+[\.\)]\s*(.+)/g)].map(m => m[1].trim());
     if (_cOptions.length >= 2) {
       const _cId = 'cs_' + Date.now();
-      choiceSheetHTML = `
-        <div class="choice-sheet" id="${_cId}">
-          <div class="choice-sheet-q">${escHtml(_cQuestion)}</div>
-          <div class="choice-sheet-opts">
-            ${_cOptions.map((opt, i) => `
-              <button class="choice-sheet-opt" onclick="_choicePick(this,'${_cId}')">
-                <span class="choice-sheet-num">${i+1}</span>
-                <span class="choice-sheet-label">${escHtml(opt)}</span>
-              </button>`).join('')}
-          </div>
-          <div class="choice-sheet-input-wrap">
-            <input class="choice-sheet-input" placeholder="Type your own answer…" onkeydown="if(event.key==='Enter'&&this.value.trim()){_choiceCustom(this,'${_cId}')}" />
-            <button class="choice-sheet-send" onclick="_choiceCustom(this.previousElementSibling,'${_cId}')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-            </button>
-          </div>
-        </div>`;
+      const _cDataQ = _cQuestion.replace(/'/g, "\\'");
+      const _cDataOpts = JSON.stringify(_cOptions).replace(/'/g, "\\'");
+      choiceSheetHTML = `<button class="choice-sheet-trigger-btn" onclick="_openChoiceSheet('${_cId}', '${_cDataQ}', '${_cDataOpts}')" style="margin-top:12px;display:flex;align-items:center;gap:8px;padding:11px 16px;border-radius:14px;background:var(--surface);border:1.5px solid var(--border);cursor:pointer;font-family:var(--font-sans);font-size:14px;font-weight:600;color:var(--text);width:100%;text-align:left;transition:background 0.12s;" onmouseenter="this.style.background='var(--surface2)'" onmouseleave="this.style.background='var(--surface)'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="8 12 12 16 16 12"/><line x1="12" y1="8" x2="12" y2="16"/></svg><span>${escHtml(_cQuestion)}</span><span style="margin-left:auto;font-size:12px;color:var(--text3);font-weight:500;">${_cOptions.length} options</span></button>`;
     }
   }
 
@@ -9440,6 +9484,71 @@ async function testVoice(id) {
     if (b) b.classList.remove('testing');
   }
   await _runTestVoice(v, sample, id, _done);
+}
+
+function _openChoiceSheet(cId, question, optsJson) {
+  const overlay = document.getElementById('choiceOverlay');
+  const sheet   = document.getElementById('choiceSheetGlobal');
+  const qEl     = document.getElementById('choiceSheetQ');
+  const optsEl  = document.getElementById('choiceSheetOpts');
+  const inp     = document.getElementById('choiceSheetInput');
+  const sendBtn = document.getElementById('choiceSheetSendBtn');
+  const inputWrap = document.getElementById('choiceSheetInputWrap');
+  if (!overlay || !sheet) return;
+
+  let opts = [];
+  try { opts = JSON.parse(optsJson); } catch(e) {}
+
+  qEl.textContent = question;
+  optsEl.innerHTML = opts.map((opt, i) => `
+    <button class="choice-sheet-opt" onclick="_choiceOverlayPick(this, '${cId}', ${i})">
+      <span class="choice-sheet-num">${i+1}</span>
+      <span class="choice-sheet-label">${escHtml(opt)}</span>
+    </button>`).join('');
+
+  inp.value = '';
+  inp.onkeydown = (e) => { if (e.key === 'Enter' && inp.value.trim()) _choiceOverlayCustom(cId); };
+  sendBtn.onclick = () => _choiceOverlayCustom(cId);
+  inputWrap.style.display = 'flex';
+  sheet.classList.remove('done');
+
+  // Store opts for later reference
+  sheet._opts = opts;
+  sheet._cId  = cId;
+
+  overlay.classList.add('open');
+  // Small delay so transition fires
+  requestAnimationFrame(() => { requestAnimationFrame(() => { sheet.classList.add('open'); }); });
+}
+
+function _closeChoiceSheet() {
+  const overlay = document.getElementById('choiceOverlay');
+  const sheet   = document.getElementById('choiceSheetGlobal');
+  if (!overlay || !sheet) return;
+  sheet.classList.remove('open');
+  overlay.classList.remove('open');
+}
+
+function _choiceOverlayPick(btn, cId, idx) {
+  const sheet = document.getElementById('choiceSheetGlobal');
+  const label = btn.querySelector('.choice-sheet-label')?.textContent?.trim();
+  if (!label) return;
+  // Mark selected
+  sheet.querySelectorAll('.choice-sheet-opt').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  sheet.classList.add('done');
+  setTimeout(() => _closeChoiceSheet(), 350);
+  _choiceSubmit(label, cId, null);
+}
+
+function _choiceOverlayCustom(cId) {
+  const inp = document.getElementById('choiceSheetInput');
+  const val = inp?.value?.trim();
+  if (!val) return;
+  const sheet = document.getElementById('choiceSheetGlobal');
+  sheet.classList.add('done');
+  setTimeout(() => _closeChoiceSheet(), 350);
+  _choiceSubmit(val, cId, null);
 }
 
 function _choicePick(btn, sheetId) {
@@ -14091,6 +14200,21 @@ function _helixModalReject() {
     if (window._helixCtxSrc) { try { window._helixCtxSrc.stop(); } catch(e){} window._helixCtxSrc = null; }
   };
 })();
-</script>
+<!-- Claude-style choice sheet overlay (global, reused) -->
+<div class="choice-overlay" id="choiceOverlay" onclick="_closeChoiceSheet()"></div>
+<div class="choice-sheet" id="choiceSheetGlobal">
+  <div class="choice-sheet-header">
+    <div class="choice-sheet-q" id="choiceSheetQ"></div>
+    <button class="choice-sheet-close" onclick="_closeChoiceSheet()">×</button>
+  </div>
+  <div class="choice-sheet-opts" id="choiceSheetOpts"></div>
+  <div class="choice-sheet-input-wrap" id="choiceSheetInputWrap">
+    <input class="choice-sheet-input" id="choiceSheetInput" placeholder="Type your own answer…" />
+    <button class="choice-sheet-send" id="choiceSheetSendBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+    </button>
+  </div>
+</div>
 </body>
 </html>
+
