@@ -4774,6 +4774,11 @@ const LOCAL_STT_MODELS = [
    Get one at: https://console.cloud.google.com/apis/credentials        */
 const GOOGLE_OAUTH_CLIENT_ID = '';
 
+/* ── Max seed value: 16-bit integer limit (65535) ──
+   Some models reject seeds above this threshold.    */
+const MAX_SEED = 65535;
+const rndSeed  = () => Math.floor(Math.random() * MAX_SEED);
+
 /* ── Brand SVG icons for local models ── */
 const LOCAL_MODEL_ICONS = {
   qwen:   `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5l-4-7h2.18l1.82 3.18 1.82-3.18H17l-4 7zm-1-9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>`,
@@ -5308,7 +5313,7 @@ async function generateVideo(prompt) {
         const _finalPrompt = _wantsStyle
           ? (_nonce + ' ' + prompt + ', ' + _camDetail)
           : (_nonce + ' Cinematic photorealistic footage. ' + prompt + ', ' + _camDetail);
-        res = await fetch('https://gen.pollinations.ai/video/' + encodeURIComponent(_finalPrompt) + '?model=' + modelParam + '&nologo=true&seed=-1', {
+        res = await fetch('https://gen.pollinations.ai/video/' + encodeURIComponent(_finalPrompt) + '?model=' + modelParam + '&nologo=true&seed=' + rndSeed(), {
           method: 'GET', headers, signal: sig
         });
       } finally {
@@ -5458,7 +5463,7 @@ async function generateVideo(prompt) {
     if (hfToken) headers['Authorization'] = 'Bearer ' + hfToken;
     const res = await fetch('https://api-inference.huggingface.co/models/' + hfModelId, {
       method: 'POST', headers,
-      body: JSON.stringify({ inputs: prompt, parameters: { seed: Math.floor(Math.random()*2147483647) } }),
+      body: JSON.stringify({ inputs: prompt, parameters: { seed: rndSeed() } }),
       signal: sig
     });
     if (res.ok) {
@@ -5598,7 +5603,7 @@ async function generateImage(prompt) {
           'Authorization': 'Bearer ' + hfToken,
           'x-wait-for-model': 'true'
         },
-        body: JSON.stringify({ inputs: prompt, parameters: { num_inference_steps: 28, guidance_scale: 3.5, seed: Math.floor(Math.random()*Number.MAX_SAFE_INTEGER) } }),
+        body: JSON.stringify({ inputs: prompt, parameters: { num_inference_steps: 28, guidance_scale: 3.5, seed: rndSeed() } }),
         signal: sig
       });
       if (res.ok) {
@@ -5618,7 +5623,7 @@ async function generateImage(prompt) {
   // Model selection: poll_turbo = fast turbo, poll_realism = realistic, nano_banana = Nano Banana free, else default flux
   if (imgPref === 'poll_turbo') {
     try {
-      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=turbo&seed=' + Math.floor(Math.random()*2147483647);
+      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=turbo&seed=' + rndSeed();
       const polRes = await fetch(polUrl, { signal: sig });
       if (polRes.ok) { const blob = await polRes.blob(); if (blob.size > 1000) return URL.createObjectURL(blob); }
     } catch(e) { if (e.name === 'AbortError') throw e; }
@@ -5627,7 +5632,7 @@ async function generateImage(prompt) {
 
   if (imgPref === 'poll_realism') {
     try {
-      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=flux-realism&seed=' + Math.floor(Math.random()*2147483647);
+      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=flux-realism&seed=' + rndSeed();
       const polRes = await fetch(polUrl, { signal: sig });
       if (polRes.ok) { const blob = await polRes.blob(); if (blob.size > 1000) return URL.createObjectURL(blob); }
     } catch(e) { if (e.name === 'AbortError') throw e; }
@@ -5638,7 +5643,7 @@ async function generateImage(prompt) {
   if (imgPref === 'nano_banana') {
     try {
       // Try nanobanana.ai API
-      const nbUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=flux&enhance=true&seed=' + Math.floor(Math.random()*2147483647);
+      const nbUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=flux&enhance=true&seed=' + rndSeed();
       const nbRes = await fetch(nbUrl, { signal: sig });
       if (nbRes.ok) { const blob = await nbRes.blob(); if (blob.size > 1000) return URL.createObjectURL(blob); }
     } catch(e) { if (e.name === 'AbortError') throw e; console.warn('[IMG] Nano Banana failed:', e.message); }
@@ -5736,7 +5741,7 @@ async function generateImage(prompt) {
   // ── FLUX.1 Kontext (free Pollinations) ──
   if (imgPref === 'poll_kontext') {
     try {
-      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=flux-kontext&seed=' + Math.floor(Math.random()*2147483647);
+      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=flux-kontext&seed=' + rndSeed();
       const polRes = await fetch(polUrl, { signal: sig });
       if (polRes.ok) { const blob = await polRes.blob(); if (blob.size > 1000) return URL.createObjectURL(blob); }
     } catch(e) { if (e.name === 'AbortError') throw e; }
@@ -5745,7 +5750,7 @@ async function generateImage(prompt) {
   // ── Wan 2.7 Image (free Pollinations) ──
   if (imgPref === 'wan_27') {
     try {
-      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=wan-2.7&seed=' + Math.floor(Math.random()*2147483647);
+      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=wan-2.7&seed=' + rndSeed();
       const polRes = await fetch(polUrl, { signal: sig });
       if (polRes.ok) { const blob = await polRes.blob(); if (blob.size > 1000) return URL.createObjectURL(blob); }
     } catch(e) { if (e.name === 'AbortError') throw e; }
@@ -5754,7 +5759,7 @@ async function generateImage(prompt) {
   // ── Qwen Image Plus (free Pollinations) ──
   if (imgPref === 'qwen_img') {
     try {
-      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=qwen-vl-plus&seed=' + Math.floor(Math.random()*2147483647);
+      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=qwen-vl-plus&seed=' + rndSeed();
       const polRes = await fetch(polUrl, { signal: sig });
       if (polRes.ok) { const blob = await polRes.blob(); if (blob.size > 1000) return URL.createObjectURL(blob); }
     } catch(e) { if (e.name === 'AbortError') throw e; }
@@ -5763,7 +5768,7 @@ async function generateImage(prompt) {
   // ── Seedream 4.0 (Pollinations freemium) ──
   if (imgPref === 'seedream') {
     try {
-      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=seedream-4&seed=' + Math.floor(Math.random()*2147483647);
+      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=seedream-4&seed=' + rndSeed();
       const polRes = await fetch(polUrl, { signal: sig });
       if (polRes.ok) { const blob = await polRes.blob(); if (blob.size > 1000) return URL.createObjectURL(blob); }
     } catch(e) { if (e.name === 'AbortError') throw e; }
@@ -5772,7 +5777,7 @@ async function generateImage(prompt) {
   // ── Grok Imagine (Pollinations freemium) ──
   if (imgPref === 'grok_img') {
     try {
-      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=grok-imagine&seed=-1';
+      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=grok-imagine&seed=' + rndSeed();
       const polRes = await fetch(polUrl, { signal: sig });
       if (polRes.ok) { const blob = await polRes.blob(); if (blob.size > 1000) return URL.createObjectURL(blob); }
     } catch(e) { if (e.name === 'AbortError') throw e; }
@@ -5799,7 +5804,7 @@ async function generateImage(prompt) {
     try {
       const polToken = ls('pollinationsToken', '') || (apiKeys && apiKeys['pollinations']) || '';
       const polHeaders = polToken ? { 'Authorization': 'Bearer ' + polToken } : {};
-      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=' + _pollImgMap[imgPref] + '&seed=-1';
+      const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=' + _pollImgMap[imgPref] + '&seed=' + rndSeed();
       const polRes = await fetch(polUrl, { headers: polHeaders, signal: sig });
       if (polRes.ok) { const blob = await polRes.blob(); if (blob.size > 1000) return URL.createObjectURL(blob); }
       const errTxt = await polRes.text().catch(() => polRes.statusText);
@@ -5873,7 +5878,7 @@ async function generateImage(prompt) {
   }
 
   try {
-    const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=flux&seed=' + Math.floor(Math.random()*2147483647);
+    const polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1024&height=1024&nologo=true&model=flux&seed=' + rndSeed();
     const polRes = await fetch(polUrl, { signal: sig });
     if (polRes.ok) {
       const blob = await polRes.blob();
@@ -6208,7 +6213,7 @@ async function _callOnline(messages, stream, onChunk, sig) {
     stream,
     max_tokens: ls('aiMaxTokens', 4096),
     temperature: ls('aiTemperature', 0.72),
-    seed: Math.floor(Math.random() * 999999), // avoid proxy caching
+    seed: rndSeed(), // avoid proxy caching
   };
 
   _showInferenceBadge('cloud');
@@ -9102,7 +9107,7 @@ async function _callOpenAICompatible(endpoint, messages, stream, onChunk, sig, k
   const body = { model, messages, stream, max_tokens: ls('aiMaxTokens',4096), temperature: ls('aiTemperature',0.7) };
   // Pollinations caches responses by default — randomize seed to always get fresh outputs
   if ((finalEndpoint || endpoint || '').includes('pollinations.ai')) {
-    body.seed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+    body.seed = rndSeed();
   }
   const headers = { 'Content-Type':'application/json' };
   // Only add Authorization header if key is non-empty
@@ -12194,7 +12199,7 @@ async function ksImgGenerate() {
       else if (_ksImgModel === 'nano_banana') modelParam = 'flux';
       const enhance = _ksImgModel === 'nano_banana' ? '&enhance=true' : '';
       const fullPrompt = negPrompt ? prompt + ' | ' + negPrompt : prompt;
-      const polUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${_ksImgW}&height=${_ksImgH}&nologo=true&model=${modelParam}${enhance}&seed=${Math.floor(Math.random()*99999)}`;
+      const polUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${_ksImgW}&height=${_ksImgH}&nologo=true&model=${modelParam}${enhance}&seed=${rndSeed()}`;
       const res = await fetch(polUrl, { signal: _ksImgAbort.signal });
       if (!res.ok) throw new Error('Generation failed');
       const blob = await res.blob();
