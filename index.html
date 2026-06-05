@@ -1255,18 +1255,18 @@ button { touch-action: manipulation; }
       </svg>
     </div>
     <div class="welcome-title">Hello.</div>
-    <div class="welcome-sub" id="welcomeGreetSub">I'm Helix. What should I call you?</div>
-    <div class="welcome-form">
-      <input class="welcome-input" id="welcomeNameInput" type="text" placeholder="Your name" autocomplete="off" spellcheck="false" maxlength="32">
+    <div class="welcome-sub" id="welcomeGreetSub">I'm Helix — your AI assistant.<br>Free, open-source, no tracking.</div>
+    <div class="welcome-form" style="margin-top:18px">
+      <input class="welcome-input" id="welcomeNameInput" type="text" placeholder="Your name (optional)" autocomplete="off" spellcheck="false" maxlength="32">
     </div>
     <div id="welcomeLangGrid" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:20px;opacity:0;animation:fadeUp 0.55s ease 1.2s forwards"></div>
-    <button class="welcome-btn" id="welcomeContinueBtn" onclick="welcomeGoStep2()" style="margin-top:24px;opacity:0;animation:fadeUp 0.55s ease 1.35s forwards">Continue</button>
+    <button class="welcome-btn" id="welcomeContinueBtn" onclick="welcomeGoStep2()" style="margin-top:24px;opacity:0;animation:fadeUp 0.55s ease 1.35s forwards">Get started →</button>
     <div class="welcome-skip" onclick="welcomeGoStep2()" style="opacity:0;animation:fadeUp 0.55s ease 1.5s forwards">Skip</div>
   </div>
   <!-- Step 2: Model selection -->
   <div id="welcomeStep2" style="display:none;width:100%;max-width:420px;flex-direction:column;align-items:center;gap:8px;padding:0 4px">
-    <div class="welcome-title" id="welcomeModelTitle" style="font-size:24px;margin-bottom:4px">Choose your AI</div>
-    <div class="welcome-sub" id="welcomeModelSub" style="margin-bottom:12px">Select a model to install on this device</div>
+    <div class="welcome-title" id="welcomeModelTitle" style="font-size:24px;margin-bottom:4px">How do you want to start?</div>
+    <div class="welcome-sub" id="welcomeModelSub" style="margin-bottom:12px">You can always change this later in Settings</div>
     <div id="welcomeModelList" style="width:100%;overflow-y:auto;max-height:55vh;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch"></div>
     <div class="welcome-skip" id="welcomeSkip2" onclick="finishWelcome()" style="margin-top:12px;opacity:1;animation:none">Skip for now</div>
   </div>
@@ -2369,42 +2369,42 @@ function _welcomeRenderProviderStep() {
   const skip  = document.getElementById('welcomeSkip2');
 
   const labels = {
-    en: { title:'How do you want to use Helix?', sub:'Choose your AI source', skip:'Skip for now',
-          cloud:'Free cloud', cloudSub:'No account needed · Powered by LLM7.io',
-          key:'API key', keySub:'OpenAI, Anthropic, Groq…',
-          local:'On-device', localSub:'Private · No internet needed' },
-    it: { title:'How do you want to use Helix?', sub:'Choose your AI source', skip:'Skip for now',
-          cloud:'Free cloud', cloudSub:'No account · LLM7.io',
-          key:'API key', keySub:'OpenAI, Anthropic, Groq…',
-          local:'On device', localSub:'Private · No connection' },
-    es: { title:'¿Cómo quieres usar Helix?', sub:'Elige tu fuente de IA', skip:'Omitir por ahora',
-          cloud:'Nube gratuita', cloudSub:'Sin cuenta · LLM7.io',
-          key:'Clave API', keySub:'OpenAI, Anthropic, Groq…',
+    en: { title:'How do you want to start?', sub:'You can always change this in Settings', skip:'Skip for now',
+          cloud:'Start for free', cloudSub:'No account, no key · Works instantly',
+          key:'Use my API key', keySub:'OpenAI, Anthropic, Groq and more',
+          local:'Run on this device', localSub:'Private · No internet needed' },
+    it: { title:'Come vuoi iniziare?', sub:'Puoi cambiarlo in qualsiasi momento', skip:'Salta per ora',
+          cloud:'Inizia gratis', cloudSub:'Nessun account, nessuna chiave · Funziona subito',
+          key:'Usa la mia API key', keySub:'OpenAI, Anthropic, Groq e altri',
+          local:'Esegui su questo dispositivo', localSub:'Privato · Nessuna connessione' },
+    es: { title:'¿Cómo quieres empezar?', sub:'Puedes cambiarlo después en Ajustes', skip:'Omitir por ahora',
+          cloud:'Empieza gratis', cloudSub:'Sin cuenta ni clave · Funciona al instante',
+          key:'Usar mi clave API', keySub:'OpenAI, Anthropic, Groq…',
           local:'En el dispositivo', localSub:'Privado · Sin internet' },
-    fr: { title:'Comment utiliser Helix?', sub:'Choisissez votre source IA', skip:'Passer pour l\'instant',
-          cloud:'Cloud gratuit', cloudSub:'Sans compte · LLM7.io',
-          key:'Clé API', keySub:'OpenAI, Anthropic, Groq…',
+    fr: { title:'Comment veux-tu commencer ?', sub:'Tu peux changer ça dans les Paramètres', skip:'Passer pour l\'instant',
+          cloud:'Commencer gratuitement', cloudSub:'Sans compte ni clé · Fonctionne immédiatement',
+          key:'Utiliser ma clé API', keySub:'OpenAI, Anthropic, Groq…',
           local:'Sur l\'appareil', localSub:'Privé · Sans internet' },
-    de: { title:'Wie möchtest du Helix nutzen?', sub:'Wähle deine KI-Quelle', skip:'Vorerst überspringen',
-          cloud:'Kostenlose Cloud', cloudSub:'Kein Konto · LLM7.io',
-          key:'API-Schlüssel', keySub:'OpenAI, Anthropic, Groq…',
+    de: { title:'Wie möchtest du starten?', sub:'Du kannst das später in den Einstellungen ändern', skip:'Vorerst überspringen',
+          cloud:'Kostenlos starten', cloudSub:'Kein Konto, kein Schlüssel · Sofort bereit',
+          key:'API-Schlüssel verwenden', keySub:'OpenAI, Anthropic, Groq…',
           local:'Auf dem Gerät', localSub:'Privat · Kein Internet nötig' },
-    pt: { title:'Como quer usar o Helix?', sub:'Escolha a fonte de IA', skip:'Pular por enquanto',
-          cloud:'Nuvem gratuita', cloudSub:'Sem conta · LLM7.io',
-          key:'Chave API', keySub:'OpenAI, Anthropic, Groq…',
+    pt: { title:'Como quer começar?', sub:'Pode mudar isso nas Definições', skip:'Pular por enquanto',
+          cloud:'Começar de graça', cloudSub:'Sem conta nem chave · Funciona já',
+          key:'Usar minha chave API', keySub:'OpenAI, Anthropic, Groq…',
           local:'No dispositivo', localSub:'Privado · Sem internet' },
-    zh: { title:'如何使用 Helix？', sub:'选择你的 AI 来源', skip:'暂时跳过',
-          cloud:'免费云端', cloudSub:'无需账号 · LLM7.io',
-          key:'API 密钥', keySub:'OpenAI, Anthropic, Groq…',
-          local:'本地设备', localSub:'隐私 · 无需联网' },
-    ja: { title:'Helix の使い方を選んでください', sub:'AI ソースを選択', skip:'今はスキップ',
-          cloud:'無料クラウド', cloudSub:'アカウント不要 · LLM7.io',
-          key:'API キー', keySub:'OpenAI, Anthropic, Groq…',
-          local:'デバイス上', localSub:'プライベート · インターネット不要' },
-    ko: { title:'Helix 사용 방법을 선택하세요', sub:'AI 소스 선택', skip:'나중에',
-          cloud:'무료 클라우드', cloudSub:'계정 불필요 · LLM7.io',
-          key:'API 키', keySub:'OpenAI, Anthropic, Groq…',
-          local:'기기 내', localSub:'개인 정보 보호 · 인터넷 불필요' },
+    zh: { title:'你想如何开始？', sub:'稍后可在设置中更改', skip:'暂时跳过',
+          cloud:'免费开始', cloudSub:'无需账号或密钥 · 立即可用',
+          key:'使用 API 密钥', keySub:'OpenAI, Anthropic, Groq…',
+          local:'本地设备运行', localSub:'隐私 · 无需联网' },
+    ja: { title:'どのように始めますか？', sub:'後で設定から変更できます', skip:'今はスキップ',
+          cloud:'無料で始める', cloudSub:'アカウント・キー不要 · すぐ使える',
+          key:'API キーを使う', keySub:'OpenAI, Anthropic, Groq…',
+          local:'デバイス上で実行', localSub:'プライベート · インターネット不要' },
+    ko: { title:'어떻게 시작하시겠어요?', sub:'나중에 설정에서 변경할 수 있어요', skip:'나중에',
+          cloud:'무료로 시작', cloudSub:'계정·키 불필요 · 즉시 사용 가능',
+          key:'API 키 사용', keySub:'OpenAI, Anthropic, Groq…',
+          local:'기기에서 실행', localSub:'개인 정보 보호 · 인터넷 불필요' },
   };
   const lbl = labels[uiLang] || labels.en;
 
@@ -2412,17 +2412,18 @@ function _welcomeRenderProviderStep() {
   if (sub)   sub.textContent   = lbl.sub;
   if (skip)  skip.textContent  = lbl.skip;
 
-  const providerCard = (icon, name, sub2, onClick) => `
-    <button onclick="${onClick}" class="wm-item" style="justify-content:flex-start">
+  const providerCard = (icon, name, sub2, onClick, recommended) => `
+    <button onclick="${onClick}" class="wm-item" style="justify-content:flex-start;position:relative${recommended ? ';border-color:var(--accent)' : ''}">
+      ${recommended ? `<span style="position:absolute;top:-9px;left:14px;font-size:10px;font-weight:700;padding:1px 8px;border-radius:20px;background:var(--accent);color:#fff;letter-spacing:0.03em">Recommended</span>` : ''}
       <div class="wm-icon" style="background:var(--surface2)">${icon}</div>
       <div class="wm-info"><div class="wm-name">${name}</div><div class="wm-sub">${sub2}</div></div>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;opacity:0.4"><polyline points="9 18 15 12 9 6"/></svg>
     </button>`;
 
   list.innerHTML =
-    providerCard('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>', lbl.cloud, lbl.cloudSub, '_welcomeShowCloud()') +
-    providerCard('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.77-7.77zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>', lbl.key, lbl.keySub, '_welcomeShowKey()') +
-    providerCard('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', lbl.local, lbl.localSub, '_welcomeShowLocal()');
+    providerCard('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>', lbl.cloud, lbl.cloudSub, '_welcomeShowCloud()', true) +
+    providerCard('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.77-7.77zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>', lbl.key, lbl.keySub, '_welcomeShowKey()', false) +
+    providerCard('<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', lbl.local, lbl.localSub, '_welcomeShowLocal()', false);
 }
 
 function _welcomeBackToProviders() {
@@ -2487,8 +2488,32 @@ function _welcomeShowKey() {
   const sub   = document.getElementById('welcomeModelSub');
   title.textContent = 'API key providers';
   sub.textContent   = 'Your own key — full access';
+  const TOP_WELCOME_PROVIDERS = ['openai','anthropic','google','groq','pollinations'];
   list.innerHTML = `
     <button onclick="_welcomeBackToProviders()" class="wm-item" style="opacity:0.6;justify-content:flex-start">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      <span style="font-family:var(--font-sans);font-size:13px">Back</span>
+    </button>` +
+    TOP_WELCOME_PROVIDERS.filter(id => PROVIDER_MODELS[id]).map(id => {
+      const p = PROVIDER_MODELS[id];
+      return `<button onclick="_welcomeSelectKeyProvider('${id}')" class="wm-item">
+        <div class="wm-icon" style="background:var(--surface2)">${p.icon}</div>
+        <div class="wm-info">
+          <div class="wm-name">${p.name}</div>
+          <div class="wm-sub">${p.models[0]?.name || ''} + ${p.models.length - 1} more</div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;opacity:0.4"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>`;
+    }).join('') +
+    `<button onclick="_welcomeShowAllProviders()" class="wm-item" style="opacity:0.55;justify-content:center">
+      <span style="font-family:var(--font-sans);font-size:13px">Show all providers…</span>
+    </button>`;
+}
+
+function _welcomeShowAllProviders() {
+  const list  = document.getElementById('welcomeModelList');
+  list.innerHTML = `
+    <button onclick="_welcomeShowKey()" class="wm-item" style="opacity:0.6;justify-content:flex-start">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
       <span style="font-family:var(--font-sans);font-size:13px">Back</span>
     </button>` +
