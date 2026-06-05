@@ -2420,8 +2420,7 @@ function _welcomeRenderProviderStep() {
   if (skip)  skip.textContent  = lbl.skip;
 
   const providerCard = (icon, name, sub2, onClick, recommended) => `
-    <button onclick="${onClick}" class="wm-item" style="justify-content:flex-start;position:relative${recommended ? ';border-color:var(--accent)' : ''}">
-      ${recommended ? `<span style="position:absolute;top:-9px;left:14px;font-size:10px;font-weight:700;padding:1px 8px;border-radius:20px;background:var(--accent);color:#fff;letter-spacing:0.03em">Recommended</span>` : ''}
+    <button onclick="${onClick}" class="wm-item" style="justify-content:flex-start;position:relative">
       <div class="wm-icon" style="background:var(--surface2)">${icon}</div>
       <div class="wm-info"><div class="wm-name">${name}</div><div class="wm-sub">${sub2}</div></div>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;opacity:0.4"><polyline points="9 18 15 12 9 6"/></svg>
