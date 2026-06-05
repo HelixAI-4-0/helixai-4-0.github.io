@@ -9490,6 +9490,14 @@ async function testVoice(id) {
   await _runTestVoice(v, sample, id, _done);
 }
 
+// Wire up overlay close handlers once DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  var ov = document.getElementById('choiceOverlay');
+  var cl = document.getElementById('choiceSheetClose');
+  if (ov) ov.addEventListener('click', _closeChoiceSheet);
+  if (cl) cl.addEventListener('click', _closeChoiceSheet);
+});
+
 function _openChoiceSheet(cId) {
   const overlay = document.getElementById('choiceOverlay');
   const sheet   = document.getElementById('choiceSheetGlobal');
@@ -14205,12 +14213,13 @@ function _helixModalReject() {
     if (window._helixCtxSrc) { try { window._helixCtxSrc.stop(); } catch(e){} window._helixCtxSrc = null; }
   };
 })();
-<!-- Claude-style choice sheet overlay (global, reused) -->
-<div class="choice-overlay" id="choiceOverlay" onclick="_closeChoiceSheet()"></div>
+</script>
+<!-- Claude-style choice sheet overlay -->
+<div class="choice-overlay" id="choiceOverlay"></div>
 <div class="choice-sheet" id="choiceSheetGlobal">
   <div class="choice-sheet-header">
     <div class="choice-sheet-q" id="choiceSheetQ"></div>
-    <button class="choice-sheet-close" onclick="_closeChoiceSheet()">×</button>
+    <button class="choice-sheet-close" id="choiceSheetClose">&#x2715;</button>
   </div>
   <div class="choice-sheet-opts" id="choiceSheetOpts"></div>
   <div class="choice-sheet-input-wrap" id="choiceSheetInputWrap">
