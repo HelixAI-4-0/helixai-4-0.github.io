@@ -8915,7 +8915,10 @@ function testAllModels() {
             <div id="tamTitle" style="font-size:15px;font-weight:700;color:var(--text)">Testing all models</div>
             <div id="tamSub"   style="font-size:11px;color:var(--text3);margin-top:2px"></div>
           </div>
-        <button onclick="document.getElementById('tamOverlay').remove()" style="background:var(--surface);border:none;color:var(--text2);border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
+          <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+            <button id="tamCopyBtn" onclick="_tamCopyResults()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);border-radius:10px;padding:5px 12px;font-size:12px;font-weight:600;font-family:var(--font-sans);cursor:pointer;display:flex;align-items:center;gap:5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
+            <button onclick="document.getElementById('tamOverlay').remove()" style="background:var(--surface);border:none;color:var(--text2);border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
+          </div>
         </div>
         <div id="tamList" style="overflow-y:auto;flex:1;padding:10px 14px 20px;display:flex;flex-direction:column;gap:6px"></div>
       </div>`;
@@ -9384,6 +9387,28 @@ async function testVoice(id) {
     if (b) b.classList.remove('testing');
   }
   await _runTestVoice(v, sample, id, _done);
+}
+
+function _tamCopyResults() {
+  const listEl = document.getElementById('tamList');
+  if (!listEl) { showToast('No results yet'); return; }
+  const rows = listEl.querySelectorAll('[id^="tam_"]');
+  if (!rows.length) { showToast('No results yet'); return; }
+  const lines = [];
+  const title = document.getElementById('tamTitle')?.textContent || 'Model Test Results';
+  lines.push(title);
+  lines.push('='.repeat(title.length));
+  rows.forEach(row => {
+    const name  = row.querySelector('.tam-dot + div > div:first-child')?.textContent?.trim() || '?';
+    const log   = row.querySelector('.tam-log')?.textContent?.trim() || '';
+    const badge = row.querySelector('.tam-badge')?.textContent?.trim() || '';
+    lines.push(`${badge === '✓' ? '✅' : badge === '✗' ? '❌' : '⏳'} ${name}: ${log}`);
+  });
+  const text = lines.join('\n');
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('tamCopyBtn');
+    if (btn) { btn.textContent = '✓ Copied'; setTimeout(() => { btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy'; }, 2000); }
+  }).catch(() => showToast('Copy failed'));
 }
 
 async function _runTestVoice(v, sample, id, _done) {
