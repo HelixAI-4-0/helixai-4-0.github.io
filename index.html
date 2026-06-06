@@ -664,34 +664,8 @@ body.theme-shifting { animation:themeShift 0.4s ease; }
   .greeting { font-size: 34px; }
 /* ── Interactive Choice Sheet ── */
 /* ── Claude-style choice bottom sheet overlay ── */
-/* ══ Choice Bottom Sheet ══ */
-.cs-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0);pointer-events:none;transition:background .3s}
-.cs-overlay.open{background:rgba(0,0,0,.6);pointer-events:all}
-.cs-panel{position:fixed;bottom:0;left:0;right:0;z-index:9001;background:var(--bg2);border-radius:24px 24px 0 0;transform:translateY(105%);transition:transform .35s cubic-bezier(.32,.72,0,1);display:none;flex-direction:column;max-height:82vh;overflow:hidden;box-shadow:0 -4px 40px rgba(0,0,0,.35)}
-.cs-panel.open{transform:translateY(0)}
-.cs-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 4px;flex-shrink:0}
-.cs-title{font-family:var(--font-sans);font-size:15px;font-weight:600;color:var(--text);padding:14px 20px 10px;flex-shrink:0;border-bottom:1px solid var(--border);line-height:1.4}
-.cs-opts{overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}
-.cs-opt{display:flex;align-items:center;gap:14px;width:100%;padding:15px 20px;background:none;border:none;border-bottom:1px solid var(--border);cursor:pointer;touch-action:manipulation;text-align:left;transition:background .12s}
-.cs-opt:active{background:var(--surface)}
-.cs-opt:last-child{border-bottom:none}
-.cs-num{width:32px;height:32px;border-radius:50%;background:var(--surface);color:var(--text);font-family:var(--font-sans);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s,color .2s}
-.cs-label{font-family:var(--font-sans);font-size:15px;font-weight:500;color:var(--text);line-height:1.4}
-.cs-opt.selected .cs-num{background:var(--accent);color:#fff}
-.cs-opt.selected .cs-label{color:var(--accent)}
-.cs-opt.done{opacity:.35;pointer-events:none}
-.cs-footer{border-top:1px solid var(--border);display:flex;align-items:center;padding:10px 14px calc(10px + env(safe-area-inset-bottom));gap:10px;flex-shrink:0;background:var(--bg2)}
-.cs-input{flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:20px;font-family:var(--font-sans);font-size:15px;color:var(--text);outline:none;padding:9px 14px;transition:border-color .15s}
-.cs-input:focus{border-color:var(--accent)}
-.cs-input::placeholder{color:var(--text3)}
-.cs-send{width:36px;height:36px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s}
-.cs-send:active{opacity:.75}
-.cs-send svg{width:15px;height:15px;stroke:#fff}
-/* pill in bubble — re-open the choice sheet */
-.cs-pill{display:inline-flex;align-items:center;gap:8px;margin-top:10px;padding:11px 16px;border-radius:14px;background:var(--surface);border:1.5px solid var(--border);cursor:pointer;font-family:var(--font-sans);font-size:13px;font-weight:600;color:var(--text2);max-width:100%;transition:background .14s,transform .1s;touch-action:manipulation}
-.cs-pill:active{background:var(--surface2);transform:scale(0.98)}
-.cs-pill svg{flex-shrink:0;opacity:.6}
-.cs-pill-badge{background:var(--accent);border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;color:#fff;margin-left:auto;flex-shrink:0}
+
+
 .suggestion-chip { display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:14px; background:var(--surface); border:1.5px solid var(--border); cursor:pointer; transition:background 0.15s,transform 0.1s; touch-action:manipulation; width:100%; box-sizing:border-box; color:var(--text); }
 .suggestion-chip:active { transform:scale(0.98); background:var(--surface2); }
 .suggestion-chip-icon { width:32px; height:32px; border-radius:8px; background:var(--bg2); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:16px; line-height:1; }
@@ -2767,7 +2741,6 @@ function restoreChat(id) {
   const chat = chats.find(c => c.id === id);
   if (!chat) return;
   closeSidebar(); goChat();
-  _csClose();
   // ── Reset generation state ──
   if (abortController) { try { abortController.abort(); } catch(_) {} abortController = null; }
   isTyping = false;
@@ -4901,7 +4874,6 @@ function closeSidebar() {
 
 function newChat() {
   closeSidebar(); goChat();
-  _csClose();
   currentChatId = null;
   conversationHistory = [];
   pendingAttachment = null;
@@ -6916,45 +6888,6 @@ function addMsg(role, text, silent, artifacts, searchHTML) {
     .replace(/\[Δ\]/g,'<span class="lm-delta">[Δ]</span>')
     .replace(/\[Ω\]/g,'<span class="lm-omega">[Ω]</span>');
 
-  // ── Interactive choice sheet detection ──
-  // Detects: a question followed by 2+ numbered options (1. / 1) / 1- formats)
-  let choiceSheetHTML = '';
-  (function detectChoiceSheet() {
-    const raw = text || '';
-    // Try multiple patterns to handle all model output formats
-    // Pattern A: Question? then numbered list with separator (dot, paren, dash)
-    const reA = /([^\n]{5,200}\?)[ \t]*\n+[ \t]*((?:[ \t]*\d+[ .\)\-\u2013][^\n]{2,}\n?){2,})/m;
-    // Pattern B: Question? then blank line then numbered list
-    const reB = /([^\n]{5,200}\?)[ \t]*\n{2,}((?:[ \t]*\d+[ .\)\-\u2013][^\n]{2,}\n?){2,})/m;
-    // Pattern C: numbered list anywhere, grab preceding question line
-    const reC = /((?:^|\n)[^\n]{5,200}\?)[ \t]*\n+((?:[ \t]*\d+[ \t.\)\-\u2013][^\n]{2,}\n?){2,})/m;
-    const m = raw.match(reA) || raw.match(reB) || raw.match(reC);
-    if (!m) {
-      console.log('[ChoiceSheet] no match for text:', raw.slice(0,200));
-      return;
-    }
-    const _cQuestion = m[1].trim();
-    const _cOptions = [];
-    // Extract options: number followed by any separator (or just space) then text
-    const optRe = /^[ \t]*\d+[ \t.\)\-\u2013]+([^\n]{2,})/gm;
-    let om;
-    while ((om = optRe.exec(m[2])) !== null) {
-      const opt = om[1].replace(/\*\*/g,'').replace(/^\s+|\s+$/g,'');
-      if (opt.length > 1) _cOptions.push(opt);
-    }
-    if (_cOptions.length < 2) {
-      console.log('[ChoiceSheet] not enough options:', _cOptions);
-      return;
-    }
-    console.log('[ChoiceSheet] detected:', _cQuestion, _cOptions);
-    const _cId = 'cs_' + Date.now();
-    window._csReg = window._csReg || {};
-    window._csReg[_cId] = { q: _cQuestion, opts: _cOptions };
-    html = html.replace(/<ol[\s\S]*?<\/ol>/gi, '').replace(/<ul[\s\S]*?<\/ul>/gi, '').trim();
-    setTimeout(() => _csOpen(_cId), 150);
-    choiceSheetHTML = `<button class="cs-pill" onclick="_csOpen('${_cId}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>${escHtml(_cQuestion)}<span class="cs-pill-badge">${_cOptions.length}</span></button>`;
-  })();
-
   // Code actions for inline code blocks
   const codeBlocks = extractCodeBlocks(text || '');
   let codeActionsHTML = '';
@@ -6996,7 +6929,6 @@ function addMsg(role, text, silent, artifacts, searchHTML) {
     <div class="ai-dot">${logo}</div>
     <div class="ai-content">
       <div class="ai-text">${html || (artifacts?.length ? '' : '<p>(empty)</p>')}</div>
-      ${choiceSheetHTML}
       ${codeActionsHTML}
       ${artifactBadgesHTML}
       <div class="msg-actions">
@@ -9465,82 +9397,9 @@ async function testVoice(id) {
 
 
 
-function _csOpen(cId) {
-  const reg = (window._csReg || {})[cId];
-  if (!reg) return;
-  const overlay = document.getElementById('csOverlay');
-  const panel   = document.getElementById('csPanel');
-  const title   = document.getElementById('csTitle');
-  const opts    = document.getElementById('csOpts');
-  const inp     = document.getElementById('csInput');
-  if (!panel || !overlay) return;
-  // Store current choice id on panel for _csPick to use
-  panel.dataset.cid = cId;
-  title.textContent = reg.q;
-  opts.innerHTML = reg.opts.map((o, i) => `
-    <button class="cs-opt" onclick="_csPick(this,'${cId}')">
-      <span class="cs-num">${i+1}</span>
-      <span class="cs-label">${escHtml(o)}</span>
-    </button>`).join('');
-  inp.value = '';
-  inp.oninput = () => {};
-  inp.onkeydown = e => { if (e.key === 'Enter' && inp.value.trim()) _csCustom(cId); };
-  document.getElementById('csSend').onclick = () => _csCustom(cId);
-  // Reset state
-  opts.querySelectorAll('.cs-opt').forEach(b => b.classList.remove('selected','done'));
-  panel.style.display = 'flex';
-  overlay.style.display = 'block';
-  // Double rAF ensures display:flex is painted before transition starts
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    overlay.classList.add('open');
-    panel.classList.add('open');
-  }));
-}
 
-function _csClose() {
-  const overlay = document.getElementById('csOverlay');
-  const panel   = document.getElementById('csPanel');
-  if (!panel || !overlay) return;
-  panel.classList.remove('open');
-  overlay.classList.remove('open');
-  setTimeout(() => {
-    panel.style.display = 'none';
-    overlay.style.display = 'none';
-  }, 320);
-}
 
-function _csPick(btn, cId) {
-  const panel = document.getElementById('csPanel');
-  if (!panel) return;
-  // Visual feedback: highlight selected, fade others
-  panel.querySelectorAll('.cs-opt').forEach(b => {
-    if (b === btn) b.classList.add('selected');
-    else b.classList.add('done');
-  });
-  const label = btn.querySelector('.cs-label')?.textContent?.trim();
-  if (!label) return;
-  setTimeout(() => {
-    _csClose();
-    const inp = document.getElementById('msgInput');
-    if (inp) { inp.value = label; if (typeof handleInput === 'function') handleInput(inp); }
-    if (typeof sendMsg === 'function') sendMsg();
-  }, 360);
-}
 
-function _csCustom(cId) {
-  const val = document.getElementById('csInput')?.value?.trim();
-  if (!val) return;
-  _csClose();
-  setTimeout(() => {
-    const inp = document.getElementById('msgInput');
-    if (inp) { inp.value = val; if (typeof handleInput === 'function') handleInput(inp); }
-    if (typeof sendMsg === 'function') sendMsg();
-  }, 50);
-  sendMsg();
-}
-
-// Legacy aliases
-function _openChoiceSheet(cId) { _csOpen(cId); }
 
 function _tamCopyResults() {
   const listEl = document.getElementById('tamList');
@@ -14172,9 +14031,6 @@ function _helixModalReject() {
 })();
 </script>
 <!-- Choice bottom sheet -->
-<div class="cs-overlay" id="csOverlay" onclick="_csClose()"></div>
-<div class="cs-panel" id="csPanel" style="display:none">
-  <div class="cs-handle"></div>
   <div class="cs-title" id="csTitle"></div>
   <div class="cs-opts" id="csOpts"></div>
   <div class="cs-footer">
