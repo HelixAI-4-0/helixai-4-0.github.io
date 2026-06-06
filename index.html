@@ -664,80 +664,73 @@ body.theme-shifting { animation:themeShift 0.4s ease; }
   .greeting { font-size: 34px; }
 /* ── Interactive Choice Sheet ── */
 /* ── Claude-style choice bottom sheet overlay ── */
-.choice-sheet-trigger { display:none; } /* hidden trigger, sheet is shown via overlay */
-/* Overlay backdrop */
+.choice-sheet-trigger { display:none; }
 .choice-overlay { position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0); pointer-events:none; transition:background 0.28s ease; }
-.choice-overlay.open { background:rgba(0,0,0,0.55); pointer-events:all; }
-/* The bottom sheet panel */
+.choice-overlay.open { background:rgba(0,0,0,0.6); pointer-events:all; }
 .choice-sheet {
   position:fixed; bottom:0; left:0; right:0; z-index:9001;
-  background:color-mix(in srgb, var(--bg2) 96%, transparent);
-  backdrop-filter:blur(24px) saturate(1.3); -webkit-backdrop-filter:blur(24px) saturate(1.3);
-  border-radius:24px 24px 0 0;
-  border-top:1px solid rgba(255,255,255,0.07);
-  box-shadow:0 -8px 48px rgba(0,0,0,0.45);
-  padding:0 0 env(safe-area-inset-bottom,0);
+  background:var(--bg2);
+  border-radius:22px 22px 0 0;
+  box-shadow:0 -4px 32px rgba(0,0,0,0.5);
+  padding:0 0 env(safe-area-inset-bottom,12px);
   transform:translateY(100%);
   transition:transform 0.32s cubic-bezier(0.32,0.72,0,1);
   max-height:85vh; display:flex; flex-direction:column;
   overflow:hidden;
 }
 .choice-sheet.open { transform:translateY(0); }
-/* Header row */
 .choice-sheet-header {
   display:flex; align-items:center; justify-content:space-between;
-  padding:20px 20px 14px;
+  padding:22px 20px 16px;
 }
 .choice-sheet-q {
-  font-family:var(--font-sans); font-size:16px; font-weight:600;
+  font-family:var(--font-sans); font-size:17px; font-weight:700;
   color:var(--text); flex:1; line-height:1.3;
 }
 .choice-sheet-close {
-  width:30px; height:30px; border-radius:50%;
+  width:28px; height:28px; border-radius:50%;
   background:var(--surface2); border:none;
-  color:var(--text2); font-size:18px; line-height:1;
+  color:var(--text3); font-size:15px; line-height:1;
   display:flex; align-items:center; justify-content:center;
   cursor:pointer; flex-shrink:0; margin-left:12px;
-  transition:background 0.15s, color 0.15s;
 }
-.choice-sheet-close:active { background:var(--surface); color:var(--text); }
-/* Options list */
-.choice-sheet-opts { display:flex; flex-direction:column; overflow-y:auto; flex:1; }
+.choice-sheet-close:active { background:var(--surface); }
+.choice-sheet-opts { display:flex; flex-direction:column; overflow-y:auto; }
 .choice-sheet-opt {
-  display:flex; align-items:center; gap:14px;
-  padding:15px 20px; background:none; border:none;
+  display:flex; align-items:center; gap:16px;
+  padding:18px 20px; background:none; border:none;
   border-top:1px solid var(--border);
   cursor:pointer; text-align:left; color:var(--text);
-  transition:background 0.12s; touch-action:manipulation; width:100%;
+  transition:background 0.1s; touch-action:manipulation; width:100%;
 }
-.choice-sheet-opt:first-child { border-top:1px solid var(--border); }
-.choice-sheet-opt:active { background:rgba(255,255,255,0.04); }
+.choice-sheet-opt:active { background:rgba(255,255,255,0.05); }
 .choice-sheet-num {
-  width:30px; height:30px; border-radius:50%;
-  background:var(--surface2); color:var(--text);
+  width:32px; height:32px; border-radius:50%;
+  background:#1a1a1a; color:#fff;
   font-family:var(--font-sans); font-size:13px; font-weight:700;
   display:flex; align-items:center; justify-content:center; flex-shrink:0;
 }
-.choice-sheet-label { font-family:var(--font-sans); font-size:15px; font-weight:500; color:var(--text); line-height:1.35; }
-/* Bottom input row */
+.choice-sheet-label { font-family:var(--font-sans); font-size:16px; font-weight:500; color:var(--text); }
 .choice-sheet-input-wrap {
-  display:flex; align-items:center; gap:0;
+  display:flex; align-items:center;
   border-top:1px solid var(--border);
-  padding:10px 16px 14px;
+  padding:10px 14px 16px;
+  gap:10px;
 }
 .choice-sheet-input {
-  flex:1; padding:11px 16px; background:transparent; border:none;
+  flex:1; padding:12px 16px; background:transparent; border:none;
   font-family:var(--font-sans); font-size:15px; color:var(--text3); outline:none;
 }
 .choice-sheet-input::placeholder { color:var(--text3); }
 .choice-sheet-send {
-  width:36px; height:36px; border-radius:50%;
-  background:var(--accent); border:none;
+  width:38px; height:38px; border-radius:50%;
+  background:var(--surface2); border:none;
   cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;
 }
-.choice-sheet-send svg { width:16px; height:16px; stroke:white; }
-/* Done state */
-.choice-sheet.done .choice-sheet-opt { opacity:0.45; pointer-events:none; cursor:default; }
+.choice-sheet-send svg { width:16px; height:16px; stroke:var(--text); }
+.choice-sheet.done .choice-sheet-opt { opacity:0.4; pointer-events:none; }
+.choice-sheet.done .choice-sheet-input-wrap { display:none; }
+.choice-sheet-opt.selected .choice-sheet-num { background:var(--accent); }
 .choice-sheet.done .choice-sheet-input-wrap { display:none; }
 .choice-sheet-opt.selected { background:rgba(255,255,255,0.05); }
 .choice-sheet-opt.selected .choice-sheet-num { background:var(--accent); color:#fff; }
@@ -6972,12 +6965,11 @@ function addMsg(role, text, silent, artifacts, searchHTML) {
     const _cOptions  = [..._choiceMatch[2].matchAll(/\d+[\.\)]\s*(.+)/g)].map(m => m[1].trim());
     if (_cOptions.length >= 2) {
       const _cId = 'cs_' + Date.now();
-      // Store in global registry to avoid HTML attribute escaping issues
       window._choiceRegistry = window._choiceRegistry || {};
       window._choiceRegistry[_cId] = { question: _cQuestion, options: _cOptions };
-      // Auto-open the sheet after render (like Claude)
       setTimeout(() => _openChoiceSheet(_cId), 80);
-      // In-chat pill — tap to reopen
+      // Strip the numbered list from the rendered HTML so it doesn't appear inline
+      html = html.replace(/<ol>[\s\S]*?<\/ol>/i, '').replace(/<ul>[\s\S]*?<\/ul>/i, '').trim();
       choiceSheetHTML = `<button class="choice-sheet-trigger-btn" onclick="_openChoiceSheet('${_cId}')" style="margin-top:10px;display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:14px;background:var(--surface);border:1.5px solid var(--border);cursor:pointer;font-family:var(--font-sans);font-size:14px;font-weight:500;color:var(--text2);width:100%;text-align:left;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;color:var(--accent)"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span style="color:var(--text)">${escHtml(_cQuestion)}</span><span style="margin-left:auto;background:var(--surface2);border-radius:20px;padding:2px 9px;font-size:12px;font-weight:600;color:var(--text3);">${_cOptions.length}</span></button>`;
     }
   }
