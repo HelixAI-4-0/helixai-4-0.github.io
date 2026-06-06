@@ -2809,6 +2809,7 @@ function restoreChat(id) {
   const chat = chats.find(c => c.id === id);
   if (!chat) return;
   closeSidebar(); goChat();
+  _closeChoiceSheet();
   // ── Reset generation state ──
   if (abortController) { try { abortController.abort(); } catch(_) {} abortController = null; }
   isTyping = false;
@@ -4942,6 +4943,7 @@ function closeSidebar() {
 
 function newChat() {
   closeSidebar(); goChat();
+  _closeChoiceSheet();
   currentChatId = null;
   conversationHistory = [];
   pendingAttachment = null;
