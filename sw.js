@@ -1,5 +1,5 @@
-// Helix AI — Service Worker v14
-const CACHE = 'helix-v14';
+// Helix AI — Service Worker v15
+const CACHE = 'helix-v15';
 const OFFLINE_ASSETS = [self.location.pathname.replace(/sw\.js$/, '') || '/'];
 
 // Install: cache assets, skip waiting immediately
