@@ -6922,12 +6922,13 @@ function addMsg(role, text, silent, artifacts, searchHTML) {
   (function detectChoiceSheet() {
     const raw = text || '';
     // Match question line ending with ? followed by numbered list
-    const re = /([^\n]{5,200}\?)\s*\n[\s\n]*((?:\s*\d+\s*[.)\-\u2013]\s*[^\n]{2,}\n?){2,})/m;
+    // Flexible: supports "1." "1)" "1-" "1 " (no separator) "1–"
+    const re = /([^\n]{5,200}\?)\s*\n((?:\s*\d+[ .\)\-\u2013][^\n]{2,}\n?){2,})/m;
     const m = raw.match(re);
     if (!m) return;
     const _cQuestion = m[1].trim();
     const _cOptions = [];
-    const optRe = /^\s*\d+\s*[.)\-\u2013]\s*(.+)/gm;
+    const optRe = /^\s*\d+[ .\)\-\u2013]+(.+)/gm;
     let om;
     while ((om = optRe.exec(m[2])) !== null) {
       const opt = om[1].replace(/\*\*/g,'').trim();
