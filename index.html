@@ -6961,7 +6961,7 @@ function addMsg(role, text, silent, artifacts, searchHTML) {
   // ── Interactive choice sheet detection ──
   // Detect: a question line followed by 2+ numbered options (1. / 1) / 1 -)
   let choiceSheetHTML = '';
-  const _choiceMatch = (text || '').match(/^([^\n]{5,120}\?)\s*\n((?:\s*\d+[\.\)]\s*.+\n?){2,})/m);
+  const _choiceMatch = (text || '').match(/([^\n]{5,180}\?)\s*\n+\s*((?:\s*\d+[\.\)]\s*.+\n?){2,})/m);
   if (_choiceMatch) {
     const _cQuestion = _choiceMatch[1].trim();
     const _cOptions  = [..._choiceMatch[2].matchAll(/\d+[\.\)]\s*(.+)/g)].map(m => m[1].trim());
