@@ -6032,8 +6032,7 @@ function buildSystemPrompt(modelName) {
   if (name) extra += `\n\nThe user's name is ${name}.`;
   if (mems.length > 0) extra += '\n\nKnown facts about this user:\n' + mems.map(m => `- ${m}`).join('\n');
   // Always identify as Helix regardless of underlying model
-  const identityOverride = `IMPORTANT IDENTITY RULE: Your name is always Helix. You are Helix, an AI assistant. Never say you are Claude, GPT, Qwen, or any other model name. If asked who made you or what you are, say you are Helix. Do not reveal the underlying model powering you.\n\nINTERACTION RULE: Whenever you ask the user a question that has multiple possible answers or paths, MUST format EXACTLY like this — number dot space text, one per line, no bold no markdown:\\nQuestion?\\n1. Option one\\n2. Option two\\n3. Other/custom\\nThis plain-text format triggers the tap-to-select menu in the UI.\\n\\n`;
-  // Always inject current date so the model  final "Other / custom" option when appropriate.\n\n`;
+  const identityOverride = `IMPORTANT IDENTITY RULE: Your name is always Helix. You are Helix, an AI assistant. Never say you are Claude, GPT, Qwen, or any other model name. If asked who made you or what you are, say you are Helix. Do not reveal the underlying model powering you.\n\nINTERACTION RULE: Whenever you ask the user a question that has multiple possible answers or paths, MUST format the options EXACTLY like this (number, dot, space, text — one per line, no bold, no markdown):\\nQuestion?\\n1. Option one\\n2. Option two\\n3. Other/custom\\nThis exact format triggers the tap-to-select menu. Always include Other/custom as last option.\\n\\n`;
   // Always inject current date so the model never confuses the year
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
@@ -6923,14 +6922,11 @@ function addMsg(role, text, silent, artifacts, searchHTML) {
   (function detectChoiceSheet() {
     const raw = text || '';
     // Try multiple patterns to handle all model output formats
-    // Pattern A: "Question?
-1. Option" or "1) Option" or "1- Option" or "1 Option"
+    // Pattern A: Question? then numbered list with separator (dot, paren, dash)
     const reA = /([^\n]{5,200}\?)[ \t]*\n+[ \t]*((?:[ \t]*\d+[ .\)\-\u2013][^\n]{2,}\n?){2,})/m;
-    // Pattern B: "Question?
-
-1. Option" (blank line between)
+    // Pattern B: Question? then blank line then numbered list
     const reB = /([^\n]{5,200}\?)[ \t]*\n{2,}((?:[ \t]*\d+[ .\)\-\u2013][^\n]{2,}\n?){2,})/m;
-    // Pattern C: pure numbered list anywhere in text (2+ items), grab preceding question
+    // Pattern C: numbered list anywhere, grab preceding question line
     const reC = /((?:^|\n)[^\n]{5,200}\?)[ \t]*\n+((?:[ \t]*\d+[ \t.\)\-\u2013][^\n]{2,}\n?){2,})/m;
     const m = raw.match(reA) || raw.match(reB) || raw.match(reC);
     if (!m) {
