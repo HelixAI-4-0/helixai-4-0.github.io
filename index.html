@@ -9414,7 +9414,8 @@ function _tamCopyResults() {
   lines.push(title);
   lines.push('='.repeat(title.length));
   rows.forEach(row => {
-    const name  = row.querySelector('.tam-dot + div > div:first-child')?.textContent?.trim() || '?';
+    const divs  = row.querySelectorAll('div');
+    const name  = Array.from(divs).find(d => d.style && d.style.fontWeight === '600' && !d.classList.contains('tam-badge'))?.textContent?.trim() || row.querySelector('[style*="font-weight:600"]')?.textContent?.trim() || '?';
     const log   = row.querySelector('.tam-log')?.textContent?.trim() || '';
     const badge = row.querySelector('.tam-badge')?.textContent?.trim() || '';
     lines.push(`${badge === '✓' ? '✅' : badge === '✗' ? '❌' : '⏳'} ${name}: ${log}`);
@@ -9439,6 +9440,7 @@ function _tamCopyResults() {
     navigator.clipboard.writeText(text).then(_markCopied).catch(_fallback);
   } else { _fallback(); }
 }
+window._tamCopyResults = _tamCopyResults;
 
 async function _runTestVoice(v, sample, id, _done) {
   if (v.provider === 'ko') {
