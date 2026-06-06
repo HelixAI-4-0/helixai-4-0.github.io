@@ -664,76 +664,30 @@ body.theme-shifting { animation:themeShift 0.4s ease; }
   .greeting { font-size: 34px; }
 /* ── Interactive Choice Sheet ── */
 /* ── Claude-style choice bottom sheet overlay ── */
-.choice-sheet-trigger { display:none; }
-.choice-overlay { position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0); pointer-events:none; transition:background 0.28s ease; }
-.choice-overlay.open { background:rgba(0,0,0,0.6); pointer-events:all; }
-.choice-sheet {
-  position:fixed; bottom:0; left:0; right:0; z-index:9001;
-  background:var(--bg2);
-  border-radius:22px 22px 0 0;
-  box-shadow:0 -4px 32px rgba(0,0,0,0.5);
-  padding:0 0 env(safe-area-inset-bottom,12px);
-  transform:translateY(100%);
-  transition:transform 0.32s cubic-bezier(0.32,0.72,0,1);
-  max-height:85vh; display:flex; flex-direction:column;
-  overflow:hidden;
-}
-.choice-sheet.open { transform:translateY(0); }
-.choice-sheet-header {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:22px 20px 16px;
-}
-.choice-sheet-q {
-  font-family:var(--font-sans); font-size:17px; font-weight:700;
-  color:var(--text); flex:1; line-height:1.3;
-}
-.choice-sheet-close {
-  width:28px; height:28px; border-radius:50%;
-  background:var(--surface2); border:none;
-  color:var(--text3); font-size:15px; line-height:1;
-  display:flex; align-items:center; justify-content:center;
-  cursor:pointer; flex-shrink:0; margin-left:12px;
-}
-.choice-sheet-close:active { background:var(--surface); }
-.choice-sheet-opts { display:flex; flex-direction:column; overflow-y:auto; }
-.choice-sheet-opt {
-  display:flex; align-items:center; gap:16px;
-  padding:18px 20px; background:none; border:none;
-  border-top:1px solid var(--border);
-  cursor:pointer; text-align:left; color:var(--text);
-  transition:background 0.1s; touch-action:manipulation; width:100%;
-}
-.choice-sheet-opt:active { background:rgba(255,255,255,0.05); }
-.choice-sheet-num {
-  width:32px; height:32px; border-radius:50%;
-  background:#1a1a1a; color:#fff;
-  font-family:var(--font-sans); font-size:13px; font-weight:700;
-  display:flex; align-items:center; justify-content:center; flex-shrink:0;
-}
-.choice-sheet-label { font-family:var(--font-sans); font-size:16px; font-weight:500; color:var(--text); }
-.choice-sheet-input-wrap {
-  display:flex; align-items:center;
-  border-top:1px solid var(--border);
-  padding:10px 14px 16px;
-  gap:10px;
-}
-.choice-sheet-input {
-  flex:1; padding:12px 16px; background:transparent; border:none;
-  font-family:var(--font-sans); font-size:15px; color:var(--text3); outline:none;
-}
-.choice-sheet-input::placeholder { color:var(--text3); }
-.choice-sheet-send {
-  width:38px; height:38px; border-radius:50%;
-  background:var(--surface2); border:none;
-  cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;
-}
-.choice-sheet-send svg { width:16px; height:16px; stroke:var(--text); }
-.choice-sheet.done .choice-sheet-opt { opacity:0.4; pointer-events:none; }
-.choice-sheet.done .choice-sheet-input-wrap { display:none; }
-.choice-sheet-opt.selected .choice-sheet-num { background:var(--accent); }
-.choice-sheet.done .choice-sheet-input-wrap { display:none; }
-.choice-sheet-opt.selected { background:rgba(255,255,255,0.05); }
-.choice-sheet-opt.selected .choice-sheet-num { background:var(--accent); color:#fff; }
+/* ══ Choice Bottom Sheet ══ */
+.cs-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0);pointer-events:none;transition:background .25s}
+.cs-overlay.open{background:rgba(0,0,0,.65);pointer-events:all}
+.cs-panel{position:fixed;bottom:0;left:0;right:0;z-index:9001;background:#1c1c1e;border-radius:20px 20px 0 0;transform:translateY(105%);transition:transform .3s cubic-bezier(.32,.72,0,1);display:none;flex-direction:column;max-height:80vh;overflow:hidden}
+.cs-panel.open{transform:translateY(0)}
+.cs-handle{width:36px;height:4px;background:#48484a;border-radius:2px;margin:10px auto 0;flex-shrink:0}
+.cs-title{font-family:var(--font-sans);font-size:16px;font-weight:700;color:#fff;padding:16px 20px 12px;flex-shrink:0}
+.cs-opts{overflow-y:auto;flex:1}
+.cs-opt{display:flex;align-items:center;gap:14px;width:100%;padding:16px 20px;background:none;border:none;border-top:1px solid #2c2c2e;cursor:pointer;touch-action:manipulation;text-align:left}
+.cs-opt:active{background:rgba(255,255,255,.06)}
+.cs-opt:first-child{border-top:none}
+.cs-num{width:30px;height:30px;border-radius:50%;background:#2c2c2e;color:#fff;font-family:var(--font-sans);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cs-label{font-family:var(--font-sans);font-size:15px;font-weight:500;color:#fff}
+.cs-opt.selected .cs-num{background:var(--accent)}
+.cs-opt.done{opacity:.4;pointer-events:none}
+.cs-footer{border-top:1px solid #2c2c2e;display:flex;align-items:center;padding:8px 12px 20px;gap:10px;flex-shrink:0}
+.cs-input{flex:1;background:none;border:none;font-family:var(--font-sans);font-size:15px;color:#8e8e93;outline:none;padding:8px 4px}
+.cs-input::placeholder{color:#48484a}
+.cs-send{width:36px;height:36px;border-radius:50%;background:#2c2c2e;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cs-send svg{width:15px;height:15px;stroke:#fff}
+/* pill in bubble */
+.cs-pill{display:inline-flex;align-items:center;gap:8px;margin-top:10px;padding:10px 14px;border-radius:12px;background:var(--surface);border:1.5px solid var(--border);cursor:pointer;font-family:var(--font-sans);font-size:13px;font-weight:600;color:var(--text2);max-width:100%}
+.cs-pill:active{background:var(--surface2)}
+.cs-pill-badge{background:var(--surface2);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;color:var(--text3);margin-left:auto}
 .suggestion-chip { display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:14px; background:var(--surface); border:1.5px solid var(--border); cursor:pointer; transition:background 0.15s,transform 0.1s; touch-action:manipulation; width:100%; box-sizing:border-box; color:var(--text); }
 .suggestion-chip:active { transform:scale(0.98); background:var(--surface2); }
 .suggestion-chip-icon { width:32px; height:32px; border-radius:8px; background:var(--bg2); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:16px; line-height:1; }
@@ -2809,7 +2763,7 @@ function restoreChat(id) {
   const chat = chats.find(c => c.id === id);
   if (!chat) return;
   closeSidebar(); goChat();
-  _closeChoiceSheet();
+  _csClose();
   // ── Reset generation state ──
   if (abortController) { try { abortController.abort(); } catch(_) {} abortController = null; }
   isTyping = false;
@@ -4943,7 +4897,7 @@ function closeSidebar() {
 
 function newChat() {
   closeSidebar(); goChat();
-  _closeChoiceSheet();
+  _csClose();
   currentChatId = null;
   conversationHistory = [];
   pendingAttachment = null;
@@ -6967,12 +6921,11 @@ function addMsg(role, text, silent, artifacts, searchHTML) {
     const _cOptions  = [..._choiceMatch[2].matchAll(/\d+[\.\)]\s*(.+)/g)].map(m => m[1].trim());
     if (_cOptions.length >= 2) {
       const _cId = 'cs_' + Date.now();
-      window._choiceRegistry = window._choiceRegistry || {};
-      window._choiceRegistry[_cId] = { question: _cQuestion, options: _cOptions };
-      setTimeout(() => _openChoiceSheet(_cId), 80);
-      // Strip the numbered list from the rendered HTML so it doesn't appear inline
-      html = html.replace(/<ol>[\s\S]*?<\/ol>/i, '').replace(/<ul>[\s\S]*?<\/ul>/i, '').trim();
-      choiceSheetHTML = `<button class="choice-sheet-trigger-btn" onclick="_openChoiceSheet('${_cId}')" style="margin-top:10px;display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:14px;background:var(--surface);border:1.5px solid var(--border);cursor:pointer;font-family:var(--font-sans);font-size:14px;font-weight:500;color:var(--text2);width:100%;text-align:left;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0;color:var(--accent)"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span style="color:var(--text)">${escHtml(_cQuestion)}</span><span style="margin-left:auto;background:var(--surface2);border-radius:20px;padding:2px 9px;font-size:12px;font-weight:600;color:var(--text3);">${_cOptions.length}</span></button>`;
+      window._csReg = window._csReg || {};
+      window._csReg[_cId] = { q: _cQuestion, opts: _cOptions };
+      setTimeout(() => _csOpen(_cId), 120);
+      html = html.replace(/<ol[\s\S]*?<\/ol>/gi, '').replace(/<ul[\s\S]*?<\/ul>/gi, '').trim();
+      choiceSheetHTML = `<button class="cs-pill" onclick="_csOpen('${_cId}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>${escHtml(_cQuestion)}<span class="cs-pill-badge">${_cOptions.length}</span></button>`;
     }
   }
 
@@ -9484,105 +9437,66 @@ async function testVoice(id) {
   await _runTestVoice(v, sample, id, _done);
 }
 
-// Wire up overlay close handlers once DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-  var ov = document.getElementById('choiceOverlay');
-  var cl = document.getElementById('choiceSheetClose');
-  if (ov) ov.addEventListener('click', _closeChoiceSheet);
-  if (cl) cl.addEventListener('click', _closeChoiceSheet);
-});
 
-function _openChoiceSheet(cId) {
-  const overlay = document.getElementById('choiceOverlay');
-  const sheet   = document.getElementById('choiceSheetGlobal');
-  const qEl     = document.getElementById('choiceSheetQ');
-  const optsEl  = document.getElementById('choiceSheetOpts');
-  const inp     = document.getElementById('choiceSheetInput');
-  const sendBtn = document.getElementById('choiceSheetSendBtn');
-  const inputWrap = document.getElementById('choiceSheetInputWrap');
-  if (!overlay || !sheet) return;
 
-  const reg = (window._choiceRegistry || {})[cId];
+function _csOpen(cId) {
+  const reg = (window._csReg || {})[cId];
   if (!reg) return;
-  const { question, options: opts } = reg;
-
-  qEl.textContent = question;
-  optsEl.innerHTML = opts.map((opt, i) => `
-    <button class="choice-sheet-opt" onclick="_choiceOverlayPick(this, '${cId}', ${i})">
-      <span class="choice-sheet-num">${i+1}</span>
-      <span class="choice-sheet-label">${escHtml(opt)}</span>
+  const overlay = document.getElementById('csOverlay');
+  const panel   = document.getElementById('csPanel');
+  const title   = document.getElementById('csTitle');
+  const opts    = document.getElementById('csOpts');
+  const inp     = document.getElementById('csInput');
+  if (!panel || !overlay) return;
+  title.textContent = reg.q;
+  opts.innerHTML = reg.opts.map((o, i) => `
+    <button class="cs-opt" onclick="_csPick(this,'${cId}')">
+      <span class="cs-num">${i+1}</span>
+      <span class="cs-label">${escHtml(o)}</span>
     </button>`).join('');
-
   inp.value = '';
-  inp.onkeydown = (e) => { if (e.key === 'Enter' && inp.value.trim()) _choiceOverlayCustom(cId); };
-  sendBtn.onclick = () => _choiceOverlayCustom(cId);
-  inputWrap.style.display = 'flex';
-  sheet.classList.remove('done');
-  sheet._opts = opts;
-  sheet._cId  = cId;
-
-  sheet.style.display = 'flex';
+  inp.onkeydown = e => { if (e.key === 'Enter' && inp.value.trim()) _csCustom(cId); };
+  document.getElementById('csSend').onclick = () => _csCustom(cId);
+  panel.classList.remove('done');
+  panel.style.display = 'flex';
   overlay.style.display = 'block';
   requestAnimationFrame(() => requestAnimationFrame(() => {
     overlay.classList.add('open');
-    sheet.classList.add('open');
+    panel.classList.add('open');
   }));
 }
 
-function _closeChoiceSheet() {
-  const overlay = document.getElementById('choiceOverlay');
-  const sheet   = document.getElementById('choiceSheetGlobal');
-  if (!overlay || !sheet) return;
-  sheet.classList.remove('open');
+function _csClose() {
+  const overlay = document.getElementById('csOverlay');
+  const panel   = document.getElementById('csPanel');
+  if (!panel || !overlay) return;
+  panel.classList.remove('open');
   overlay.classList.remove('open');
-  setTimeout(() => {
-    sheet.style.display = 'none';
-    overlay.style.display = 'none';
-  }, 320);
+  setTimeout(() => { panel.style.display = 'none'; overlay.style.display = 'none'; }, 320);
 }
 
-function _choiceOverlayPick(btn, cId, idx) {
-  const sheet = document.getElementById('choiceSheetGlobal');
-  const label = btn.querySelector('.choice-sheet-label')?.textContent?.trim();
-  if (!label) return;
-  // Mark selected
-  sheet.querySelectorAll('.choice-sheet-opt').forEach(b => b.classList.remove('selected'));
+function _csPick(btn, cId) {
   btn.classList.add('selected');
-  sheet.classList.add('done');
-  setTimeout(() => _closeChoiceSheet(), 350);
-  _choiceSubmit(label, cId, null);
-}
-
-function _choiceOverlayCustom(cId) {
-  const inp = document.getElementById('choiceSheetInput');
-  const val = inp?.value?.trim();
-  if (!val) return;
-  const sheet = document.getElementById('choiceSheetGlobal');
-  sheet.classList.add('done');
-  setTimeout(() => _closeChoiceSheet(), 350);
-  _choiceSubmit(val, cId, null);
-}
-
-function _choicePick(btn, sheetId) {
-  const label = btn.querySelector('.choice-sheet-label')?.textContent?.trim();
-  if (!label) return;
-  _choiceSubmit(label, sheetId, btn);
-}
-function _choiceCustom(input, sheetId) {
-  const val = input.value.trim();
-  if (!val) return;
-  _choiceSubmit(val, sheetId, null);
-}
-function _choiceSubmit(answer, sheetId, selectedBtn) {
-  const sheet = document.getElementById(sheetId);
-  if (sheet) {
-    sheet.classList.add('done');
-    if (selectedBtn) selectedBtn.classList.add('selected');
-  }
+  document.getElementById('csPanel').querySelectorAll('.cs-opt').forEach(b => { if(b!==btn) b.classList.add('done'); });
+  const label = btn.querySelector('.cs-label')?.textContent?.trim();
+  setTimeout(_csClose, 380);
   const inp = document.getElementById('msgInput');
-  if (inp) { inp.value = answer; handleInput(inp); }
+  if (inp) { inp.value = label; handleInput(inp); }
   sendMsg();
 }
+
+function _csCustom(cId) {
+  const val = document.getElementById('csInput')?.value?.trim();
+  if (!val) return;
+  _csClose();
+  const inp = document.getElementById('msgInput');
+  if (inp) { inp.value = val; handleInput(inp); }
+  sendMsg();
+}
+
+// Legacy aliases
+function _csClose() { _csClose(); }
+function _openChoiceSheet(cId) { _csOpen(cId); }
 
 function _tamCopyResults() {
   const listEl = document.getElementById('tamList');
@@ -14213,17 +14127,15 @@ function _helixModalReject() {
   };
 })();
 </script>
-<!-- Claude-style choice sheet overlay -->
-<div class="choice-overlay" id="choiceOverlay" onclick="_closeChoiceSheet()"></div>
-<div class="choice-sheet" id="choiceSheetGlobal" style="display:none">
-  <div class="choice-sheet-header">
-    <div class="choice-sheet-q" id="choiceSheetQ"></div>
-    <button class="choice-sheet-close" id="choiceSheetClose" onclick="_closeChoiceSheet()">&#x2715;</button>
-  </div>
-  <div class="choice-sheet-opts" id="choiceSheetOpts"></div>
-  <div class="choice-sheet-input-wrap" id="choiceSheetInputWrap">
-    <input class="choice-sheet-input" id="choiceSheetInput" placeholder="Type your own answer…" />
-    <button class="choice-sheet-send" id="choiceSheetSendBtn">
+<!-- Choice bottom sheet -->
+<div class="cs-overlay" id="csOverlay" onclick="_csClose()"></div>
+<div class="cs-panel" id="csPanel" style="display:none">
+  <div class="cs-handle"></div>
+  <div class="cs-title" id="csTitle"></div>
+  <div class="cs-opts" id="csOpts"></div>
+  <div class="cs-footer">
+    <input class="cs-input" id="csInput" placeholder="Type your own answer…" />
+    <button class="cs-send" id="csSend">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
     </button>
   </div>
