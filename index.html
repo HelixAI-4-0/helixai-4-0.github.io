@@ -9518,14 +9518,15 @@ function _openChoiceSheet(cId) {
   sendBtn.onclick = () => _choiceOverlayCustom(cId);
   inputWrap.style.display = 'flex';
   sheet.classList.remove('done');
-
-  // Store opts for later reference
   sheet._opts = opts;
   sheet._cId  = cId;
 
-  overlay.classList.add('open');
-  // Small delay so transition fires
-  requestAnimationFrame(() => { requestAnimationFrame(() => { sheet.classList.add('open'); }); });
+  sheet.style.display = 'flex';
+  overlay.style.display = 'block';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    overlay.classList.add('open');
+    sheet.classList.add('open');
+  }));
 }
 
 function _closeChoiceSheet() {
@@ -9534,6 +9535,10 @@ function _closeChoiceSheet() {
   if (!overlay || !sheet) return;
   sheet.classList.remove('open');
   overlay.classList.remove('open');
+  setTimeout(() => {
+    sheet.style.display = 'none';
+    overlay.style.display = 'none';
+  }, 320);
 }
 
 function _choiceOverlayPick(btn, cId, idx) {
@@ -14209,11 +14214,11 @@ function _helixModalReject() {
 })();
 </script>
 <!-- Claude-style choice sheet overlay -->
-<div class="choice-overlay" id="choiceOverlay"></div>
-<div class="choice-sheet" id="choiceSheetGlobal">
+<div class="choice-overlay" id="choiceOverlay" onclick="_closeChoiceSheet()"></div>
+<div class="choice-sheet" id="choiceSheetGlobal" style="display:none">
   <div class="choice-sheet-header">
     <div class="choice-sheet-q" id="choiceSheetQ"></div>
-    <button class="choice-sheet-close" id="choiceSheetClose">&#x2715;</button>
+    <button class="choice-sheet-close" id="choiceSheetClose" onclick="_closeChoiceSheet()">&#x2715;</button>
   </div>
   <div class="choice-sheet-opts" id="choiceSheetOpts"></div>
   <div class="choice-sheet-input-wrap" id="choiceSheetInputWrap">
