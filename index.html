@@ -6032,7 +6032,8 @@ function buildSystemPrompt(modelName) {
   if (name) extra += `\n\nThe user's name is ${name}.`;
   if (mems.length > 0) extra += '\n\nKnown facts about this user:\n' + mems.map(m => `- ${m}`).join('\n');
   // Always identify as Helix regardless of underlying model
-  const identityOverride = `IMPORTANT IDENTITY RULE: Your name is always Helix. You are Helix, an AI assistant. Never say you are Claude, GPT, Qwen, or any other model name. If asked who made you or what you are, say you are Helix. Do not reveal the underlying model powering you.\n\nINTERACTION RULE: Whenever you ask the user a question that has multiple possible answers or paths, ALWAYS present the options as a numbered list on separate lines, like this:\nYour question here?\n1. Option one\n2. Option two\n3. Option three\nThis lets the user tap an option directly. Always add a final "Other / custom" option when appropriate.\n\n`;
+  const identityOverride = `IMPORTANT IDENTITY RULE: Your name is always Helix. You are Helix, an AI assistant. Never say you are Claude, GPT, Qwen, or any other model name. If asked who made you or what you are, say you are Helix. Do not reveal the underlying model powering you.\n\nINTERACTION RULE: Whenever you ask the user a question that has multiple possible answers or paths, MUST format EXACTLY like this — number dot space text, one per line, no bold no markdown:\\nQuestion?\\n1. Option one\\n2. Option two\\n3. Other/custom\\nThis plain-text format triggers the tap-to-select menu in the UI.\\n\\n`;
+  // Always inject current date so the model  final "Other / custom" option when appropriate.\n\n`;
   // Always inject current date so the model never confuses the year
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
@@ -6921,20 +6922,35 @@ function addMsg(role, text, silent, artifacts, searchHTML) {
   let choiceSheetHTML = '';
   (function detectChoiceSheet() {
     const raw = text || '';
-    // Match question line ending with ? followed by numbered list
-    // Flexible: supports "1." "1)" "1-" "1 " (no separator) "1–"
-    const re = /([^\n]{5,200}\?)\s*\n((?:\s*\d+[ .\)\-\u2013][^\n]{2,}\n?){2,})/m;
-    const m = raw.match(re);
-    if (!m) return;
+    // Try multiple patterns to handle all model output formats
+    // Pattern A: "Question?
+1. Option" or "1) Option" or "1- Option" or "1 Option"
+    const reA = /([^\n]{5,200}\?)[ \t]*\n+[ \t]*((?:[ \t]*\d+[ .\)\-\u2013][^\n]{2,}\n?){2,})/m;
+    // Pattern B: "Question?
+
+1. Option" (blank line between)
+    const reB = /([^\n]{5,200}\?)[ \t]*\n{2,}((?:[ \t]*\d+[ .\)\-\u2013][^\n]{2,}\n?){2,})/m;
+    // Pattern C: pure numbered list anywhere in text (2+ items), grab preceding question
+    const reC = /((?:^|\n)[^\n]{5,200}\?)[ \t]*\n+((?:[ \t]*\d+[ \t.\)\-\u2013][^\n]{2,}\n?){2,})/m;
+    const m = raw.match(reA) || raw.match(reB) || raw.match(reC);
+    if (!m) {
+      console.log('[ChoiceSheet] no match for text:', raw.slice(0,200));
+      return;
+    }
     const _cQuestion = m[1].trim();
     const _cOptions = [];
-    const optRe = /^\s*\d+[ .\)\-\u2013]+(.+)/gm;
+    // Extract options: number followed by any separator (or just space) then text
+    const optRe = /^[ \t]*\d+[ \t.\)\-\u2013]+([^\n]{2,})/gm;
     let om;
     while ((om = optRe.exec(m[2])) !== null) {
-      const opt = om[1].replace(/\*\*/g,'').trim();
-      if (opt) _cOptions.push(opt);
+      const opt = om[1].replace(/\*\*/g,'').replace(/^\s+|\s+$/g,'');
+      if (opt.length > 1) _cOptions.push(opt);
     }
-    if (_cOptions.length < 2) return;
+    if (_cOptions.length < 2) {
+      console.log('[ChoiceSheet] not enough options:', _cOptions);
+      return;
+    }
+    console.log('[ChoiceSheet] detected:', _cQuestion, _cOptions);
     const _cId = 'cs_' + Date.now();
     window._csReg = window._csReg || {};
     window._csReg[_cId] = { q: _cQuestion, opts: _cOptions };
