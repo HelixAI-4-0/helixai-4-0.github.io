@@ -4249,7 +4249,7 @@ function _switchToFreeCloud(modelId) {
 function _switchToApiKey(providerId, modelId) {
   const prov = PROVIDER_MODELS[providerId];
   if (prov?.noKey) {
-    customApiKey = { provider: providerId, key: ' ', model: modelId };
+    customApiKey = { provider: providerId, key: (prov.fixedKey || ' '), model: modelId };
     lsSet('customApiKey', customApiKey);
     _updateModelPillLabel && _updateModelPillLabel();
     renderCloudModelSheet && renderCloudModelSheet();
@@ -4733,6 +4733,8 @@ const PROVIDER_MODELS = {
   },
   aqua: {
     name:'Aqua API', icon:'<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-0.15em;flex-shrink:0"><path d="M12 2C12 2 5 10 5 15a7 7 0 0 0 14 0c0-5-7-13-7-13z"/></svg>', color:'#06b6d4',
+    noKey:true,
+    fixedKey:'helix-anon',
     endpoint:'https://api.aquadevs.com/v1/chat/completions',
     models:[
       { id:'opus-4.8',           name:'Claude Opus 4.8',           free:true, sub:'Anthropic · FREE · Approval required' },
@@ -9089,7 +9091,7 @@ async function _callCustomProvider(messages, stream, onChunk, sig) {
   const prov  = PROVIDER_MODELS[customApiKey.provider];
   const model = customApiKey.model;
   // Always read fresh key from apiKeys store (in case it was updated after customApiKey was set)
-  const key   = (prov?.noKey ? '' : (apiKeys[customApiKey.provider] || customApiKey.key || ''));
+  const key   = (prov?.noKey ? (prov.fixedKey || '') : (apiKeys[customApiKey.provider] || customApiKey.key || ''));
   if (!prov?.noKey && (!key || !key.trim())) {
     throw new Error('No API key saved for ' + (prov?.name || customApiKey.provider) + ' — add it in Settings → API Keys');
   }
